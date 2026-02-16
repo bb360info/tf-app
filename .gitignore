@@ -1,16 +1,28 @@
-# Node
+# dependencies
 node_modules/
+.pnpm-store/
+
+# next.js
 .next/
 out/
+build/
+next-env.d.ts
 
-# Dependencies
-pnpm-lock.yaml
-package-lock.json
+# serwist / PWA
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+public/swe-worker-*.js.map
 
-# Environment
+# production
+*.tsbuildinfo
+
+# env files
 .env
-.env.local
-.env.production
+.env*.local
+
+# vercel
+.vercel
 
 # OS
 .DS_Store
@@ -19,20 +31,9 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # PocketBase (local dev)
 pb_data/
 pb_migrations/
-
-# Build
-dist/
-*.tsbuildinfo
-
-# PWA
-sw.js
-workbox-*.js
-serwist-*.js
-
-# Debug
-*.log
-npm-debug.log*

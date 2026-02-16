@@ -20,9 +20,9 @@
 - [ ] CORS on R2 configured for domain
 
 ## Next.js
-- [ ] `create-next-app@15` initialized with TypeScript + App Router
-- [ ] Serwist PWA configured
-- [ ] Static export builds (`pnpm build` → `out/`)
+- [x] `create-next-app@15` initialized with TypeScript + App Router
+- [x] Serwist PWA configured
+- [x] Static export builds (`pnpm build` → `out/`)
 - [ ] Deployed to VPS via nginx
 - [ ] Domain resolves to static site
 
@@ -33,6 +33,6 @@
 - [ ] Backup restore tested
 
 ## Fonts & Design System
-- [ ] Fonts self-hosted in `/public/fonts/`: Inter, Plus Jakarta Sans, JetBrains Mono, Noto Sans SC
+- [x] Fonts self-hosted in `/public/fonts/`: Inter, Plus Jakarta Sans, JetBrains Mono, Noto Sans SC
 - [ ] `docs/DESIGN_SYSTEM.md` read and understood by dev team
-- [ ] CSS tokens file created with design tokens from DESIGN_SYSTEM.md
+- [x] CSS tokens file created with design tokens from DESIGN_SYSTEM.md
