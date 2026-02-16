@@ -1,0 +1,38 @@
+# Node
+node_modules/
+.next/
+out/
+
+# Dependencies
+pnpm-lock.yaml
+package-lock.json
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# PocketBase (local dev)
+pb_data/
+pb_migrations/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# PWA
+sw.js
+workbox-*.js
+serwist-*.js
+
+# Debug
+*.log
+npm-debug.log*

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Энциклопедия прыгуна | Jump Training Encyclopedia</title>
+  <meta name="description"
+    content="Полная энциклопедия упражнений для прыгунов в высоту: плиометрика, силовые, ОФП, гибкость. С дозировкой и фразами тренера.">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1>🏃‍♂️ Энциклопедия <span>Прыгуна</span></h1>
+      <div class="header-controls">
+        <span class="fs-label">Aa</span>
+        <button class="btn-icon" id="fontMinus" title="Уменьшить шрифт">−</button>
+        <button class="btn-icon" id="fontPlus" title="Увеличить шрифт">+</button>
+        <button class="btn-icon" id="themeToggle" title="Тема">🌙</button>
+      </div>
+    </div>
+    <nav class="section-nav" id="sectionNav">
+      <button class="section-chip active" data-section="exercises">📖 Упражнения</button>
+      <button class="section-chip" data-section="technique">⚠️ Техника</button>
+      <button class="section-chip" data-section="reference">📊 Справочник</button>
+      <button class="section-chip" data-section="program">📋 Программа</button>
+    </nav>
+  </header>
+
+  <!-- SECTION: Exercises (existing) -->
+  <section class="filters" id="exerciseFilters">
+    <div class="search-wrap">
+      <input type="search" class="search-box" id="searchInput" placeholder="Поиск упражнения...">
+    </div>
+    <button class="filter-toggle-btn" id="filterToggle">🔽 Фильтры <span class="toggle-arrow">▼</span></button>
+    <div class="filter-row" id="catFilters"></div>
+    <div class="filter-row" id="equipFilters"></div>
+    <div class="filter-row" id="levelFilters"></div>
+    <div class="results-count" id="resultsCount"></div>
+  </section>
+  <main class="cards-container" id="cardsContainer"></main>
+
+  <!-- SECTION: Technique -->
+  <section class="section-content" id="sectionTechnique" style="display:none">
+    <div class="section-intro">
+      <h2>⚠️ Типичные ошибки техники</h2>
+      <p>23 ошибки по 6 фазам прыжка в высоту с исправлениями и тренерскими подсказками</p>
+    </div>
+    <div class="technique-tabs" id="techniquePhaseTabs"></div>
+    <div id="techniqueCards"></div>
+    <div class="section-divider"></div>
+    <div class="checklist-section">
+      <h3>📝 Чеклист оценки техники</h3>
+      <p class="checklist-subtitle">Отмечайте выполненные элементы — прогресс сохраняется</p>
+      <div id="checklistContainer"></div>
+    </div>
+  </section>
+
+  <!-- SECTION: Reference -->
+  <section class="section-content" id="sectionReference" style="display:none">
+    <div class="section-intro">
+      <h2>📊 Справочник</h2>
+      <p>Периодизация, травмы, ментальная подготовка, биометрики</p>
+    </div>
+    <div class="ref-tabs" id="refTabs">
+      <button class="ref-tab active" data-ref="periodization">📅 Периодизация</button>
+      <button class="ref-tab" data-ref="injuries">🩹 Травмы</button>
+      <button class="ref-tab" data-ref="mental">🧠 Ментальная</button>
+      <button class="ref-tab" data-ref="benchmarks">📏 Метрики</button>
+    </div>
+    <div id="refContent"></div>
+  </section>
+
+  <!-- SECTION: Program -->
+  <section class="section-content" id="sectionProgram" style="display:none">
+    <div class="section-intro">
+      <h2>📋 Программа тренировок</h2>
+      <p>Разминка, планировщик, экспорт</p>
+    </div>
+    <div class="ref-tabs" id="programTabs">
+      <button class="ref-tab active" data-prog="warmup">🔥 Разминка</button>
+      <button class="ref-tab" data-prog="planner">🗓️ Планировщик</button>
+      <button class="ref-tab" data-prog="weekly">📅 Неделя</button>
+    </div>
+    <div id="programContent"></div>
+  </section>
+
+  <button class="fab-workout" id="fabWorkout" title="Тренировка">
+    📋
+    <span class="fab-badge" id="fabBadge" style="display:none">0</span>
+  </button>
+
+  <div class="panel-overlay" id="panelOverlay"></div>
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <h2 id="panelTitle">Избранное</h2>
+      <button class="panel-close" id="panelClose">✕</button>
+    </div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" data-tab="favorites">⭐ Избранное</button>
+      <button class="panel-tab" data-tab="workout">📋 Тренировка</button>
+    </div>
+    <div id="panelContent">
+      <ul class="panel-list" id="panelList"></ul>
+      <div class="panel-empty" id="panelEmpty">Пусто. Добавьте упражнения!</div>
+    </div>
+  </div>
+
+  <!-- Athlete Overlay (fullscreen text display) -->
+  <div id="athleteOverlay" class="athlete-overlay" style="display:none" onclick="closeAthleteOverlay(event)">
+    <button class="athlete-close" onclick="closeAthleteOverlay()">&times;</button>
+    <div class="athlete-content" onclick="event.stopPropagation()">
+      <div class="athlete-text" id="athleteText"></div>
+      <button class="athlete-speak" id="athleteSpeak" onclick="speakFromOverlay()">🔊</button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="motivational.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

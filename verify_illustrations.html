@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Illustration Verification</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .card img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .card p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .missing {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Exercise Illustration Verification</h1>
+    <div id="grid" class="grid"></div>
+
+    <script src="data.js"></script>
+    <script>
+        const grid = document.getElementById('grid');
+
+        if (typeof EXERCISES !== 'undefined') {
+            EXERCISES.forEach(ex => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // Add error handling for images
+                const imgPath = ex.img || '';
+                const imgTag = imgPath
+                    ? `<img src="${imgPath}" alt="${ex.nameEn}" onerror="this.parentElement.innerHTML='<div class=\'missing\'>Image Not Found: ${imgPath}</div>'">`
+                    : '<div class="missing">No Image Path Configured</div>';
+
+                card.innerHTML = `
+                    ${imgTag}
+                    <h3>${ex.id}. ${ex.nameEn}</h3>
+                    <p>${ex.nameRu}</p>
+                `;
+                grid.appendChild(card);
+            });
+        } else {
+            console.error("EXERCISES is undefined");
+            grid.innerHTML = '<p class="missing">Error: EXERCISES data not found. Check console.</p>';
+        }
+    </script>
+</body>
+
+</html>
