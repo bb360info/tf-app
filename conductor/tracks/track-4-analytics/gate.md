@@ -12,3 +12,8 @@
 - [ ] i18n: All 3 languages switchable (RU/EN/CN)
 - [ ] Dark/Light/Auto theme with persistence
 - [ ] China audit: zero external scripts
+
+## Design System Compliance
+- [ ] All UI passes `docs/DESIGN_SYSTEM.md` Pre-Delivery Checklist
+- [ ] Charts use category color tokens (`--color-cat-*`)
+- [ ] Glass surfaces have `@supports` fallback

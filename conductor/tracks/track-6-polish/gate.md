@@ -10,3 +10,9 @@
 - [ ] Final security review (API rules, headers, CORS)
 - [ ] Backup restore procedure documented and tested
 - [ ] Works in China without VPN (except Google OAuth)
+
+## Design System Final Audit
+- [ ] Full DESIGN_SYSTEM.md Pre-Delivery Checklist pass on all pages
+- [ ] No emoji icons remain in UI — all Lucide SVGs
+- [ ] Dark mode tested end-to-end on all pages
+- [ ] WCAG AA contrast verified on all text

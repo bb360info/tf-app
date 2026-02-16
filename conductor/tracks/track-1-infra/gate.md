@@ -31,3 +31,8 @@
 - [ ] Telegram alert configured
 - [ ] Backup cron: SQLite → R2 daily
 - [ ] Backup restore tested
+
+## Fonts & Design System
+- [ ] Fonts self-hosted in `/public/fonts/`: Inter, Plus Jakarta Sans, JetBrains Mono, Noto Sans SC
+- [ ] `docs/DESIGN_SYSTEM.md` read and understood by dev team
+- [ ] CSS tokens file created with design tokens from DESIGN_SYSTEM.md

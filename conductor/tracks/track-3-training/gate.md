@@ -18,3 +18,9 @@
 - [ ] Settings page (language, units, theme)
 - [ ] Coach Preferences saved
 - [ ] Onboarding Wizard (3-5 screens)
+
+## Design System Compliance
+- [ ] All UI passes `docs/DESIGN_SYSTEM.md` Pre-Delivery Checklist
+- [ ] No hardcoded colors — only `var(--color-*)` tokens
+- [ ] All touch targets ≥ 44px
+- [ ] Tested at 375px width + Chinese text

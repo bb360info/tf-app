@@ -46,6 +46,7 @@ conductor/             ← Track-based task management
 2. **Never start Track N+1** until Gate N is passed (all checkboxes in `conductor/tracks/track-N/gate.md`)
 3. **New feature ideas** → add to `conductor/backlog.md`, do NOT implement mid-track
 4. **1 commit = 1 task** — don't mix unrelated changes
+5. **Update `CHANGELOG.md`** after completing a task — use Added/Changed/Fixed/Removed format
 
 ## Commands
 ```bash

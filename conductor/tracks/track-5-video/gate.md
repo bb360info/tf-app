@@ -9,3 +9,8 @@
 - [ ] Comparison with reference model
 - [ ] Storage quota management + warning
 - [ ] Photo diary (daily snapshots)
+
+## Design System Compliance
+- [ ] All UI passes `docs/DESIGN_SYSTEM.md` Pre-Delivery Checklist
+- [ ] Video player respects `prefers-reduced-motion`
+- [ ] Canvas overlays tested on low-end Android (Xiaomi)
