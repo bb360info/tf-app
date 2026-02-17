@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Энциклопедия Прыгуна в Высоту</title>
+    <!-- Use locally hosted Inter font -->
+    <link rel="stylesheet" href="/fonts/inter.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --accent: #f59e0b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        header {
+            background: var(--surface);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .lang-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .lang-btn.active {
+            background: var(--text-main);
+            color: white;
+            border-color: var(--text-main);
+        }
+
+        /* Navigation / Categories */
+        .nav-scroller {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .nav-scroller::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        .nav-tabs {
+            display: inline-flex;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Active Filter Bar */
+        #filter-bar {
+            display: none;
+            /* Hidden by default */
+            background: #eff6ff;
+            padding: 0.75rem 1rem;
+            margin: 0 -1rem 1rem -1rem;
+            /* Stretch to edges on mobile */
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (min-width: 640px) {
+            #filter-bar {
+                margin: 0 0 1rem 0;
+                border-radius: 0.5rem;
+                border: 1px solid var(--border);
+            }
+        }
+
+        .filter-info {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .clear-filter-btn {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--error);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .clear-filter-btn:hover {
+            background: #fef2f2;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        #exercises-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            transition: opacity 0.2s;
+        }
+
+        @media (min-width: 640px) {
+            #exercises-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Exercise Card */
+        .exercise-card {
+            background: var(--surface);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Placeholder Image Area */
+        .card-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-style: italic;
+            position: relative;
+        }
+
+        .placeholder-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .card-content {
+            padding: 1.25rem;
+        }
+
+        .card-header {
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .tag-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .tag-badge:hover {
+            background: #bae6fd;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .coach-box {
+            background: #eff6ff;
+            border-left: 3px solid var(--primary);
+            padding: 0.75rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-bottom: 0.75rem;
+        }
+
+        .coach-label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .coach-text {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: #1e40af;
+        }
+
+        .inventory-list {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .inv-item {
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+            text-decoration-color: var(--text-secondary);
+        }
+
+        .inv-item:hover {
+            color: var(--primary);
+            text-decoration-color: var(--primary);
+        }
+
+        /* Loading State */
+        #loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="lang-toggle">
+            <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('cn')">CN</button>
+        </div>
+
+        <h1 id="page-title">Энциклопедия Прыгуна</h1>
+
+        <div class="nav-scroller">
+            <div class="nav-tabs" id="category-tabs">
+                <!-- Tabs injected by JS -->
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="loading">Loading encyclopedia data...</div>
+
+        <div id="filter-bar">
+            <div class="filter-info" id="filter-message">Filtered by: Tag</div>
+            <button class="clear-filter-btn" onclick="clearFilter()">✕ Clear</button>
+        </div>
+
+        <div id="exercises-grid">
+            <!-- Cards injected by JS -->
+        </div>
+    </main>
+
+    <script>
+        let appData = null;
+        let currentLang = 'ru';
+        let currentCategory = null;
+        let activeFilter = null; // { type: 'tag'|'inventory', id: string }
+
+        // Translations for UI elements
+        const uiTrans = {
+            title: {
+                ru: "Энциклопедия Прыгуна",
+                en: "High Jumper Encyclopedia",
+                cn: "跳高运动员百科全书"
+            },
+            coach: {
+                ru: "Тренер:",
+                en: "Coach:",
+                cn: "教练:"
+            },
+            inventory: {
+                ru: "Инвентарь:",
+                en: "Inventory:",
+                cn: "器材:"
+            },
+            loading: {
+                ru: "Загрузка данных...",
+                en: "Loading data...",
+                cn: "正在加载数据..."
+            },
+            placeholder_badge: {
+                ru: "Иллюстрация",
+                en: "Illustration",
+                cn: "插图"
+            },
+            filtered_by: {
+                ru: "Фильтр:",
+                en: "Filtered by:",
+                cn: "筛选:"
+            },
+            clear: {
+                ru: "Сбросить",
+                en: "Clear",
+                cn: "清除"
+            }
+        };
+
+        // Helper to get translated string safer
+        function t(obj, lang) {
+            if (!obj) return "";
+            return obj[lang] || obj['en'] || obj['ru'] || "";
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                const response = await fetch('/encyclopedia-data.json');
+                appData = await response.json();
+
+                // Set initial category
+                if (appData.categories && appData.categories.length > 0) {
+                    currentCategory = appData.categories[0].id;
+                }
+
+                render();
+            } catch (e) {
+                document.getElementById('loading').innerText = 'Error loading data: ' + e.message;
+                console.error(e);
+            }
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            // Update UI buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick').includes(lang));
+            });
+            render();
+        }
+
+        function setCategory(catId) {
+            currentCategory = catId;
+            activeFilter = null; // Clearing filter when changing category explicitly
+            render();
+        }
+
+        function setFilter(type, id) {
+            activeFilter = { type, id };
+            render();
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function clearFilter() {
+            activeFilter = null;
+            render();
+        }
+
+        function getTagName(tagId) {
+            const tagObj = appData.all_tags.find(t => t.id === tagId);
+            return tagObj ? t(tagObj.name, currentLang) : tagId;
+        }
+
+        function getInventoryName(invId) {
+            const invObj = appData.all_inventory.find(i => i.id === invId);
+            return invObj ? t(invObj.name, currentLang) : invId;
+        }
+
+        function render() {
+            if (!appData) return;
+
+            // 1. Update Header Title
+            document.getElementById('page-title').innerText = uiTrans.title[currentLang];
+            document.getElementById('loading').style.display = 'none';
+
+            // 2. Render Tabs (Categories)
+            // If filter is active, no tab is 'active' or maybe all are inactive visually
+            const tabsContainer = document.getElementById('category-tabs');
+            tabsContainer.innerHTML = appData.categories.map(cat => `
+            <div class="nav-tab ${!activeFilter && cat.id === currentCategory ? 'active' : ''}" 
+                 onclick="setCategory('${cat.id}')">
+                ${t(cat.name, currentLang)}
+            </div>
+        `).join('');
+
+            // 3. Determine Exercises to Show
+            let exercisesToShow = [];
+            const filterBar = document.getElementById('filter-bar');
+            const filterMessage = document.getElementById('filter-message');
+            const clearBtn = document.querySelector('.clear-filter-btn');
+
+            if (activeFilter) {
+                // Filter Mode: Search ALL categories
+                filterBar.style.display = 'flex';
+                clearBtn.innerText = `✕ ${uiTrans.clear[currentLang]}`;
+
+                let filterName = "";
+                if (activeFilter.type === 'tag') {
+                    filterName = getTagName(activeFilter.id);
+                } else {
+                    filterName = getInventoryName(activeFilter.id);
+                }
+
+                filterMessage.innerHTML = `${uiTrans.filtered_by[currentLang]} <strong>${filterName}</strong>`;
+
+                // Collect all matching exercises
+                appData.categories.forEach(cat => {
+                    cat.exercises.forEach(ex => {
+                        if (activeFilter.type === 'tag') {
+                            if (ex.tags && ex.tags.includes(activeFilter.id)) {
+                                exercisesToShow.push({ ...ex, categoryName: t(cat.name, currentLang) });
+                            }
+                        } else if (activeFilter.type === 'inventory') {
+                            if (ex.inventory && ex.inventory.includes(activeFilter.id)) {
+                                exercisesToShow.push({ ...ex, categoryName: t(cat.name, currentLang) });
+                            }
+                        }
+                    });
+                });
+
+            } else {
+                // Category Mode
+                filterBar.style.display = 'none';
+                const categoryData = appData.categories.find(c => c.id === currentCategory);
+                exercisesToShow = categoryData ? categoryData.exercises : [];
+            }
+
+            // 4. Render Grid
+            const grid = document.getElementById('exercises-grid');
+
+            if (exercisesToShow.length === 0) {
+                grid.innerHTML = `<div style="text-align:center; grid-column: 1/-1; padding: 2rem; color: var(--text-secondary);">No exercises found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = exercisesToShow.map(ex => {
+                // Render Tags
+                const tagsHtml = ex.tags.map(tagId =>
+                    `<span class="tag-badge" onclick="setFilter('tag', '${tagId}')">${getTagName(tagId)}</span>`
+                ).join('');
+
+                // Render Inventory
+                let invHtml = '';
+                if (ex.inventory && ex.inventory.length > 0) {
+                    const invListHtml = ex.inventory.map(id =>
+                        `<span class="inv-item" onclick="setFilter('inventory', '${id}')">${getInventoryName(id)}</span>`
+                    ).join(', '); // Note: spans are comma separated visually by the join, need logic adjustment if comma should be outside clickable area?
+                    // Actually better to join with ", " string, but then the click target is only the text.
+                    // Let's do: map -> join(', ')
+
+                    invHtml = `
+                    <div class="inventory-list">
+                        <span>🔧 ${uiTrans.inventory[currentLang]}</span>
+                        <strong>${invListHtml}</strong>
+                    </div>
+                `;
+                }
+
+                return `
+            <div class="exercise-card">
+                <div class="card-image-placeholder">
+                    <span class="placeholder-badge">${uiTrans.placeholder_badge[currentLang]}</span>
+                    ${ex.placeholder_text || "No illustration description"}
+                </div>
+                <div class="card-content">
+                    <div class="card-header">
+                        <div class="card-title">${t(ex.name, currentLang)}</div>
+                        <div class="tags-container">${tagsHtml}</div>
+                    </div>
+                    <div class="card-desc">${t(ex.desc, currentLang)}</div>
+                    <div class="coach-box">
+                        <span class="coach-label">${uiTrans.coach[currentLang]}</span>
+                        <div class="coach-text">«${t(ex.cue, currentLang)}»</div>
+                    </div>
+                    ${invHtml}
+                </div>
+            </div>
+            `;
+            }).join('');
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+
+</html>

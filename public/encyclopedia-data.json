@@ -1,0 +1,2981 @@
+{
+    "categories": [
+        {
+            "id": "warmup_activation",
+            "name": {
+                "ru": "Разминка и Нейромышечная Активация (RAMP)",
+                "en": "Warm-up & Neuromuscular Activation (RAMP)",
+                "cn": "热身与神经肌肉激活 (RAMP)"
+            },
+            "description": "Базовая подготовка ЦНС, повышение температуры мышц и мобилизация суставов перед основной работой.",
+            "exercises": [
+                {
+                    "name": {
+                        "ru": "А-Скип (A-Skip)",
+                        "en": "A-Skip",
+                        "cn": "A字跳 / 高抬腿跳"
+                    },
+                    "desc": {
+                        "ru": "Ритмичные подскоки с высоким подниманием бедра и активным ударом стопой под центр тяжести.",
+                        "en": "Rhythmic skipping with high knee lift and active foot strike under the center of mass.",
+                        "cn": "有节奏的跳跃，高抬膝，脚掌在重心下方主动着地。"
+                    },
+                    "cue": {
+                        "ru": "Держи корпус высоко, бей стопой под себя.",
+                        "en": "Stay tall, strike the ground beneath you.",
+                        "cn": "保持躯干挺直，脚掌向下发力。"
+                    },
+                    "tags": [
+                        "coordination",
+                        "foot_strength",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет выполняет ритмичный подскок, бедро параллельно земле, носок натянут на себя."
+                },
+                {
+                    "name": {
+                        "ru": "Перешагивание барьеров (Hurdle Walkovers)",
+                        "en": "Hurdle Walkovers",
+                        "cn": "跨栏步走"
+                    },
+                    "desc": {
+                        "ru": "Ходьба через барьеры с акцентом на мобильность тазобедренных суставов и изоляцию движения ног.",
+                        "en": "Walking over hurdles focusing on hip mobility and leg movement isolation.",
+                        "cn": "跨越栏架行走，专注于髋关节灵活性和腿部动作隔离。"
+                    },
+                    "cue": {
+                        "ru": "Колено выше стопы, корпус стабилен.",
+                        "en": "Knee higher than foot, stable torso.",
+                        "cn": "膝盖高于脚，躯干保持稳定。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "hip_mobility",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "hurdles"
+                    ],
+                    "placeholder_text": "Атлет переносит ногу через барьер, сохраняя равновесие на опорной ноге."
+                },
+                {
+                    "name": {
+                        "ru": "Скорпион (Scorpion)",
+                        "en": "Scorpion",
+                        "cn": "蝎子式伸展"
+                    },
+                    "desc": {
+                        "ru": "Динамическая растяжка лежа на животе: пятка тянется к противоположной руке через спину.",
+                        "en": "Dynamic stretch lying on stomach: heel reaches towards the opposite hand across the back.",
+                        "cn": "俯卧动态拉伸：脚跟通过背部伸向对侧手。"
+                    },
+                    "cue": {
+                        "ru": "Скручивай поясницу, не отрывай грудь от пола.",
+                        "en": "Twist from the hips, keep chest on the floor.",
+                        "cn": "扭转腰部，胸部紧贴地面。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "spine_health",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Атлет лежит на животе, одна нога поднята и скручена за спину к разноименной руке."
+                },
+                {
+                    "name": {
+                        "ru": "Пружинки голеностопом (Pogo Hops)",
+                        "en": "Ankle Pogo Hops",
+                        "cn": "脚踝跳 / 蹦跳"
+                    },
+                    "desc": {
+                        "ru": "Мелкие прыжки только за счет стопы с минимальным сгибанием коленей для активации ахилла.",
+                        "en": "Small jumps using only the ankles with minimal knee flexion to activate the Achilles.",
+                        "cn": "仅利用脚踝进行的微小跳跃，膝盖弯曲极小，以激活跟腱。"
+                    },
+                    "cue": {
+                        "ru": "Пятки не касаются пола, колени жесткие.",
+                        "en": "Heels off the ground, stiff knees.",
+                        "cn": "脚跟不着地，膝盖保持僵直。"
+                    },
+                    "tags": [
+                        "stiffness",
+                        "foot_strength",
+                        "plyo_low",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет быстро отскакивает от пола на прямых ногах."
+                },
+                {
+                    "name": {
+                        "ru": "Махи ногами (Leg Swings)",
+                        "en": "Leg Swings (Sagittal/Lateral)",
+                        "cn": "摆腿 (前后/侧向)"
+                    },
+                    "desc": {
+                        "ru": "Махи у опоры вперед-назад и в стороны для динамической растяжки.",
+                        "en": "Swings at a support forward-backward and sideways for dynamic stretching.",
+                        "cn": "手扶支撑物进行前后和侧向摆腿，进行动态拉伸。"
+                    },
+                    "cue": {
+                        "ru": "Расслабленная нога, работай от бедра.",
+                        "en": "Relaxed leg, move from the hip.",
+                        "cn": "腿部放松，髋部发力。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "dynamic_flexibility",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "wall_or_hurdle"
+                    ],
+                    "placeholder_text": "Атлет стоит у стены и выполняет маховое движение прямой ногой."
+                },
+                {
+                    "name": {
+                        "ru": "Бег змейкой (Weave Running)",
+                        "en": "Weave Running",
+                        "cn": "蛇形跑"
+                    },
+                    "desc": {
+                        "ru": "Бег по S-образной траектории для разогрева голеностопа под углом (подготовка к виражу).",
+                        "en": "Running in a curved S-pattern to warm up ankles for curve running.",
+                        "cn": "沿S形路径跑动，为弯道跑预热脚踝。"
+                    },
+                    "cue": {
+                        "ru": "Наклоняйся в повороты.",
+                        "en": "Lean into curves.",
+                        "cn": "向弯道倾斜。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "curve_mechanics",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "Атлет бежит змейкой между конусами."
+                },
+                {
+                    "name": {
+                        "ru": "Бег спиной вперед (Backwards Jog)",
+                        "en": "Backwards Jog",
+                        "cn": "倒退跑"
+                    },
+                    "desc": {
+                        "ru": "Легкий бег спиной для активации задней цепи и бицепса бедра.",
+                        "en": "Jogging backwards to activate the posterior chain and hamstrings.",
+                        "cn": "向后慢跑以激活后链肌群和腘绳肌。"
+                    },
+                    "cue": {
+                        "ru": "Тянись назад, корпус прямо.",
+                        "en": "Reach back, stay tall.",
+                        "cn": "向后伸展，保持躯干挺直。"
+                    },
+                    "tags": [
+                        "activation",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет бежит спиной вперед, сохраняя равновесие."
+                },
+                {
+                    "name": {
+                        "ru": "Кариока (Carioca)",
+                        "en": "Carioca (Grapevine)",
+                        "cn": "交叉步跑"
+                    },
+                    "desc": {
+                        "ru": "Боковое движение со скрестным шагом спереди и сзади для раскрытия таза.",
+                        "en": "Lateral movement crossing feet in front and behind to open hips.",
+                        "cn": "侧向移动，脚在前和后交叉，以打开髋部。"
+                    },
+                    "cue": {
+                        "ru": "Вращай тазом, шаги быстрые.",
+                        "en": "Rotate the hips.",
+                        "cn": "转动髋部。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "coordination",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет бежит боком, выполняя интенсивное вращение тазом."
+                },
+                {
+                    "name": {
+                        "ru": "Железный Крест (Iron Cross)",
+                        "en": "Iron Cross",
+                        "cn": "仰卧转体"
+                    },
+                    "desc": {
+                        "ru": "Лежа на спине, мах ногой к противоположной руке. Мобилизация поясницы.",
+                        "en": "Lying supine, swing leg across body to opposite hand.",
+                        "cn": "仰卧，将腿摆向对侧手。"
+                    },
+                    "cue": {
+                        "ru": "Плечи прижаты к полу.",
+                        "en": "Shoulders flat.",
+                        "cn": "肩膀紧贴地面。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "spine_health",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Атлет лежит на спине, скручивая ноги в сторону."
+                },
+                {
+                    "name": {
+                        "ru": "Гусеница (Inchworm)",
+                        "en": "Inchworm",
+                        "cn": "手脚爬行 / 毛毛虫"
+                    },
+                    "desc": {
+                        "ru": "Переход из упора лежа к стопам мелкими шагами рук/ног. Растяжка задней цепи.",
+                        "en": "Walk hands out to push-up position, then walk feet to hands.",
+                        "cn": "双手向前爬至俯卧撑姿势，然后双脚走向双手。"
+                    },
+                    "cue": {
+                        "ru": "Ноги прямые, чувствуй растяжение.",
+                        "en": "Legs straight.",
+                        "cn": "腿伸直。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "hamstring",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет стоит в наклоне, касаясь руками пола перед собой."
+                },
+                {
+                    "name": {
+                        "ru": "Боковой проход барьеров (Lateral Hurdle Walk)",
+                        "en": "Lateral Hurdle Walk",
+                        "cn": "侧向跨栏"
+                    },
+                    "desc": {
+                        "ru": "Боковая ходьба через барьеры с высоким подниманием бедра.",
+                        "en": "Walking laterally over hurdles, lifting leading and trailing legs.",
+                        "cn": "侧向跨越栏架，抬起前导腿和跟随腿。"
+                    },
+                    "cue": {
+                        "ru": "Таз высоко, не задевай барьер.",
+                        "en": "Keep hips tall.",
+                        "cn": "保持髋部高位。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "hip_mobility",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "hurdles"
+                    ],
+                    "placeholder_text": "Атлет перешагивает барьеры боком."
+                },
+                {
+                    "name": {
+                        "ru": "Барьеры: Над-Под (Over-Under)",
+                        "en": "Hurdle Over-Under",
+                        "cn": "栏架上下钻越"
+                    },
+                    "desc": {
+                        "ru": "Чередование: перешагнуть один барьер, пролезть под следующим.",
+                        "en": "Step over one hurdle, duck under the next.",
+                        "cn": "跨过一个栏架，钻过下一个。"
+                    },
+                    "cue": {
+                        "ru": "Меняй уровень, спина гибкая.",
+                        "en": "Change levels.",
+                        "cn": "改变高度重心。"
+                    },
+                    "tags": [
+                        "mobility",
+                        "spine_health",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "hurdles"
+                    ],
+                    "placeholder_text": "Атлет подлезает под высоким барьером."
+                },
+                {
+                    "name": {
+                        "ru": "Ходьба в полуприседе",
+                        "en": "Verdun Low Walk",
+                        "cn": "Verdun Low Walk"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walk forward maintaining a half-squat depth; heels stay flat.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Hips low, chest high.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "mobility",
+                        "pfaff"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Walk forward maintaining a half-squat depth; heels stay flat."
+                },
+                {
+                    "name": {
+                        "ru": "Утиная ходьба",
+                        "en": "Verdun Duck Walk",
+                        "cn": "Verdun Duck Walk"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Deep squat walking, full knee flexion/extension cycle.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Glutes to heels.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "hips",
+                        "pfaff"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Deep squat walking, full knee flexion/extension cycle."
+                },
+                {
+                    "name": {
+                        "ru": "Выпады с подъемом",
+                        "en": "Lunge Extension Walk",
+                        "cn": "Lunge Extension Walk"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Deep lunge, pause, then rise up high over the front leg before stepping.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Deep, then tall.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "mobility",
+                        "pfaff"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Deep lunge, pause, then rise up high over the front leg before stepping."
+                },
+                {
+                    "name": {
+                        "ru": "Перекаты в седе 90/90",
+                        "en": "Shin Box Switch",
+                        "cn": "Shin Box Switch"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Seated 90/90 leg position; rotate hips to switch knees to the other side without hands.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Rotate from the hip socket.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "hips",
+                        "floor"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Seated 90/90 leg position; rotate hips to switch knees to the other side without hands."
+                },
+                {
+                    "name": {
+                        "ru": "Мини-приседания на одной ноге",
+                        "en": "Knee Buffs",
+                        "cn": "Knee Buffs"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Single-leg mini-squat (pistol) hovering the non-support leg.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Knee over toe, balance.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "activation",
+                        "usatf"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Single-leg mini-squat (pistol) hovering the non-support leg."
+                },
+                {
+                    "name": {
+                        "ru": "Изометрия голеностопа",
+                        "en": "Ankle Rocker Iso Hold",
+                        "cn": "Ankle Rocker Iso Hold"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Deep dorsiflexion hold (knee over toe) with heel barely off ground.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Load the spring.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "ankle",
+                        "static"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Deep dorsiflexion hold (knee over toe) with heel barely off ground."
+                },
+                {
+                    "name": {
+                        "ru": "Проходка с лентой",
+                        "en": "Banded Monster Walk",
+                        "cn": "Banded Monster Walk"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Diagonal forward walking with band around ankles/knees.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Step wide and forward.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "glutes"
+                    ],
+                    "inventory": [
+                        "bands"
+                    ],
+                    "placeholder_text": "Diagonal forward walking with band around ankles/knees."
+                },
+                {
+                    "name": {
+                        "ru": "Ходьба на пятках в песке",
+                        "en": "Sand Pit Heel Walk",
+                        "cn": "Sand Pit Heel Walk"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walking in the sand pit exclusively on heels to tax dorsiflexors.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Toes to the sky.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "ankle",
+                        "sand"
+                    ],
+                    "inventory": [
+                        "sand_pit"
+                    ],
+                    "placeholder_text": "Walking in the sand pit exclusively on heels to tax dorsiflexors."
+                },
+                {
+                    "name": {
+                        "ru": "Разгибание грудного отдела",
+                        "en": "Thoracic Extension on Roller",
+                        "cn": "Thoracic Extension on Roller"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Lying back over foam roller, extending spine (not lumbar).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Open the chest.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "mobility"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Lying back over foam roller, extending spine (not lumbar)."
+                },
+                {
+                    "name": {
+                        "ru": "Становая тяга на одной ноге",
+                        "en": "Single Leg RDL",
+                        "cn": "Single Leg RDL"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Hinge at hip on one leg, extending free leg back for balance.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Teeter-totter flat back.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "hamstring"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Hinge at hip on one leg, extending free leg back for balance."
+                }
+            ]
+        },
+        {
+            "id": "technique_drills",
+            "name": {
+                "ru": "Техника и Специальные Упражнения",
+                "en": "Technique & Specific Drills",
+                "cn": "技术与专项练习"
+            },
+            "description": "Отработка фаз разбега, дуги, отталкивания и перехода через планку.",
+            "exercises": [
+                {
+                    "name": {
+                        "ru": "Бег по кругу (Circle Runs)",
+                        "en": "Circle Runs / Curve Drills",
+                        "cn": "圆周跑 / 弯道跑练习"
+                    },
+                    "desc": {
+                        "ru": "Бег по радиусу (8-10м) с наклоном корпуса внутрь для создания центростремительной силы.",
+                        "en": "Running on a radius (8-10m) leaning inward to generate centripetal force.",
+                        "cn": "沿半径（8-10米）跑步，身体向内倾斜以产生向心力。"
+                    },
+                    "cue": {
+                        "ru": "Дави внешней стопой, плечи параллельно радиусу.",
+                        "en": "Lean away, step over.",
+                        "cn": "外侧脚蹬地，肩膀平行于半径。"
+                    },
+                    "tags": [
+                        "technique",
+                        "curve_mechanics",
+                        "warmup",
+                        "lean"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "Атлет бежит по кругу, тело наклонено к центру, внешняя рука работает активно."
+                },
+                {
+                    "name": {
+                        "ru": "Бег восьмеркой (Figure 8 Runs)",
+                        "en": "Figure 8 Runs",
+                        "cn": "8字跑"
+                    },
+                    "desc": {
+                        "ru": "Бег по траектории восьмерки для отработки смены наклона слева направо.",
+                        "en": "Running a figure-8 pattern to practice transitioning lean from left to right.",
+                        "cn": "跑8字形路线，练习从左向右转换倾斜。"
+                    },
+                    "cue": {
+                        "ru": "Смотри сквозь поворот.",
+                        "en": "Look through the curve.",
+                        "cn": "视线穿过弯道。"
+                    },
+                    "tags": [
+                        "technique",
+                        "curve_mechanics",
+                        "coordination",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "Схема движения бегуна по восьмерке."
+                },
+                {
+                    "name": {
+                        "ru": "Прыжки спиной через планку (Back-overs)",
+                        "en": "Back-overs / Flop Clearance",
+                        "cn": "背越式过杆 /背弓练习"
+                    },
+                    "desc": {
+                        "ru": "Прыжок спиной вперед с места или 2-3 шагов на маты для отработки прогиба («моста»).",
+                        "en": "Backwards jump from standing or 2-3 steps onto mats to practice the arch position.",
+                        "cn": "立定或2-3步助跑背向跳垫子，练习背弓姿势。"
+                    },
+                    "cue": {
+                        "ru": "Бедра вверх, смотри назад, пятки к голове.",
+                        "en": "Heels to head.",
+                        "cn": "髋部上顶，向后看，脚跟找头。"
+                    },
+                    "tags": [
+                        "technique",
+                        "bar_clearance",
+                        "air_mechanics",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "landing_pit",
+                        "bar_or_elastic"
+                    ],
+                    "placeholder_text": "Атлет в полете над планкой, прогнувшись в спине, бедра максимально высоко."
+                },
+                {
+                    "name": {
+                        "ru": "Ножницы (Scissor Jump)",
+                        "en": "Scissor Jump",
+                        "cn": "剪刀式跳高"
+                    },
+                    "desc": {
+                        "ru": "Прыжок через планку с прямым корпусом и поочередным махом ногами.",
+                        "en": "Jump over the bar with upright torso and alternating leg swing.",
+                        "cn": "直体跨越式跳高，双腿交替摆动。"
+                    },
+                    "cue": {
+                        "ru": "Держи корпус вертикально, активный мах прямой ногой.",
+                        "en": "Stay tall, inside leg up.",
+                        "cn": "保持躯干垂直，直腿主动摆动。"
+                    },
+                    "tags": [
+                        "technique",
+                        "vertical_lift",
+                        "takeoff_mechanics",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "landing_pit",
+                        "bar_or_elastic"
+                    ],
+                    "placeholder_text": "Атлет в фазе полета, корпус вертикален, ноги разведены в шаге (ножницы)."
+                },
+                {
+                    "name": {
+                        "ru": "Имитация отталкивания (Pop-ups)",
+                        "en": "Pop-ups / Short Approach Jump",
+                        "cn": "短助跑起跳 / 腾空练习"
+                    },
+                    "desc": {
+                        "ru": "Короткий разбег (3-5 шагов) с акцентом на вертикальный взлет без перехода через планку.",
+                        "en": "Short approach (3-5 steps) focusing on vertical takeoff without clearing a bar.",
+                        "cn": "短助跑（3-5步），专注于垂直起跳，不过杆。"
+                    },
+                    "cue": {
+                        "ru": "Колено маховой ноги вверх, заблокируй плечи.",
+                        "en": "Drive knee up, block shoulders.",
+                        "cn": "摆动腿膝盖上顶，锁定肩膀。"
+                    },
+                    "tags": [
+                        "technique",
+                        "takeoff_mechanics",
+                        "vertical_lift",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "landing_pit"
+                    ],
+                    "placeholder_text": "Атлет в высшей точке отталкивания, маховое колено поднято, опорная нога прямая."
+                },
+                {
+                    "name": {
+                        "ru": "Дрилл 3-х шагов (3-Step Rhythm)",
+                        "en": "3-Step Rhythm Drill",
+                        "cn": "三步节奏练习"
+                    },
+                    "desc": {
+                        "ru": "Отработка ритма последних трех шагов: длинный, длинный, короткий-быстрый.",
+                        "en": "Practicing the last three steps of the approach: long, long, short/quick.",
+                        "cn": "练习最后三步的节奏：长，长，短/快。"
+                    },
+                    "cue": {
+                        "ru": "Ба-да-БУМ! Ритм.",
+                        "en": "Ba-da-BOP.",
+                        "cn": "哒-哒-蹦！"
+                    },
+                    "tags": [
+                        "technique",
+                        "rhythm",
+                        "approach",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Схема ритма последних шагов."
+                },
+                {
+                    "name": {
+                        "ru": "Работа рук (Arm Blocking)",
+                        "en": "Arm Blocking Drill",
+                        "cn": "手臂制动练习"
+                    },
+                    "desc": {
+                        "ru": "Изоляция работы рук при отталкивании: мощный мах вверх и фиксация.",
+                        "en": "Isolating the double arm punch used at takeoff.",
+                        "cn": "隔离起跳时的手臂动作：用力上摆并锁定。"
+                    },
+                    "cue": {
+                        "ru": "Ударь и замри.",
+                        "en": "Punch and freeze.",
+                        "cn": "上冲并冻结。"
+                    },
+                    "tags": [
+                        "technique",
+                        "arms",
+                        "block",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет показывает активную работу рук при имитации прыжка."
+                },
+                {
+                    "name": {
+                        "ru": "Пробегание дуги (J-Approach Rehearsal)",
+                        "en": "J-Approach Rehearsal",
+                        "cn": "J形助跑演练"
+                    },
+                    "desc": {
+                        "ru": "Пробегание полного J-разбега без прыжка для контроля траектории.",
+                        "en": "Running the full J-curve approach without jumping (running through).",
+                        "cn": "跑完整的J形助跑路线，不起跳，以控制轨迹。"
+                    },
+                    "cue": {
+                        "ru": "Толкай, переход, вираж.",
+                        "en": "Push, transition, curve.",
+                        "cn": "蹬地，转换，弯道。"
+                    },
+                    "tags": [
+                        "technique",
+                        "approach",
+                        "rhythm",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Вид сверху на траекторию разбега (J-curve)."
+                },
+                {
+                    "name": {
+                        "ru": "Галоп",
+                        "en": "Gallop Drill",
+                        "cn": "Gallop Drill"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Rhythmic pushing off the back leg to simulate penultimate step mechanics.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Push, don't pull.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "curve",
+                        "technique"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Rhythmic pushing off the back leg to simulate penultimate step mechanics."
+                },
+                {
+                    "name": {
+                        "ru": "Бег змейкой",
+                        "en": "Serpentine Run",
+                        "cn": "Serpentine Run"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "S-curve running to practice entering and exiting curves with lean.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Lean from the ankles.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "curve"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "S-curve running to practice entering and exiting curves with lean."
+                },
+                {
+                    "name": {
+                        "ru": "5-шаговый ритм",
+                        "en": "5-Step Rhythm Run",
+                        "cn": "5-Step Rhythm Run"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Approach rhythm practice counting 1-2-3-4-5 (no jump).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Accelerate through 5.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "approach"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Approach rhythm practice counting 1-2-3-4-5 (no jump)."
+                },
+                {
+                    "name": {
+                        "ru": "Тренировка взгляда",
+                        "en": "Eye Flick Drill",
+                        "cn": "Eye Flick Drill"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Run approach focusing eyes on check marks, shifting focus at specific steps.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Mark, mark, vertical.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "visual"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Run approach focusing eyes on check marks, shifting focus at specific steps."
+                },
+                {
+                    "name": {
+                        "ru": "Удержание маховой ноги",
+                        "en": "Knee Drive Hold",
+                        "cn": "Knee Drive Hold"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Static hold of the takeoff position (knee parallel) to build balance.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Lock the drive.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "static",
+                        "technique"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Static hold of the takeoff position (knee parallel) to build balance."
+                },
+                {
+                    "name": {
+                        "ru": "Отталкивание с одного шага",
+                        "en": "One-Step Takeoff",
+                        "cn": "One-Step Takeoff"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walk one step and execute explosive vertical takeoff.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Plant and punch.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "takeoff"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Walk one step and execute explosive vertical takeoff."
+                },
+                {
+                    "name": {
+                        "ru": "Работа рук 1-2-3",
+                        "en": "1-2-3 Arm Action",
+                        "cn": "1-2-3 Arm Action"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walking drill: Step R (arm fwd), Step L (arm back), Takeoff (double arm drive).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Block the arms.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "arms"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Walking drill: Step R (arm fwd), Step L (arm back), Takeoff (double arm drive)."
+                },
+                {
+                    "name": {
+                        "ru": "Галоп предпоследнего шага",
+                        "en": "Penultimate Step Gallop",
+                        "cn": "Penultimate Step Gallop"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Continuous gallops emphasizing the \"flat-flat\" contact of the last two steps.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Rolling contact.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "rhythm"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Continuous gallops emphasizing the \"flat-flat\" contact of the last two steps."
+                },
+                {
+                    "name": {
+                        "ru": "Бег по виражу с препятствиями",
+                        "en": "Curve Wicket Run",
+                        "cn": "Curve Wicket Run"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Running the J-curve over mini-hurdles/wickets to enforce frequency.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Step over, lean in.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "curve",
+                        "freq"
+                    ],
+                    "inventory": [
+                        "wickets"
+                    ],
+                    "placeholder_text": "Running the J-curve over mini-hurdles/wickets to enforce frequency."
+                },
+                {
+                    "name": {
+                        "ru": "Ускорения по кругу",
+                        "en": "Circle Accelerations",
+                        "cn": "Circle Accelerations"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Accelerating from walk to sprint while maintaining a tight circle path.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Inside shoulder down.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "curve"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "Accelerating from walk to sprint while maintaining a tight circle path."
+                }
+            ]
+        },
+        {
+            "id": "plyometrics",
+            "name": {
+                "ru": "Плиометрика и Прыжковая подготовка",
+                "en": "Plyometrics & Jump Training",
+                "cn": "增强式与跳跃训练"
+            },
+            "description": "Развитие реактивной силы, упругости сухожилий и взрывной мощности.",
+            "exercises": [
+                {
+                    "name": {
+                        "ru": "Спрыгивания с тумбы (Depth Jumps)",
+                        "en": "Depth Jumps / Drop Jumps",
+                        "cn": "深跳 / 坠落跳"
+                    },
+                    "desc": {
+                        "ru": "Спрыгивание с возвышения с мгновенным отскоком вверх. Развивает реактивную силу.",
+                        "en": "Dropping from a height followed by an immediate rebound upwards. Develops reactive power.",
+                        "cn": "从高处跳下并立即向上反弹。发展反应力量。"
+                    },
+                    "cue": {
+                        "ru": "Минимальный контакт, отскок как от горячего.",
+                        "en": "Bounce like off a hot plate.",
+                        "cn": "触地时间最短，像踩在热板上一样反弹。"
+                    },
+                    "tags": [
+                        "explosive_power",
+                        "reactive_strength",
+                        "plyo_high"
+                    ],
+                    "inventory": [
+                        "plyo_box"
+                    ],
+                    "placeholder_text": "Атлет приземляется с тумбы и мгновенно выпрыгивает вверх."
+                },
+                {
+                    "name": {
+                        "ru": "Многоскоки (Bounding)",
+                        "en": "Bounding",
+                        "cn": "跨步跳"
+                    },
+                    "desc": {
+                        "ru": "Серия мощных прыжков с ноги на ногу с продвижением вперед.",
+                        "en": "Series of powerful jumps from leg to leg moving forward.",
+                        "cn": "一系列有力的腿部交替向前跳跃。"
+                    },
+                    "cue": {
+                        "ru": "Толкай землю назад, колено вперед.",
+                        "en": "Push ground back.",
+                        "cn": "向后蹬地，膝盖向负责前上方。"
+                    },
+                    "tags": [
+                        "power",
+                        "elasticity"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет в фазе полета широкого шага, маховая нога высоко."
+                },
+                {
+                    "name": {
+                        "ru": "Линейные подскоки (Line Hops)",
+                        "en": "Line Hops",
+                        "cn": "线侧跳"
+                    },
+                    "desc": {
+                        "ru": "Быстрые прыжки через линию боком или вперед-назад на одной/двух ногах.",
+                        "en": "Rapid lateral single-leg hops over a line.",
+                        "cn": "单腿或双腿快速左右或前后跳过线。"
+                    },
+                    "cue": {
+                        "ru": "Быстрый контакт.",
+                        "en": "Fast contacts.",
+                        "cn": "快速触地。"
+                    },
+                    "tags": [
+                        "stiffness",
+                        "lateral",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет быстро перепрыгивает линию влево-вправо."
+                },
+                {
+                    "name": {
+                        "ru": "Мелкие подскоки (Bunny Hops)",
+                        "en": "Bunny Hops",
+                        "cn": "兔子跳"
+                    },
+                    "desc": {
+                        "ru": "Серия мелких прыжков на двух ногах для ритма и координации.",
+                        "en": "Small, continuous double-leg jumps for rhythm and coordination.",
+                        "cn": "连续的小幅双腿跳跃，用于节奏和协调性。"
+                    },
+                    "cue": {
+                        "ru": "Мелко и быстро.",
+                        "en": "Small quick jumps.",
+                        "cn": "小而快。"
+                    },
+                    "tags": [
+                        "rhythm",
+                        "coordination",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет выполняет серию коротких подскоков."
+                },
+                {
+                    "name": {
+                        "ru": "Прыжки с поворотом 180 (180 Turns)",
+                        "en": "180-Degree Turns",
+                        "cn": "180度转身跳"
+                    },
+                    "desc": {
+                        "ru": "Прыжок вверх с разворотом на 180 градусов и фиксацией приземления.",
+                        "en": "Jumping and rotating 180 degrees in the air, sticking the landing.",
+                        "cn": "跳起并在空中旋转180度，稳住落地。"
+                    },
+                    "cue": {
+                        "ru": "Приклей приземление.",
+                        "en": "Stick the landing.",
+                        "cn": "落地生根。"
+                    },
+                    "tags": [
+                        "landing",
+                        "coordination",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет в прыжке разворачивается вокруг своей оси."
+                },
+                {
+                    "name": {
+                        "ru": "Скачки на высоту (Skips for Height)",
+                        "en": "Skips for Height",
+                        "cn": "高跳步"
+                    },
+                    "desc": {
+                        "ru": "Мощные подскоки с акцентом на вертикальный вылет.",
+                        "en": "Power skipping emphasizing vertical displacement.",
+                        "cn": "强调垂直位移的强力跳步。"
+                    },
+                    "cue": {
+                        "ru": "Отталкивай землю.",
+                        "en": "Push the ground away.",
+                        "cn": "推离地面。"
+                    },
+                    "tags": [
+                        "power",
+                        "vertical_lift",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет в верхней точке мощного подскока."
+                },
+                {
+                    "name": {
+                        "ru": "Голеностопные перекаты (Ankle Flips)",
+                        "en": "Ankle Flips",
+                        "cn": "脚踝跳栏"
+                    },
+                    "desc": {
+                        "ru": "Преодоление мини-барьеров только за счет работы голеностопа.",
+                        "en": "Using ankles to pop over mini-hurdles.",
+                        "cn": "仅利用脚踝力量跳过迷你栏架。"
+                    },
+                    "cue": {
+                        "ru": "Жесткий голеностоп.",
+                        "en": "Stiff ankles.",
+                        "cn": "僵硬的脚踝。"
+                    },
+                    "tags": [
+                        "stiffness",
+                        "reactive_strength",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "hurdles"
+                    ],
+                    "placeholder_text": "Атлет перескакивает низкие барьеры на прямых ногах."
+                },
+                {
+                    "name": {
+                        "ru": "Звездные прыжки",
+                        "en": "Star Jumps",
+                        "cn": "Star Jumps"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Explosive jump spreading arms and legs wide in air.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Get big in the air.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "plyo",
+                        "usatf"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Explosive jump spreading arms and legs wide in air."
+                },
+                {
+                    "name": {
+                        "ru": "Прыжки ракетой",
+                        "en": "Rocket Jumps",
+                        "cn": "Rocket Jumps"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Squat jump for maximal vertical height, fully extended body.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Touch the sky.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "vertical"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Squat jump for maximal vertical height, fully extended body."
+                },
+                {
+                    "name": {
+                        "ru": "Толчок одной ногой с тумбы",
+                        "en": "SL Box Push-off",
+                        "cn": "SL Box Push-off"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Foot on low box, explosive drive up using only the box leg.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Drive through the box.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "unilateral"
+                    ],
+                    "inventory": [
+                        "plyo_box"
+                    ],
+                    "placeholder_text": "Foot on low box, explosive drive up using only the box leg."
+                },
+                {
+                    "name": {
+                        "ru": "Боковой толчок с тумбы",
+                        "en": "Lateral Box Push-off",
+                        "cn": "Lateral Box Push-off"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Sideways stance, foot on box, drive vertically using adductors/glutes.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Push straight down.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "lateral"
+                    ],
+                    "inventory": [
+                        "plyo_box"
+                    ],
+                    "placeholder_text": "Sideways stance, foot on box, drive vertically using adductors/glutes."
+                },
+                {
+                    "name": {
+                        "ru": "Прыжки зигзагом",
+                        "en": "Zig-Zag Hops",
+                        "cn": "Zig-Zag Hops"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Double leg hops moving diagonally forward (Z-pattern).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Stick the landing.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "multidirectional"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Double leg hops moving diagonally forward (Z-pattern)."
+                },
+                {
+                    "name": {
+                        "ru": "Боковые прыжки (двумя ногами)",
+                        "en": "Rudiment Jump (DL Lateral)",
+                        "cn": "Rudiment Jump (DL Lateral)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Small amplitude lateral jumps, keeping feet together (Pfaff).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Springy ankles.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "pfaff",
+                        "lateral"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Small amplitude lateral jumps, keeping feet together (Pfaff)."
+                },
+                {
+                    "name": {
+                        "ru": "Боковые прыжки (одной ной)",
+                        "en": "Rudiment Jump (SL Lateral)",
+                        "cn": "Rudiment Jump (SL Lateral)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Single leg lateral hops, low amplitude (Pfaff).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Stable hip.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "pfaff",
+                        "unilateral"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Single leg lateral hops, low amplitude (Pfaff)."
+                },
+                {
+                    "name": {
+                        "ru": "Прыжки по квадрату",
+                        "en": "4-Square Hops",
+                        "cn": "4-Square Hops"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Hops in a box pattern (Forward, Right, Back, Left).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Quick ground contact.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "coordination"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Hops in a box pattern (Forward, Right, Back, Left)."
+                },
+                {
+                    "name": {
+                        "ru": "Ходьба на носках в песке",
+                        "en": "Sand Pit Toe Walking",
+                        "cn": "Sand Pit Toe Walking"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walking on toes in sand to maximize calf/foot engagement.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Stay high.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "foot_strength"
+                    ],
+                    "inventory": [
+                        "sand_pit"
+                    ],
+                    "placeholder_text": "Walking on toes in sand to maximize calf/foot engagement."
+                },
+                {
+                    "name": {
+                        "ru": "Отскок с низкой тумбы",
+                        "en": "Box Rebound (Low)",
+                        "cn": "Box Rebound (Low)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Drop from low box (6\") and immediately jump vertical.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Hot ground.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "reactive"
+                    ],
+                    "inventory": [
+                        "plyo_box"
+                    ],
+                    "placeholder_text": "Drop from low box (6\") and immediately jump vertical."
+                }
+            ]
+        },
+        {
+            "id": "strength_power",
+            "name": {
+                "ru": "Сила и Мощность",
+                "en": "Strength & Power",
+                "cn": "力量与爆发力"
+            },
+            "description": "Упражнения с отягощениями и медболами для развития максимальной и взрывной силы.",
+            "exercises": [
+                {
+                    "name": {
+                        "ru": "Взятие штанги на грудь (Power Clean)",
+                        "en": "Power Clean / Hang Clean",
+                        "cn": "高翻 / 悬垂翻"
+                    },
+                    "desc": {
+                        "ru": "Взрывной подъем штанги с пола или виса на грудь. Основное упражнение для мощности.",
+                        "en": "Explosive lifting of the barbell from floor or hang to shoulders. Key exercise for power.",
+                        "cn": "从地面或悬垂位置爆发性将杠铃提至肩部。爆发力的关键练习。"
+                    },
+                    "cue": {
+                        "ru": "Тройное разгибание! Локти быстро вперед.",
+                        "en": "Triple extension! Elbows fast forward.",
+                        "cn": "三关节伸展！肘部快速向前。"
+                    },
+                    "tags": [
+                        "max_power",
+                        "weightlifting"
+                    ],
+                    "inventory": [
+                        "barbell",
+                        "plates"
+                    ],
+                    "placeholder_text": "Атлет в фазе подрыва штанги, тело полностью выпрямлено."
+                },
+                {
+                    "name": {
+                        "ru": "Ягодичный мост (Glute Bridge)",
+                        "en": "Glute Bridge",
+                        "cn": "臀桥"
+                    },
+                    "desc": {
+                        "ru": "Лежа на спине, подъем таза до прямой линии. Активация ягодиц.",
+                        "en": "Lying supine, lifting hips to create a straight line. Glute activation.",
+                        "cn": "仰卧，抬起骨盆至一直线。激活臀部。"
+                    },
+                    "cue": {
+                        "ru": "Сжимай ягодицы вверху.",
+                        "en": "Squeeze glutes.",
+                        "cn": "在顶部收紧臀部。"
+                    },
+                    "tags": [
+                        "activation",
+                        "glutes",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Атлет лежит на спине с поднятым тазом."
+                },
+                {
+                    "name": {
+                        "ru": "Птица-Собака (Bird Dog)",
+                        "en": "Bird Dog",
+                        "cn": "鸟狗式"
+                    },
+                    "desc": {
+                        "ru": "Стоя на четвереньках, выпрямление противоположной руки и ноги. Стабильность кора.",
+                        "en": "On all fours, extending opposite arm and leg. Core stability.",
+                        "cn": "四足支撑，伸展对侧手臂和腿。核心稳定性。"
+                    },
+                    "cue": {
+                        "ru": "Не вращай тазом.",
+                        "en": "Resist rotation.",
+                        "cn": "抵抗旋转。"
+                    },
+                    "tags": [
+                        "core",
+                        "stability",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Атлет на четвереньках с вытянутой рукой и ногой."
+                },
+                {
+                    "name": {
+                        "ru": "Мертвый жук (Dead Bug)",
+                        "en": "Dead Bug",
+                        "cn": "死虫式"
+                    },
+                    "desc": {
+                        "ru": "Лежа на спине, опускание разноименных руки и ноги. Контроль пресса.",
+                        "en": "Lying supine, lowering opposite arm and leg while keeping back flat.",
+                        "cn": "仰卧，放下对侧手臂和腿。控制腹肌。"
+                    },
+                    "cue": {
+                        "ru": "Поясница прижата к полу.",
+                        "en": "Back flat to floor.",
+                        "cn": "下背部紧贴地面。"
+                    },
+                    "tags": [
+                        "core",
+                        "stability",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "mat"
+                    ],
+                    "placeholder_text": "Атлет лежит на спине, руки и ноги подняты вверх."
+                },
+                {
+                    "name": {
+                        "ru": "Ракушка (Clamshells)",
+                        "en": "Clamshells",
+                        "cn": "贝壳式"
+                    },
+                    "desc": {
+                        "ru": "Лежа на боку, разведение коленей без разворота таза. Средняя ягодичная.",
+                        "en": "Side-lying, opening knees while keeping feet touching. Glute medius.",
+                        "cn": "侧卧，打开膝盖，双脚保持接触。臀中肌。"
+                    },
+                    "cue": {
+                        "ru": "Открывай книгу.",
+                        "en": "Open the book.",
+                        "cn": "像开书一样打开。"
+                    },
+                    "tags": [
+                        "activation",
+                        "glutes",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "bands"
+                    ],
+                    "placeholder_text": "Атлет лежит на боку с резинкой на бедрах, разводя колени."
+                },
+                {
+                    "name": {
+                        "ru": "Выпад с поворотом (Lunge with Twist)",
+                        "en": "Lunge with Twist",
+                        "cn": "弓步转体"
+                    },
+                    "desc": {
+                        "ru": "Выпад вперед с поворотом корпуса в сторону передней ноги.",
+                        "en": "Forward lunge adding a torso twist over the front leg.",
+                        "cn": "向前弓步，上半身向从前腿侧转体。"
+                    },
+                    "cue": {
+                        "ru": "Колено стабильно.",
+                        "en": "Stable knee.",
+                        "cn": "膝盖稳定。"
+                    },
+                    "tags": [
+                        "strength",
+                        "mobility",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет в выпаде поворачивает корпус."
+                },
+                {
+                    "name": {
+                        "ru": "Козачок (Cossack Squat)",
+                        "en": "Cossack Squat",
+                        "cn": "哥萨克深蹲"
+                    },
+                    "desc": {
+                        "ru": "Глубокий боковой выпад с переносом веса. Мобильность таза и приводящих.",
+                        "en": "Wide stance, shifting weight to one side into a deep side lunge.",
+                        "cn": "宽站距，重心移向一侧进行深侧弓步。"
+                    },
+                    "cue": {
+                        "ru": "Грудь высоко, пятка на полу.",
+                        "en": "Chest up.",
+                        "cn": "挺胸。"
+                    },
+                    "tags": [
+                        "strength",
+                        "mobility",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет в глубоком боковом выпаде."
+                },
+                {
+                    "name": {
+                        "ru": "Бросок мяча назад из-за головы",
+                        "en": "MB Overhead Back Throw",
+                        "cn": "MB Overhead Back Throw"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Explosive triple extension throwing ball backward for height/distance.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Explode and arch.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "power",
+                        "posterior"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Explosive triple extension throwing ball backward for height/distance."
+                },
+                {
+                    "name": {
+                        "ru": "Бросок мяча снизу (между ног)",
+                        "en": "MB Scoop Toss",
+                        "cn": "MB Scoop Toss"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Throwing ball forward from between legs (Granny Toss).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Hips forward.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "power"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Throwing ball forward from between legs (Granny Toss)."
+                },
+                {
+                    "name": {
+                        "ru": "Вращательный бросок в стену",
+                        "en": "Rotational Wall Throw",
+                        "cn": "Rotational Wall Throw"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Standing side-on to wall, throw ball using hip rotation.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Rotate the torso.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "core",
+                        "rotation"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Standing side-on to wall, throw ball using hip rotation."
+                },
+                {
+                    "name": {
+                        "ru": "Складка (V-ситап)",
+                        "en": "V-Sits",
+                        "cn": "V-Sits"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Lying on back, fold body to touch hands to feet simultaneously.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Snap up.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "core",
+                        "usatf"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Lying on back, fold body to touch hands to feet simultaneously."
+                },
+                {
+                    "name": {
+                        "ru": "Гиперэкстензия на полу",
+                        "en": "Back Hypers",
+                        "cn": "Back Hypers"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Lying prone, lift chest and legs off ground (Superman).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Squeeze glutes/back.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "core",
+                        "posterior"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Lying prone, lift chest and legs off ground (Superman)."
+                },
+                {
+                    "name": {
+                        "ru": "Копенгагенская планка",
+                        "en": "Copenhagen Plank",
+                        "cn": "Copenhagen Plank"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Side plank with top leg on bench/partner, bottom leg hovering.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Lift the bottom hip.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "adductor"
+                    ],
+                    "inventory": [
+                        "bench"
+                    ],
+                    "placeholder_text": "Side plank with top leg on bench/partner, bottom leg hovering."
+                },
+                {
+                    "name": {
+                        "ru": "Выпады с мячом над головой",
+                        "en": "Walking Lunge (MB Overhead)",
+                        "cn": "Walking Lunge (MB Overhead)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Walking lunge while holding med ball locked out overhead.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Lock the elbows.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "strength",
+                        "stability"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Walking lunge while holding med ball locked out overhead."
+                },
+                {
+                    "name": {
+                        "ru": "Приседания на баланс-борде",
+                        "en": "Balance Board Squat",
+                        "cn": "Balance Board Squat"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Bodyweight squat performing on a wobble board/Bosu.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Stabilize the ankles.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "proprioception"
+                    ],
+                    "inventory": [
+                        "bosu_board"
+                    ],
+                    "placeholder_text": "Bodyweight squat performing on a wobble board/Bosu."
+                },
+                {
+                    "name": {
+                        "ru": "Русский твист с мячом",
+                        "en": "Med Ball Seated Twist",
+                        "cn": "Med Ball Seated Twist"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Seated, feet off ground, rotating ball side to side (Russian Twist).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Control the rotation.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "core"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Seated, feet off ground, rotating ball side to side (Russian Twist)."
+                },
+                {
+                    "name": {
+                        "ru": "Броски мяча перед собой",
+                        "en": "Front Loaders",
+                        "cn": "Front Loaders"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Toss and catch heavy med ball in front of body (hot potato style).",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Brace the core.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "core",
+                        "pfaff"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Toss and catch heavy med ball in front of body (hot potato style)."
+                }
+            ]
+        },
+        {
+            "id": "speed_acceleration",
+            "name": {
+                "ru": "Скорость и Ускорение",
+                "en": "Speed & Acceleration",
+                "cn": "速度与加速"
+            },
+            "description": "Развитие механики спринта, частоты шагов и способности к ускорению.",
+            "exercises": [
+                {
+                    "name": {
+                        "ru": "Спринт с хода (Flying Sprints)",
+                        "en": "Flying Sprints (Fly 30s)",
+                        "cn": "行进间冲刺 (飞30米)"
+                    },
+                    "desc": {
+                        "ru": "Бег с максимальной скоростью на коротком отрезке (10-30м) после предварительного разгона.",
+                        "en": "Running at max speed for a short distance (10-30m) after a build-up.",
+                        "cn": "加速后进行短距离（10-30米）全速跑。"
+                    },
+                    "cue": {
+                        "ru": "Беги высоко, контакт быстрый.",
+                        "en": "Run tall, quick contact.",
+                        "cn": "跑姿高，触地快。"
+                    },
+                    "tags": [
+                        "max_velocity",
+                        "cns_activation"
+                    ],
+                    "inventory": [
+                        "cones",
+                        "track"
+                    ],
+                    "placeholder_text": "Атлет бежит на максимальной скорости, корпус вертикален."
+                },
+                {
+                    "name": {
+                        "ru": "А-Марш (A-March)",
+                        "en": "A-March",
+                        "cn": "A字走 / 高抬腿走"
+                    },
+                    "desc": {
+                        "ru": "Ходьба с высоким подниманием бедра и контролем осанки.",
+                        "en": "Walking drill lifting knee to hip height, toe dorsiflexed.",
+                        "cn": "高抬膝行走，脚尖背屈，控制姿态。"
+                    },
+                    "cue": {
+                        "ru": "Высокая посадка.",
+                        "en": "Tall posture.",
+                        "cn": "高姿态。"
+                    },
+                    "tags": [
+                        "technique",
+                        "posture",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет идет, высоко поднимая колени."
+                },
+                {
+                    "name": {
+                        "ru": "Б-Скип (B-Skip)",
+                        "en": "B-Skip",
+                        "cn": "B字跳 / 折叠高抬腿"
+                    },
+                    "desc": {
+                        "ru": "А-Скип с выпрямлением голени («загребающее» движение). Акцент на бицепс бедра.",
+                        "en": "A-skip mechanics but extending the leg and pawing back.",
+                        "cn": "A字跳基础上小腿前伸并扒地。强调腘绳肌。"
+                    },
+                    "cue": {
+                        "ru": "Загребай под себя.",
+                        "en": "Cycle the leg.",
+                        "cn": "腿部划圆。"
+                    },
+                    "tags": [
+                        "speed",
+                        "hamstring",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет выполняет активное 'загребающее' движение ногой."
+                },
+                {
+                    "name": {
+                        "ru": "Перекаты (Ankling / Dribbles)",
+                        "en": "Ankling (Dribbles)",
+                        "cn": "脚踝跑 / 小步跑"
+                    },
+                    "desc": {
+                        "ru": "Бег с минимальным подъемом колена, переступая через голеностоп.",
+                        "en": "Running with minimal knee lift, stepping over the ankle.",
+                        "cn": "极小膝盖抬起的跑步，跨过脚踝的高度。"
+                    },
+                    "cue": {
+                        "ru": "Носок на себя, переступай.",
+                        "en": "Toe up, step over.",
+                        "cn": "脚尖勾起，跨步。"
+                    },
+                    "tags": [
+                        "speed",
+                        "turnover",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет быстро перебирает ногами с минимальной амплитудой."
+                },
+                {
+                    "name": {
+                        "ru": "Быстрая нога (Fast Leg)",
+                        "en": "Fast Leg Drill",
+                        "cn": "快腿练习"
+                    },
+                    "desc": {
+                        "ru": "Равномерный бег с резким включением одного, двух или трех быстрых шагов.",
+                        "en": "Jogging with intermittent single-leg rapid cycle.",
+                        "cn": "慢跑中歇性插入单腿快速循环动作。"
+                    },
+                    "cue": {
+                        "ru": "Быстрый оборот.",
+                        "en": "Quick turnover.",
+                        "cn": "快速循环。"
+                    },
+                    "tags": [
+                        "speed",
+                        "neural",
+                        "warmup"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Атлет выполняет резкое ускорение одной ногой."
+                },
+                {
+                    "name": {
+                        "ru": "Стенка: Осанка (Wall Drill - Posture)",
+                        "en": "Wall Drill (Posture)",
+                        "cn": "墙壁练习 (姿态)"
+                    },
+                    "desc": {
+                        "ru": "Упор руками в стену, удержание колена в положении А-позиции.",
+                        "en": "Leaning against wall, holding A-position (knee up).",
+                        "cn": "手撑墙，保持A字姿势（提膝）。"
+                    },
+                    "cue": {
+                        "ru": "Прямая линия от пятки до головы.",
+                        "en": "Straight line.",
+                        "cn": "从脚跟到头成一直线。"
+                    },
+                    "tags": [
+                        "static",
+                        "posture",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "wall_or_hurdle"
+                    ],
+                    "placeholder_text": "Атлет стоит в упоре у стены с поднятым коленом."
+                },
+                {
+                    "name": {
+                        "ru": "Стенка: Смены (Wall Drill - Exchanges)",
+                        "en": "Wall Drill (Exchanges)",
+                        "cn": "墙壁练习 (腿部交换)"
+                    },
+                    "desc": {
+                        "ru": "Динамичная смена ног у стены (одиночные, тройные смены).",
+                        "en": "Leaning against wall, rapid switching of legs.",
+                        "cn": "靠墙快速腿部交换（单次，三次）。"
+                    },
+                    "cue": {
+                        "ru": "Как поршень.",
+                        "en": "Piston legs.",
+                        "cn": "像活塞一样。"
+                    },
+                    "tags": [
+                        "speed",
+                        "power",
+                        "warmup"
+                    ],
+                    "inventory": [
+                        "wall_or_hurdle"
+                    ],
+                    "placeholder_text": "Атлет быстро меняет ноги в упоре у стены."
+                },
+                {
+                    "name": {
+                        "ru": "Падающий старт",
+                        "en": "Falling Start",
+                        "cn": "Falling Start"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Lean forward from standing until gravity forces a step, then sprint.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Fall then drive.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "accel"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Lean forward from standing until gravity forces a step, then sprint."
+                },
+                {
+                    "name": {
+                        "ru": "Спринт за мячом",
+                        "en": "MB Chase Sprint",
+                        "cn": "MB Chase Sprint"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Throw MB forward (chest pass), then sprint to catch/pass it.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Throw and go.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "reaction"
+                    ],
+                    "inventory": [
+                        "med_ball"
+                    ],
+                    "placeholder_text": "Throw MB forward (chest pass), then sprint to catch/pass it."
+                },
+                {
+                    "name": {
+                        "ru": "Марш с сопротивлением",
+                        "en": "Resisted Marching",
+                        "cn": "Resisted Marching"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "A-March with partner holding waist harness/band resistance.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Drive knee, push floor.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "mechanics"
+                    ],
+                    "inventory": [
+                        "harness"
+                    ],
+                    "placeholder_text": "A-March with partner holding waist harness/band resistance."
+                },
+                {
+                    "name": {
+                        "ru": "Тяга саней (шагом)",
+                        "en": "Sled Drag (Walk)",
+                        "cn": "Sled Drag (Walk)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Heavy sled drag walking, emphasizing full hip extension.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Push the earth away.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "power",
+                        "posterior"
+                    ],
+                    "inventory": [
+                        "sled"
+                    ],
+                    "placeholder_text": "Heavy sled drag walking, emphasizing full hip extension."
+                },
+                {
+                    "name": {
+                        "ru": "Бег по меткам",
+                        "en": "Stick Drill",
+                        "cn": "Stick Drill"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Acceleration run over sticks/tape spaced progressively further apart.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Hit the sticks.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "rhythm",
+                        "accel"
+                    ],
+                    "inventory": [
+                        "tape_markers"
+                    ],
+                    "placeholder_text": "Acceleration run over sticks/tape spaced progressively further apart."
+                },
+                {
+                    "name": {
+                        "ru": "Старт из упора лежа",
+                        "en": "Push-Up Start",
+                        "cn": "Push-Up Start"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Start sprint from a down push-up position on the ground.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Push and drive.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "accel",
+                        "reaction"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Start sprint from a down push-up position on the ground."
+                },
+                {
+                    "name": {
+                        "ru": "Старт с хода",
+                        "en": "Rolling Start (20m)",
+                        "cn": "Rolling Start (20m)"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Jog 10m, then accelerate to 90% for 20m.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Shift gears.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "speed"
+                    ],
+                    "inventory": [],
+                    "placeholder_text": "Jog 10m, then accelerate to 90% for 20m."
+                },
+                {
+                    "name": {
+                        "ru": "Вход-выход",
+                        "en": "Ins-and-Outs",
+                        "cn": "Ins-and-Outs"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Sprint drill: Accelerate 20m, Float 20m, Accelerate 20m.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Sprint, float, sprint.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "speed_change"
+                    ],
+                    "inventory": [
+                        "cones"
+                    ],
+                    "placeholder_text": "Sprint drill: Accelerate 20m, Float 20m, Accelerate 20m."
+                },
+                {
+                    "name": {
+                        "ru": "Бег под гору",
+                        "en": "Downhill Sprint",
+                        "cn": "Downhill Sprint"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "Sprinting down a very slight decline (1-2 degrees) for turnover.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Fast feet.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "overspeed"
+                    ],
+                    "inventory": [
+                        "track"
+                    ],
+                    "placeholder_text": "Sprinting down a very slight decline (1-2 degrees) for turnover."
+                },
+                {
+                    "name": {
+                        "ru": "Одиночный выпад с сопротивлением",
+                        "en": "Partner Resisted Single Drive",
+                        "cn": "Partner Resisted Single Drive"
+                    },
+                    "desc": {
+                        "ru": "Упражнение для разминки и подготовки.",
+                        "en": "One explosive step against partner resistance, then reset.",
+                        "cn": "Warm-up exercise."
+                    },
+                    "cue": {
+                        "ru": "Следи за техникой.",
+                        "en": "Explosive first step.",
+                        "cn": "Watch your technique."
+                    },
+                    "tags": [
+                        "warmup",
+                        "accel",
+                        "power"
+                    ],
+                    "inventory": [
+                        "harness"
+                    ],
+                    "placeholder_text": "One explosive step against partner resistance, then reset."
+                }
+            ]
+        }
+    ],
+    "all_tags": [
+        {
+            "id": "warmup",
+            "name": {
+                "ru": "Разминка / Warm-up"
+            }
+        },
+        {
+            "id": "coordination",
+            "name": {
+                "ru": "Координация"
+            }
+        },
+        {
+            "id": "mobility",
+            "name": {
+                "ru": "Мобильность"
+            }
+        },
+        {
+            "id": "hip_mobility",
+            "name": {
+                "ru": "Мобильность таза"
+            }
+        },
+        {
+            "id": "spine_health",
+            "name": {
+                "ru": "Здоровье спины"
+            }
+        },
+        {
+            "id": "stiffness",
+            "name": {
+                "ru": "Жесткость стопы"
+            }
+        },
+        {
+            "id": "foot_strength",
+            "name": {
+                "ru": "Сила стопы"
+            }
+        },
+        {
+            "id": "plyo_low",
+            "name": {
+                "ru": "Плиометрика (Низкая)"
+            }
+        },
+        {
+            "id": "dynamic_flexibility",
+            "name": {
+                "ru": "Динамическая гибкость"
+            }
+        },
+        {
+            "id": "technique",
+            "name": {
+                "ru": "Техника"
+            }
+        },
+        {
+            "id": "curve_mechanics",
+            "name": {
+                "ru": "Механика виража"
+            }
+        },
+        {
+            "id": "bar_clearance",
+            "name": {
+                "ru": "Переход через планку"
+            }
+        },
+        {
+            "id": "vertical_lift",
+            "name": {
+                "ru": "Вертикальный взлет"
+            }
+        },
+        {
+            "id": "takeoff_mechanics",
+            "name": {
+                "ru": "Механика отталкивания"
+            }
+        },
+        {
+            "id": "rhythm",
+            "name": {
+                "ru": "Ритм"
+            }
+        },
+        {
+            "id": "explosive_power",
+            "name": {
+                "ru": "Взрывная сила"
+            }
+        },
+        {
+            "id": "reactive_strength",
+            "name": {
+                "ru": "Реактивная сила"
+            }
+        },
+        {
+            "id": "plyo_high",
+            "name": {
+                "ru": "Плиометрика (Высокая)"
+            }
+        },
+        {
+            "id": "power",
+            "name": {
+                "ru": "Мощность"
+            }
+        },
+        {
+            "id": "elasticity",
+            "name": {
+                "ru": "Упругость"
+            }
+        },
+        {
+            "id": "unilateral_strength",
+            "name": {
+                "ru": "Односторонняя сила"
+            }
+        },
+        {
+            "id": "starting_strength",
+            "name": {
+                "ru": "Стартовая сила"
+            }
+        },
+        {
+            "id": "max_power",
+            "name": {
+                "ru": "Максимальная мощность"
+            }
+        },
+        {
+            "id": "weightlifting",
+            "name": {
+                "ru": "Тяжелая атлетика"
+            }
+        },
+        {
+            "id": "glutes",
+            "name": {
+                "ru": "Ягодицы"
+            }
+        },
+        {
+            "id": "full_body",
+            "name": {
+                "ru": "Все тело"
+            }
+        },
+        {
+            "id": "max_strength",
+            "name": {
+                "ru": "Максимальная сила"
+            }
+        },
+        {
+            "id": "legs",
+            "name": {
+                "ru": "Ноги"
+            }
+        },
+        {
+            "id": "core",
+            "name": {
+                "ru": "Кор (Мышцы центра)"
+            }
+        },
+        {
+            "id": "stability",
+            "name": {
+                "ru": "Стабильность"
+            }
+        },
+        {
+            "id": "max_velocity",
+            "name": {
+                "ru": "Максимальная скорость"
+            }
+        },
+        {
+            "id": "cns_activation",
+            "name": {
+                "ru": "Активация ЦНС"
+            }
+        },
+        {
+            "id": "acceleration",
+            "name": {
+                "ru": "Ускорение"
+            }
+        },
+        {
+            "id": "power_speed",
+            "name": {
+                "ru": "Силовая скорость"
+            }
+        },
+        {
+            "id": "reaction",
+            "name": {
+                "ru": "Реакция"
+            }
+        },
+        {
+            "id": "speed_maintenance",
+            "name": {
+                "ru": "Поддержание скорости"
+            }
+        },
+        {
+            "id": "specific_speed",
+            "name": {
+                "ru": "Специфическая скорость"
+            }
+        },
+        {
+            "id": "activation",
+            "name": {
+                "ru": "Активация"
+            }
+        },
+        {
+            "id": "lean",
+            "name": {
+                "ru": "Наклон в вираж"
+            }
+        },
+        {
+            "id": "air_mechanics",
+            "name": {
+                "ru": "Работа в воздухе"
+            }
+        },
+        {
+            "id": "approach",
+            "name": {
+                "ru": "Разбег"
+            }
+        },
+        {
+            "id": "arms",
+            "name": {
+                "ru": "Работа рук"
+            }
+        },
+        {
+            "id": "block",
+            "name": {
+                "ru": "Блок"
+            }
+        },
+        {
+            "id": "lateral",
+            "name": {
+                "ru": "Боковые движения"
+            }
+        },
+        {
+            "id": "landing",
+            "name": {
+                "ru": "Приземление"
+            }
+        },
+        {
+            "id": "hamstring",
+            "name": {
+                "ru": "Бицепс бедра"
+            }
+        },
+        {
+            "id": "posture",
+            "name": {
+                "ru": "Осанка"
+            }
+        },
+        {
+            "id": "turnover",
+            "name": {
+                "ru": "Частота"
+            }
+        },
+        {
+            "id": "neural",
+            "name": {
+                "ru": "Нейро"
+            }
+        },
+        {
+            "id": "static",
+            "name": {
+                "ru": "Статика"
+            }
+        },
+        {
+            "id": "pfaff",
+            "name": {
+                "ru": "pfaff",
+                "en": "pfaff",
+                "cn": "pfaff"
+            }
+        },
+        {
+            "id": "hips",
+            "name": {
+                "ru": "hips",
+                "en": "hips",
+                "cn": "hips"
+            }
+        },
+        {
+            "id": "floor",
+            "name": {
+                "ru": "floor",
+                "en": "floor",
+                "cn": "floor"
+            }
+        },
+        {
+            "id": "usatf",
+            "name": {
+                "ru": "usatf",
+                "en": "usatf",
+                "cn": "usatf"
+            }
+        },
+        {
+            "id": "ankle",
+            "name": {
+                "ru": "ankle",
+                "en": "ankle",
+                "cn": "ankle"
+            }
+        },
+        {
+            "id": "sand",
+            "name": {
+                "ru": "sand",
+                "en": "sand",
+                "cn": "sand"
+            }
+        },
+        {
+            "id": "curve",
+            "name": {
+                "ru": "curve",
+                "en": "curve",
+                "cn": "curve"
+            }
+        },
+        {
+            "id": "visual",
+            "name": {
+                "ru": "visual",
+                "en": "visual",
+                "cn": "visual"
+            }
+        },
+        {
+            "id": "takeoff",
+            "name": {
+                "ru": "takeoff",
+                "en": "takeoff",
+                "cn": "takeoff"
+            }
+        },
+        {
+            "id": "freq",
+            "name": {
+                "ru": "freq",
+                "en": "freq",
+                "cn": "freq"
+            }
+        },
+        {
+            "id": "plyo",
+            "name": {
+                "ru": "plyo",
+                "en": "plyo",
+                "cn": "plyo"
+            }
+        },
+        {
+            "id": "vertical",
+            "name": {
+                "ru": "vertical",
+                "en": "vertical",
+                "cn": "vertical"
+            }
+        },
+        {
+            "id": "unilateral",
+            "name": {
+                "ru": "unilateral",
+                "en": "unilateral",
+                "cn": "unilateral"
+            }
+        },
+        {
+            "id": "multidirectional",
+            "name": {
+                "ru": "multidirectional",
+                "en": "multidirectional",
+                "cn": "multidirectional"
+            }
+        },
+        {
+            "id": "reactive",
+            "name": {
+                "ru": "reactive",
+                "en": "reactive",
+                "cn": "reactive"
+            }
+        },
+        {
+            "id": "posterior",
+            "name": {
+                "ru": "posterior",
+                "en": "posterior",
+                "cn": "posterior"
+            }
+        },
+        {
+            "id": "rotation",
+            "name": {
+                "ru": "rotation",
+                "en": "rotation",
+                "cn": "rotation"
+            }
+        },
+        {
+            "id": "adductor",
+            "name": {
+                "ru": "adductor",
+                "en": "adductor",
+                "cn": "adductor"
+            }
+        },
+        {
+            "id": "strength",
+            "name": {
+                "ru": "strength",
+                "en": "strength",
+                "cn": "strength"
+            }
+        },
+        {
+            "id": "proprioception",
+            "name": {
+                "ru": "proprioception",
+                "en": "proprioception",
+                "cn": "proprioception"
+            }
+        },
+        {
+            "id": "accel",
+            "name": {
+                "ru": "accel",
+                "en": "accel",
+                "cn": "accel"
+            }
+        },
+        {
+            "id": "mechanics",
+            "name": {
+                "ru": "mechanics",
+                "en": "mechanics",
+                "cn": "mechanics"
+            }
+        },
+        {
+            "id": "speed",
+            "name": {
+                "ru": "speed",
+                "en": "speed",
+                "cn": "speed"
+            }
+        },
+        {
+            "id": "speed_change",
+            "name": {
+                "ru": "speed change",
+                "en": "speed change",
+                "cn": "speed change"
+            }
+        },
+        {
+            "id": "overspeed",
+            "name": {
+                "ru": "overspeed",
+                "en": "overspeed",
+                "cn": "overspeed"
+            }
+        }
+    ],
+    "all_inventory": [
+        {
+            "id": "hurdles",
+            "name": {
+                "ru": "Барьеры"
+            }
+        },
+        {
+            "id": "mat",
+            "name": {
+                "ru": "Мат/Коврик"
+            }
+        },
+        {
+            "id": "wall_or_hurdle",
+            "name": {
+                "ru": "Стена или Барьер (опора)"
+            }
+        },
+        {
+            "id": "cones",
+            "name": {
+                "ru": "Конусы/Фишки"
+            }
+        },
+        {
+            "id": "landing_pit",
+            "name": {
+                "ru": "Яма для приземления (Маты)"
+            }
+        },
+        {
+            "id": "bar_or_elastic",
+            "name": {
+                "ru": "Планка или Резинка"
+            }
+        },
+        {
+            "id": "tape_markers",
+            "name": {
+                "ru": "Маркерная лента/Метки"
+            }
+        },
+        {
+            "id": "plyo_box",
+            "name": {
+                "ru": "Плиометрический бокс (Тумба)"
+            }
+        },
+        {
+            "id": "barbell",
+            "name": {
+                "ru": "Штанга"
+            }
+        },
+        {
+            "id": "plates",
+            "name": {
+                "ru": "Блины"
+            }
+        },
+        {
+            "id": "dumbbells",
+            "name": {
+                "ru": "Гантели"
+            }
+        },
+        {
+            "id": "medicine_ball",
+            "name": {
+                "ru": "Медицинбол (Медбол)"
+            }
+        },
+        {
+            "id": "rack",
+            "name": {
+                "ru": "Стойка для приседаний"
+            }
+        },
+        {
+            "id": "track",
+            "name": {
+                "ru": "Беговая дорожка"
+            }
+        },
+        {
+            "id": "sled",
+            "name": {
+                "ru": "Сани (Sled)"
+            }
+        },
+        {
+            "id": "harness",
+            "name": {
+                "ru": "Упряжь"
+            }
+        },
+        {
+            "id": "weights",
+            "name": {
+                "ru": "Отягощения"
+            }
+        },
+        {
+            "id": "bands",
+            "name": {
+                "ru": "Резинки (Mini-bands)"
+            }
+        },
+        {
+            "id": "sand_pit",
+            "name": {
+                "ru": "Sand Pit",
+                "en": "Sand Pit",
+                "cn": "Sand Pit"
+            }
+        },
+        {
+            "id": "wickets",
+            "name": {
+                "ru": "Wickets",
+                "en": "Wickets",
+                "cn": "Wickets"
+            }
+        },
+        {
+            "id": "med_ball",
+            "name": {
+                "ru": "Med Ball",
+                "en": "Med Ball",
+                "cn": "Med Ball"
+            }
+        },
+        {
+            "id": "bench",
+            "name": {
+                "ru": "Bench",
+                "en": "Bench",
+                "cn": "Bench"
+            }
+        },
+        {
+            "id": "bosu_board",
+            "name": {
+                "ru": "Bosu/Board",
+                "en": "Bosu/Board",
+                "cn": "Bosu/Board"
+            }
+        }
+    ]
+}

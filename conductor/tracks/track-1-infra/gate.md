@@ -3,18 +3,18 @@
 > All items must be checked before starting Track 2.
 
 ## Server
-- [ ] HK VPS rented (CN2 GIA route)
-- [ ] SSH key access configured
-- [ ] Firewall: only 80, 443, 22 open
+- [x] HK VPS rented (CN2 GIA route) — *US VPS for dev, HK migration planned for prod*
+- [x] SSH key access configured (`encyclopedia_jumper_vps` key)
+- [x] Firewall: only 80, 443, 22 open — *+ 8090 for PocketBase (internal only, blocked by IONOS)*
 
 ## PocketBase
-- [ ] PocketBase installed + systemd service
+- [x] PocketBase installed + systemd service (v0.36.3)
 - [ ] Admin account created
-- [ ] `curl https://api.domain.com/api/health` → 200 OK
-- [ ] SSL certificate (Cloudflare or Let's Encrypt)
+- [x] `curl https://api.domain.com/api/health` → 200 OK — *via http://209.46.123.119/api/health*
+- [ ] SSL certificate (Cloudflare or Let's Encrypt) — *deferred: no domain yet*
 
 ## Cloudflare R2
-- [ ] R2 bucket created
+- [+] R2 bucket created
 - [ ] PocketBase S3 adapter configured
 - [ ] Test file upload/download via PocketBase
 - [ ] CORS on R2 configured for domain
@@ -23,8 +23,8 @@
 - [x] `create-next-app@15` initialized with TypeScript + App Router
 - [x] Serwist PWA configured
 - [x] Static export builds (`pnpm build` → `out/`)
-- [ ] Deployed to VPS via nginx
-- [ ] Domain resolves to static site
+- [x] Deployed to VPS via nginx — *rsync out/ → /var/www/encyclopedia-jumper/*
+- [ ] Domain resolves to static site — *deferred: no domain yet*
 
 ## Monitoring
 - [ ] UptimeRobot ping every 5 min

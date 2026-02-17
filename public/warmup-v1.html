@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Идеальная разминка прыгуна в высоту (30 мин)</title>
+    <!-- Use locally hosted Inter font if available, otherwise fallback to system sans-serif -->
+    <link rel="stylesheet" href="/fonts/inter.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--surface);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .lang-btn {
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: var(--text-main);
+            color: white;
+            border-color: var(--text-main);
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .exercise-card {
+            background: var(--surface);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+
+        .exercise-content {
+            padding: 1.5rem;
+        }
+
+        .exercise-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .exercise-desc {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .coach-cue {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            font-style: italic;
+            color: var(--text-main);
+        }
+
+        .coach-label {
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="page-title">Разминка Прыгуна (30 мин)</h1>
+    <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" onclick="setLang('cn')">CN</button>
+    </div>
+</header>
+
+<main id="exercises-container">
+    <!-- Exercises will be injected here by JS -->
+</main>
+
+<script>
+    const data = {
+        title: {
+            ru: "Разминка Прыгуна (30 мин)",
+            en: "High Jumper Warm-up (30 min)",
+            cn: "跳高运动员热身 (30分钟)"
+        },
+        coach_label: {
+            ru: "Тренер говорит:",
+            en: "Coach says:",
+            cn: "教练说:"
+        },
+        exercises: [
+            {
+                img: "/img/warmup-v1/jogging.png",
+                name: {
+                    ru: "1. Легкий бег и вариации (5-7 мин)",
+                    en: "1. Light Jogging & Variations (5-7 min)",
+                    cn: "1. 慢跑和变奏 (5-7 分钟)"
+                },
+                desc: {
+                    ru: "Спокойный бег по стадиону. В последние 2 минуты включите бег спиной вперед (активация бицепса бедра) и приставные шаги.",
+                    en: "Easy jog around the track. Include backward running and side shuffles in the last 2 minutes.",
+                    cn: "绕跑道慢跑。最后2分钟包括向后跑和侧滑步。"
+                },
+                cue: {
+                    ru: "«Держите плечи расслабленными, стопы мягкие!»",
+                    en: "“Keep your shoulders relaxed, soft feet!”",
+                    cn: "“保持肩膀放松，脚步轻盈！”"
+                }
+            },
+            {
+                img: "/img/warmup-v1/lunge.png",
+                name: {
+                    ru: "2. Выпады с поворотом корпуса",
+                    en: "2. Walking Lunge with Twist",
+                    cn: "2. 弓步转体"
+                },
+                desc: {
+                    ru: "Глубокий выпад вперед. В нижней точке поверните корпус в сторону передней ноги. Спина прямая. 20-30 метров.",
+                    en: "Deep forward lunge. Twist torso towards the front leg at the bottom. Keep back straight. 20-30 meters.",
+                    cn: "深弓步。在底部向同侧腿扭转躯干。保持背部挺直。20-30米。"
+                },
+                cue: {
+                    ru: "«Колено над пяткой, взгляд вперед, скручиваемся от талии!»",
+                    en: "“Knee over heel, look forward, twist from the waist!”",
+                    cn: "“膝盖在脚跟上方，向前看，从腰部扭转！”"
+                }
+            },
+            {
+                img: "/img/warmup-v1/leg_swing.png",
+                name: {
+                    ru: "3. Махи ногами у опоры",
+                    en: "3. Dynamic Leg Swings",
+                    cn: "3. 动态摆腿"
+                },
+                desc: {
+                    ru: "Махи вперед-назад и в стороны у барьера. Постепенно увеличивайте амплитуду. Мобильность таза для прохождения планки.",
+                    en: "Forward-backward and lateral swings at a hurdle. Increase amplitude gradually. Hip mobility for bar clearance.",
+                    cn: "扶栏前后和左右摆腿。逐渐增加幅度。髋部灵活性对过杆至关重要。"
+                },
+                cue: {
+                    ru: "«Не сгибайте опорную ногу, корпус стабилен!»",
+                    en: "“Keep the standing leg straight, torso stable!”",
+                    cn: "“保持支撑腿伸直，躯干稳定！”"
+                }
+            },
+            {
+                img: "/img/warmup-v1/a_skip.png",
+                name: {
+                    ru: "4. А-Скип (2x30м)",
+                    en: "4. A-Skip (2x30m)",
+                    cn: "4. A字跳 (2x30米)"
+                },
+                desc: {
+                    ru: "Ритмичные подскоки с акцентированным подъемом бедра и активным ударом стопой («заряженная стопа»).",
+                    en: "Rhythmic skipping with emphasized knee drive and active foot strike ('dorsiflexed foot').",
+                    cn: "有节奏的跳跃，强调提膝和脚掌积极着地（‘勾脚尖’）。"
+                },
+                cue: {
+                    ru: "«Атакуй дорожку! Носок на себя!»",
+                    en: "“Attack the track! Toe up!”",
+                    cn: "“用力蹬地！脚尖勾起！”"
+                }
+            },
+            {
+                img: "/img/warmup-v1/curve_run.png",
+                name: {
+                    ru: "5. Бег по виражу (J-бег)",
+                    en: "5. Curve Running / J-Run",
+                    cn: "5. 弧线跑"
+                },
+                desc: {
+                    ru: "Имитация разбега по дуге. Наклон всего тела внутрь виража от голеностопа, а не от талии. Внешнее плечо чуть впереди.",
+                    en: "Curve approach simulation. Lean whole body inward from the ankle, not waist. Outer shoulder forward.",
+                    cn: "弧线助跑模拟。从脚踝而非腰部向内倾斜身体。外侧肩膀靠前。"
+                },
+                cue: {
+                    ru: "«Наклон от стопы! Держи внешнее плечо!»",
+                    en: "“Lean from the ankle! Hold the outer shoulder!”",
+                    cn: "“从脚踝开始倾斜！保持外侧肩膀位置！”"
+                }
+            },
+            {
+                img: "/img/warmup-v1/scissor_jump.png",
+                name: {
+                    ru: "6. Прыжки «Ножницы»",
+                    en: "6. Short Approach Scissor Jump",
+                    cn: "6. 短助跑剪式跳"
+                },
+                desc: {
+                    ru: "Прыжок через планку/резинку с 3-5 шагов. Акцент на вертикальный взлет и прямую маховую ногу.",
+                    en: "Jump over bar/elastic from 3-5 steps. Focus on vertical take-off and straight lead leg.",
+                    cn: "3-5步助跑跨越横杆/橡皮筋。重点是垂直起跳和直腿摆动。"
+                },
+                cue: {
+                    ru: "«Вертикальный взлет! Колено маховой ноги — вверх!»",
+                    en: "“Vertical drive! Lead knee up!”",
+                    cn: "“垂直起跳！摆动腿膝盖向上！”"
+                }
+            }
+        ]
+    };
+
+    function setLang(lang) {
+        // Update styling
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+        // Update Title
+        document.getElementById('page-title').innerText = data.title[lang];
+
+        // Render Exercises
+        const container = document.getElementById('exercises-container');
+        container.innerHTML = '';
+
+        data.exercises.forEach(ex => {
+            const card = document.createElement('div');
+            card.className = 'exercise-card';
+            card.innerHTML = `
+                <img src="${ex.img}" alt="${ex.name.en}" class="exercise-img">
+                <div class="exercise-content">
+                    <div class="exercise-title">${ex.name[lang]}</div>
+                    <div class="exercise-desc">${ex.desc[lang]}</div>
+                    <div class="coach-cue">
+                        <span class="coach-label">${data.coach_label[lang]}</span>
+                        ${ex.cue[lang]}
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Init
+    setLang('ru');
+</script>
+
+</body>
+</html>
