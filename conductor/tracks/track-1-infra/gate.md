@@ -9,15 +9,15 @@
 
 ## PocketBase
 - [x] PocketBase installed + systemd service (v0.36.3)
-- [ ] Admin account created
+- [x] Admin account created
 - [x] `curl https://api.domain.com/api/health` → 200 OK — *via http://209.46.123.119/api/health*
 - [ ] SSL certificate (Cloudflare or Let's Encrypt) — *deferred: no domain yet*
 
 ## Cloudflare R2
-- [+] R2 bucket created
-- [ ] PocketBase S3 adapter configured
-- [ ] Test file upload/download via PocketBase
-- [ ] CORS on R2 configured for domain
+- [x] R2 bucket created (`tf-storage`)
+- [x] PocketBase S3 adapter configured (forcePathStyle: true)
+- [x] Test backup upload verified (test_backup.zip → R2)
+- [ ] CORS on R2 configured for domain — *deferred: no domain yet*
 
 ## Next.js
 - [x] `create-next-app@15` initialized with TypeScript + App Router
@@ -27,10 +27,10 @@
 - [ ] Domain resolves to static site — *deferred: no domain yet*
 
 ## Monitoring
-- [ ] UptimeRobot ping every 5 min
-- [ ] Telegram alert configured
-- [ ] Backup cron: SQLite → R2 daily
-- [ ] Backup restore tested
+- [ ] UptimeRobot ping every 5 min — *needs domain*
+- [ ] Telegram alert configured — *deferred*
+- [x] Backup cron: SQLite → R2 daily (3 AM UTC)
+- [x] Backup tested (test_backup.zip, 229 KB)
 
 ## Fonts & Design System
 - [x] Fonts self-hosted in `/public/fonts/`: Inter, Plus Jakarta Sans, JetBrains Mono, Noto Sans SC
