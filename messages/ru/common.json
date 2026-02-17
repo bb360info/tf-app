@@ -1,0 +1,54 @@
+{
+    "app": {
+        "title": "Энциклопедия Прыгуна",
+        "description": "Тренировочная платформа для прыгунов",
+        "loading": "Загрузка..."
+    },
+    "nav": {
+        "home": "Главная",
+        "exercises": "Упражнения",
+        "training": "Тренировки",
+        "analytics": "Аналитика",
+        "settings": "Настройки",
+        "profile": "Профиль",
+        "logout": "Выйти"
+    },
+    "auth": {
+        "login": "Войти",
+        "register": "Регистрация",
+        "email": "Email",
+        "password": "Пароль",
+        "confirmPassword": "Подтвердите пароль",
+        "name": "Имя",
+        "forgotPassword": "Забыли пароль?",
+        "resetPassword": "Сбросить пароль",
+        "sendResetLink": "Отправить ссылку",
+        "loginWithGoogle": "Войти через Google",
+        "registerWithGoogle": "Зарегистрироваться через Google",
+        "noAccount": "Нет аккаунта?",
+        "hasAccount": "Есть аккаунт?",
+        "signUp": "Зарегистрироваться",
+        "signIn": "Войти",
+        "emailVerification": "Подтвердите email",
+        "emailVerificationSent": "Письмо с подтверждением отправлено на {email}",
+        "orContinueWith": "или продолжить с",
+        "termsAgree": "Регистрируясь, вы принимаете условия использования"
+    },
+    "errors": {
+        "required": "Обязательное поле",
+        "invalidEmail": "Неверный формат email",
+        "passwordMin": "Минимум 8 символов",
+        "passwordMismatch": "Пароли не совпадают",
+        "loginFailed": "Неверный email или пароль",
+        "registerFailed": "Ошибка регистрации",
+        "networkError": "Ошибка сети. Проверьте подключение",
+        "unknown": "Произошла неизвестная ошибка",
+        "sessionExpired": "Сессия истекла. Войдите снова"
+    },
+    "language": {
+        "label": "Язык",
+        "ru": "Русский",
+        "en": "English",
+        "cn": "中文"
+    }
+}

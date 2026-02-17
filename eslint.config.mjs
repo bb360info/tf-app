@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Legacy v1 app (vanilla JS, not part of Next.js build)
+    "legacy/**",
+    // PocketBase hooks (Goja JS runtime, not compiled by Next.js)
+    "pb_hooks/**",
   ]),
 ]);
 

@@ -1,22 +1,10 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import '../styles/tokens.css';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Энциклопедия Прыгуна",
-  description: "Training encyclopedia for high jump athletes",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Энциклопедия Прыгуна",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#6366F1",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
+  title: 'Jumpedia',
+  description: 'Training platform for high jump athletes',
 };
 
 export default function RootLayout({
@@ -24,9 +12,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="ru">
-      <body>{children}</body>
-    </html>
-  );
+  return children;
 }

@@ -11,28 +11,28 @@
 - [x] PocketBase installed + systemd service (v0.36.3)
 - [x] Admin account created
 - [x] `curl https://api.domain.com/api/health` → 200 OK — *via http://209.46.123.119/api/health*
-- [ ] SSL certificate (Cloudflare or Let's Encrypt) — *deferred: no domain yet*
+- [x] SSL certificate (Cloudflare) — *Cloudflare proxied, auto SSL*
 
 ## Cloudflare R2
 - [x] R2 bucket created (`tf-storage`)
 - [x] PocketBase S3 adapter configured (forcePathStyle: true)
 - [x] Test backup upload verified (test_backup.zip → R2)
-- [ ] CORS on R2 configured for domain — *deferred: no domain yet*
+- [x] CORS on R2 configured for domain — *PocketBase proxies R2 files with `access-control-allow-origin: *`*
 
 ## Next.js
 - [x] `create-next-app@15` initialized with TypeScript + App Router
 - [x] Serwist PWA configured
 - [x] Static export builds (`pnpm build` → `out/`)
 - [x] Deployed to VPS via nginx — *rsync out/ → /var/www/encyclopedia-jumper/*
-- [ ] Domain resolves to static site — *deferred: no domain yet*
+- [x] Domain resolves to static site — *`https://jumpedia.app/api/health` → 200 OK via Cloudflare proxy*
 
 ## Monitoring
-- [ ] UptimeRobot ping every 5 min — *needs domain*
-- [ ] Telegram alert configured — *deferred*
+- [x] UptimeRobot ping every 5 min — *jumpedia.app/api/health, 100% uptime*
+- [~] Telegram alert configured — *skipped, email alerts via UptimeRobot sufficient*
 - [x] Backup cron: SQLite → R2 daily (3 AM UTC)
 - [x] Backup tested (test_backup.zip, 229 KB)
 
 ## Fonts & Design System
 - [x] Fonts self-hosted in `/public/fonts/`: Inter, Plus Jakarta Sans, JetBrains Mono, Noto Sans SC
-- [ ] `docs/DESIGN_SYSTEM.md` read and understood by dev team
+- [x] `docs/DESIGN_SYSTEM.md` read and understood by dev team
 - [x] CSS tokens file created with design tokens from DESIGN_SYSTEM.md

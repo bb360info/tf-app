@@ -1,0 +1,54 @@
+{
+    "app": {
+        "title": "Jumpedia",
+        "description": "Training platform for high jump athletes",
+        "loading": "Loading..."
+    },
+    "nav": {
+        "home": "Home",
+        "exercises": "Exercises",
+        "training": "Training",
+        "analytics": "Analytics",
+        "settings": "Settings",
+        "profile": "Profile",
+        "logout": "Log out"
+    },
+    "auth": {
+        "login": "Log in",
+        "register": "Sign up",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "name": "Name",
+        "forgotPassword": "Forgot password?",
+        "resetPassword": "Reset password",
+        "sendResetLink": "Send reset link",
+        "loginWithGoogle": "Log in with Google",
+        "registerWithGoogle": "Sign up with Google",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?",
+        "signUp": "Sign up",
+        "signIn": "Log in",
+        "emailVerification": "Verify your email",
+        "emailVerificationSent": "Verification email sent to {email}",
+        "orContinueWith": "or continue with",
+        "termsAgree": "By signing up, you agree to the Terms of Service"
+    },
+    "errors": {
+        "required": "This field is required",
+        "invalidEmail": "Invalid email format",
+        "passwordMin": "Minimum 8 characters",
+        "passwordMismatch": "Passwords don't match",
+        "loginFailed": "Invalid email or password",
+        "registerFailed": "Registration failed",
+        "networkError": "Network error. Check your connection",
+        "unknown": "An unknown error occurred",
+        "sessionExpired": "Session expired. Please log in again"
+    },
+    "language": {
+        "label": "Language",
+        "ru": "Русский",
+        "en": "English",
+        "cn": "中文"
+    }
+}

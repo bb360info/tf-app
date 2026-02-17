@@ -1,0 +1,54 @@
+{
+    "app": {
+        "title": "跳高百科",
+        "description": "跳高运动员训练平台",
+        "loading": "加载中..."
+    },
+    "nav": {
+        "home": "首页",
+        "exercises": "练习",
+        "training": "训练",
+        "analytics": "分析",
+        "settings": "设置",
+        "profile": "个人资料",
+        "logout": "退出"
+    },
+    "auth": {
+        "login": "登录",
+        "register": "注册",
+        "email": "邮箱",
+        "password": "密码",
+        "confirmPassword": "确认密码",
+        "name": "姓名",
+        "forgotPassword": "忘记密码？",
+        "resetPassword": "重置密码",
+        "sendResetLink": "发送重置链接",
+        "loginWithGoogle": "使用 Google 登录",
+        "registerWithGoogle": "使用 Google 注册",
+        "noAccount": "没有账号？",
+        "hasAccount": "已有账号？",
+        "signUp": "注册",
+        "signIn": "登录",
+        "emailVerification": "验证邮箱",
+        "emailVerificationSent": "验证邮件已发送至 {email}",
+        "orContinueWith": "或通过以下方式继续",
+        "termsAgree": "注册即表示您同意服务条款"
+    },
+    "errors": {
+        "required": "此字段为必填项",
+        "invalidEmail": "邮箱格式无效",
+        "passwordMin": "最少8个字符",
+        "passwordMismatch": "两次密码不一致",
+        "loginFailed": "邮箱或密码错误",
+        "registerFailed": "注册失败",
+        "networkError": "网络错误，请检查连接",
+        "unknown": "发生未知错误",
+        "sessionExpired": "会话已过期，请重新登录"
+    },
+    "language": {
+        "label": "语言",
+        "ru": "Русский",
+        "en": "English",
+        "cn": "中文"
+    }
+}

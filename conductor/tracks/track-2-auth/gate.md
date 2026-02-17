@@ -3,14 +3,14 @@
 > All items must be checked before starting Track 3.
 
 ## PocketBase Collections
-- [ ] All 21 collections created
-- [ ] 9 indexes on FK columns configured
-- [ ] UNIQUE constraints on 5 collections
-- [ ] `sync_id` field on 3 sync-heavy collections
-- [ ] `deleted_at` on all collections with soft-delete
+- [x] All 21 collections created
+- [x] 9 indexes on FK columns configured
+- [x] UNIQUE constraints on 5 collections
+- [x] `sync_id` field on 3 sync-heavy collections
+- [x] `deleted_at` on all collections with soft-delete
 
 ## API Rules
-- [ ] List/Create/Update/Delete rules for all 21 collections
+- [x] List/Create/Update/Delete rules for all 21 collections
 - [ ] Anonymous request → 403 (tested)
 - [ ] Coach can only see own athletes (tested)
 - [ ] Athlete can only see own data (tested)
@@ -25,7 +25,7 @@
 - [ ] Google OAuth2 registration + login works
 - [ ] Email verification sent
 - [ ] Password reset works
-- [ ] SMTP configured
+- [x] SMTP configured (Resend)
 
 ## Offline + Sync
 - [ ] IndexedDB schema (Dexie.js) mirrors PocketBase
@@ -34,7 +34,7 @@
 - [ ] Conflict resolution works (last-write-wins with timestamps)
 
 ## Validation
-- [ ] Zod schemas for all collections
+- [x] Zod schemas for all collections
 - [ ] Invalid data rejected client-side
 
 ## Data

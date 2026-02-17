@@ -4,8 +4,8 @@
 
 | Status | Track | Title | Days | Gate |
 |--------|-------|-------|------|------|
-| 🔵 Active | 1 | Infrastructure | 2-3 | [Gate 1](tracks/track-1-infra/gate.md) |
-| ⬜ | 2 | Auth + Data Foundation | 3-4 | [Gate 2](tracks/track-2-auth/gate.md) |
+| 🟢 Done | 1 | Infrastructure | 2-3 | [Gate 1](tracks/track-1-infra/gate.md) |
+| 🔵 Active | 2 | Auth + Data Foundation | 3-4 | [Gate 2](tracks/track-2-auth/gate.md) |
 | ⬜ | 3 | Training System | 5-6 | [Gate 3](tracks/track-3-training/gate.md) |
 | ⬜ | 4 | Analytics + Reference | 4-5 | [Gate 4](tracks/track-4-analytics/gate.md) |
 | ⬜ | 5 | Video + Biomechanics | 3-4 | [Gate 5](tracks/track-5-video/gate.md) |
