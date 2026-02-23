@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог упражнений — Легкая атлетика</title>
+  <meta name="description"
+    content="Каталог упражнений с собственным весом для легкоатлетов. Фильтрация, поиск, создание тренировочных списков и экспорт в PDF.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="header-logo">🏃</div>
+        <div>
+          <h1 class="header-title">Каталог упражнений</h1>
+          <p class="header-subtitle">Упражнения с собственным весом для легкоатлетов</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="Поиск упражнений..." autocomplete="off">
+          <button id="searchClear" class="search-clear" aria-label="Очистить">&times;</button>
+        </div>
+        <button class="btn btn-workout" id="toggleLists" title="Мои тренировки">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="M9 14l2 2 4-4" />
+          </svg>
+          <span>Тренировки</span>
+          <span class="badge" id="listsBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filters -->
+  <section class="filters">
+    <div class="filters-inner">
+      <button class="filter-pill active" data-category="all">
+        <span class="filter-icon">🔥</span>
+        <span>Все</span>
+        <span class="filter-count" id="count-all">0</span>
+      </button>
+      <div class="filter-divider"></div>
+      <div id="filterPills" class="filter-pills"></div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="main-inner">
+      <!-- Exercise Grid -->
+      <div class="exercise-grid" id="exerciseGrid"></div>
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">🔍</div>
+        <h3>Ничего не найдено</h3>
+        <p>Попробуйте изменить фильтры или поисковый запрос</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Workout Lists Sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Мои тренировки</h2>
+      <button class="btn-icon" id="closeSidebar" aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-primary btn-sm" id="createList">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Новая тренировка
+      </button>
+    </div>
+    <div class="lists-container" id="listsContainer">
+      <div class="no-lists" id="noLists">
+        <div class="no-lists-icon">📋</div>
+        <p>Нет тренировок</p>
+        <p class="no-lists-hint">Создайте тренировку и добавляйте в неё упражнения из каталога</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Exercise Detail Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="exerciseModal">
+      <button class="modal-close" id="modalClose" aria-label="Закрыть">&times;</button>
+      <div class="modal-body">
+        <div class="modal-media">
+          <img class="modal-gif" id="modalGif" src="" alt="">
+          <div class="modal-images" id="modalImages"></div>
+        </div>
+        <div class="modal-info">
+          <div class="modal-category" id="modalCategory"></div>
+          <h2 class="modal-title" id="modalTitle"></h2>
+          <h3 class="modal-title-ru" id="modalTitleRu"></h3>
+          <p class="modal-description" id="modalDescription"></p>
+          <a class="modal-jefit-link" id="modalJefitLink" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Подробнее на JEFIT
+          </a>
+          <div class="modal-add-section">
+            <label for="addToListSelect">Добавить в тренировку:</label>
+            <div class="modal-add-row">
+              <select id="addToListSelect" class="select"></select>
+              <button class="btn btn-primary btn-sm" id="addToListBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Добавить
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div class="modal-overlay rename-modal-overlay" id="renameOverlay">
+    <div class="modal modal-sm">
+      <h3>Переименовать тренировку</h3>
+      <input type="text" id="renameInput" class="input" placeholder="Название тренировки" autocomplete="off">
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="renameCancel">Отмена</button>
+        <button class="btn btn-primary" id="renameSave">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Export Progress Modal -->
+  <div class="modal-overlay" id="exportOverlay" style="display:none">
+    <div class="modal modal-sm export-modal">
+      <h3 id="exportTitle">Экспорт...</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="exportProgress"></div>
+      </div>
+      <p class="export-status" id="exportStatus">Подготовка...</p>
+    </div>
+  </div>
+
+  <!-- CDN Dependencies -->
+  <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="exercises.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

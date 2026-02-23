@@ -1,0 +1,81 @@
+/* =========================================================
+   404 Not Found — Athletic Minimal + Glassmorphism
+   ========================================================= */
+
+.page {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    background: var(--color-bg-primary);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 420px;
+    width: 100%;
+    padding: var(--space-8);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .card {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-lg);
+    }
+}
+
+.code {
+    font-family: var(--font-mono);
+    font-size: var(--text-5xl);
+    font-weight: var(--weight-extrabold);
+    color: var(--color-accent-primary);
+    line-height: 1;
+    margin: 0;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.description {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+}
+
+.homeBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--space-6);
+    background: var(--color-accent-primary);
+    color: var(--color-text-on-accent);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    transition: background var(--duration-normal) var(--ease-default);
+    margin-top: var(--space-2);
+}
+
+.homeBtn:hover {
+    background: var(--color-accent-hover);
+}

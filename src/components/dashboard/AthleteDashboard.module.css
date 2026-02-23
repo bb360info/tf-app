@@ -1,0 +1,398 @@
+/* AthleteDashboard — Athletic Minimal, mobile-first */
+
+/* ── Page ───────────────────────────────────────────────────────── */
+
+.page {
+    min-height: 100dvh;
+    padding: var(--space-4) var(--space-4) calc(var(--space-4) + 64px);
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* ── Hero ───────────────────────────────────────────────────────── */
+
+.hero {
+    padding: var(--space-6) 0 var(--space-2);
+}
+
+.welcome {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-extrabold);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+    margin: 0 0 var(--space-2);
+}
+
+.dateLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    text-transform: capitalize;
+}
+
+/* ── Card ───────────────────────────────────────────────────────── */
+
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    @supports not (backdrop-filter: blur(1px)) {
+        background: var(--color-bg-elevated);
+    }
+}
+
+.cardHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.cardTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+    line-height: var(--leading-tight);
+}
+
+.chartIcon {
+    display: inline;
+    margin-right: var(--space-2);
+    vertical-align: -3px;
+}
+
+.cardSubtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--leading-normal);
+}
+
+/* ── Score Badge ─────────────────────────────────────────────────── */
+
+.scoreBadge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.scoreBadge[data-color='green'] {
+    background: rgba(0, 168, 107, 0.12);
+    color: var(--color-success);
+}
+
+.scoreBadge[data-color='yellow'] {
+    background: rgba(242, 153, 74, 0.12);
+    color: var(--color-warning);
+}
+
+.scoreBadge[data-color='red'] {
+    background: rgba(235, 87, 87, 0.12);
+    color: var(--color-error);
+}
+
+.scoreBadge[data-color='neutral'] {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────── */
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-6) 0;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Check-in done state ─────────────────────────────────────────── */
+
+.checkinDone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: rgba(0, 168, 107, 0.08);
+    border: 1px solid rgba(0, 168, 107, 0.2);
+    border-radius: var(--radius-md);
+}
+
+.checkinDoneText {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-success);
+}
+
+.reCheckinBtn {
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast);
+    min-height: 44px;
+}
+
+.reCheckinBtn:hover {
+    color: var(--color-text-primary);
+}
+
+/* ── Check-in CTA Button ─────────────────────────────────────────── */
+
+.checkinBtn {
+    height: 48px;
+    width: 100%;
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.checkinBtn:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Stats Bar ───────────────────────────────────────────────────── */
+
+.statsBar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.statsTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+    .statsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.statCard {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.statValue {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+}
+
+.statValue[data-color='green'] {
+    color: var(--color-success);
+}
+
+.statValue[data-color='yellow'] {
+    color: var(--color-warning);
+}
+
+.statValue[data-color='red'] {
+    color: var(--color-error);
+}
+
+.statValue[data-color='neutral'] {
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+/* ── Empty Plan ──────────────────────────────────────────────────── */
+
+.emptyPlan {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: var(--space-4) 0;
+    margin: 0;
+}
+
+/* ── Fade-in Animation ──────────────────────────────────────────── */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn var(--duration-normal, 250ms) var(--ease-default) both;
+}
+
+/* stagger cards for progressive reveal */
+.card:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.card:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.card:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+/* ── Reduced Motion ──────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation: none;
+    }
+
+    .checkinBtn:hover,
+    .reCheckinBtn:hover {
+        transform: none;
+    }
+
+    .card {
+        animation: none;
+    }
+}
+
+/* ── Analytics Loading (CLS fix) ─────────────────────────────────── */
+
+.analyticsLoading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-8) 0;
+    min-height: 160px;
+    /* CLS fix: reserve space for chart */
+}
+
+/* ── Shimmer Skeleton ─────────────────────────────────────────────── */
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.shimmerBar {
+    height: 12px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(90deg,
+            var(--color-bg-tertiary) 25%,
+            var(--color-bg-secondary) 50%,
+            var(--color-bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite ease-in-out;
+}
+
+.shimmerBar:nth-child(2) {
+    width: 75%;
+    margin-top: var(--space-2);
+}
+
+.shimmerBar:nth-child(3) {
+    width: 50%;
+    margin-top: var(--space-2);
+}
+
+/* ── Achievements Section ─────────────────────────────────────────── */
+
+.achievementsSection {
+    /* Unwrapped — AchievementsGrid has its own glass card styles */
+    margin: 0;
+}
+/* ── Today's Plan card ────────────────────────────────────────────── */
+
+.todayPlanContent {
+    padding: var(--space-2) 0;
+}
+
+.todayPlanName {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.todayPlanMeta {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}

@@ -1,0 +1,401 @@
+/* =========================================================
+   Groups page — Athletic Minimal + Glassmorphism
+   ========================================================= */
+
+.page {
+    min-height: 100dvh;
+    padding-bottom: var(--space-8);
+}
+
+/* ── Sections ────────────────────────────────────────────── */
+
+.section {
+    margin-bottom: var(--space-6);
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-4);
+    line-height: var(--leading-relaxed);
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+
+.addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-accent-primary);
+    color: var(--color-text-on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.addBtn:hover {
+    background: var(--color-accent-hover);
+}
+
+.cancelBtn {
+    padding: var(--space-2) var(--space-3);
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}
+
+.saveBtn {
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-accent-primary);
+    color: var(--color-text-on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.saveBtn:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.generateBtn {
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    color: var(--color-accent-primary);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 25%, transparent);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.generateBtn:hover {
+    background: color-mix(in srgb, var(--color-accent-primary) 20%, transparent);
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.iconBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-accent-primary);
+}
+
+/* ── Forms ────────────────────────────────────────────────── */
+
+.createForm {
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.input {
+    width: 100%;
+    padding: var(--space-3);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    /* 16px — prevents iOS auto-zoom on focus */
+    margin-bottom: var(--space-3);
+    transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+}
+
+.formActions {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: flex-end;
+}
+
+.joinForm {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.codeInput {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    text-align: center;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.codeInput:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+}
+
+/* ── Group cards ──────────────────────────────────────────── */
+
+.groupList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.groupCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.groupInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.groupActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+}
+
+.deleteBtn {
+    color: var(--color-text-tertiary);
+}
+
+.deleteBtn:hover {
+    color: var(--color-error) !important;
+    background: color-mix(in srgb, var(--color-error) 10%, transparent) !important;
+}
+
+.removeBtn {
+    color: var(--color-text-tertiary);
+    min-width: 36px;
+    min-height: 36px;
+}
+
+.removeBtn:hover {
+    color: var(--color-error) !important;
+    background: color-mix(in srgb, var(--color-error) 10%, transparent) !important;
+}
+
+/* Members panel */
+.membersPanel {
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
+}
+
+.membersLoading {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-3);
+}
+
+.spinnerSm {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+.noMembers {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    text-align: center;
+    padding: var(--space-2) 0;
+}
+
+.membersList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.memberItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-2);
+    border-radius: var(--radius-md);
+    transition: background var(--duration-fast);
+}
+
+.memberItem:hover {
+    background: var(--color-bg-secondary);
+}
+
+.memberName {
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    font-weight: var(--weight-medium);
+}
+
+
+.groupName {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.codeBlock {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.code {
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    color: var(--color-accent-primary);
+    letter-spacing: 0.15em;
+    padding: var(--space-1) var(--space-2);
+    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+    border-radius: var(--radius-sm);
+}
+
+.expiry {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}
+
+/* ── States ───────────────────────────────────────────────── */
+
+.loading {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-8) 0;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-8) 0;
+    color: var(--color-text-tertiary);
+    text-align: center;
+}
+
+.empty p {
+    font-size: var(--text-sm);
+}
+
+.successMsg {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-success);
+}
+
+.errorMsg {
+    margin-top: var(--space-3);
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-error) 12%, transparent);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-error);
+}
+
+/* ── Glassmorphism Fallback (Safari < 9, older Android) ─────── */
+@supports not (backdrop-filter: blur(1px)) {
+
+    .createForm,
+    .groupCard {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-md);
+    }
+}

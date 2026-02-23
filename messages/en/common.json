@@ -1,54 +1,1050 @@
 {
-    "app": {
-        "title": "Jumpedia",
-        "description": "Training platform for high jump athletes",
-        "loading": "Loading..."
+  "app": {
+    "title": "Jumpedia",
+    "description": "Training platform for high jump athletes",
+    "loading": "Loading...",
+    "close": "Close",
+    "cancel": "Cancel",
+    "notFound": "Page not found",
+    "notFoundDescription": "Sorry, the page you're looking for doesn't exist or has been moved.",
+    "goHome": "Go to Home"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "exercises": "Exercises",
+    "training": "Training",
+    "analytics": "Analytics",
+    "reference": "Reference",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "name": "Name",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "sendResetLink": "Send reset link",
+    "resendVerification": "Resend verification email",
+    "resetSuccess": "Check your email for a password reset link.",
+    "resetDescription": "Enter your email and we'll send you a link to reset your password.",
+    "loginWithGoogle": "Log in with Google",
+    "registerWithGoogle": "Sign up with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Log in",
+    "emailVerification": "Verify your email",
+    "emailVerificationSent": "Verification email sent to {email}",
+    "orContinueWith": "or continue with",
+    "termsAgree": "By signing up, you agree to the Terms of Service",
+    "role": "I am a...",
+    "roleAthlete": "Athlete",
+    "roleCoach": "Coach",
+    "close": "Close"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email format",
+    "passwordMin": "Minimum 8 characters",
+    "passwordMismatch": "Passwords don't match",
+    "loginFailed": "Invalid email or password",
+    "registerFailed": "Registration failed",
+    "networkError": "Network error. Check your connection",
+    "unknown": "An unknown error occurred",
+    "sessionExpired": "Session expired. Please log in again",
+    "authLoading": "Loading authentication... Please wait.",
+    "notLoggedIn": "Not logged in. Please log in and try again.",
+    "title": "Something went wrong",
+    "fallbackMessage": "An unexpected error occurred",
+    "retry": "Try again",
+    "assignFailed": "Failed to assign plan. Please try again."
+  },
+  "language": {
+    "label": "Language",
+    "ru": "Русский",
+    "en": "English",
+    "cn": "中文"
+  },
+  "training": {
+    "title": "Training Seasons",
+    "selectAthlete": "— Select athlete —",
+    "noAthletesHint": "Add an athlete in Dashboard first, then assign seasons.",
+    "myself": "Myself",
+    "allAthletes": "All Athletes",
+    "newSeason": "New Season",
+    "emptyTitle": "No Seasons Created",
+    "emptyDescription": "Create your first training season to start planning periodization",
+    "createFirst": "Create First Season",
+    "retry": "Retry",
+    "checkin": "Check-in",
+    "checkinDone": "Ready",
+    "checkinCreateFailed": "Cannot save check-in: athlete profile could not be created.",
+    "checkinSaveFailed": "Failed to save check-in. Check console for details.",
+    "backToSeasons": "Back to seasons",
+    "wizardTitle": "Create Season",
+    "step_basics": "Basics",
+    "step_phases": "Phases",
+    "step_competitions": "Competitions",
+    "step_review": "Review",
+    "seasonName": "Season Name",
+    "seasonNamePlaceholder": "e.g. Indoor Season 2026",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "dates": "Dates",
+    "phasesHint": "Auto-generate phases based on season dates, or add manually",
+    "autoGenerate": "Auto-generate phases",
+    "addPhase": "Add Phase",
+    "focusPlaceholder": "Focus (optional)",
+    "phases": "Phases",
+    "competitionsHint": "Add competitions to mark key dates on the timeline (optional)",
+    "addCompetition": "Add Competition",
+    "compName": "Competition name",
+    "compLocation": "Location (optional)",
+    "competitions": "Competitions",
+    "priorityA": "Main Target",
+    "priorityB": "Important",
+    "priorityC": "Preparation",
+    "timeline": "Timeline",
+    "back": "Back",
+    "next": "Next",
+    "createSeason": "Create Season",
+    "weekConstructor": "Week",
+    "weeks": "weeks",
+    "day_mon": "Mon",
+    "day_tue": "Tue",
+    "day_wed": "Wed",
+    "day_thu": "Thu",
+    "day_fri": "Fri",
+    "day_sat": "Sat",
+    "day_sun": "Sun",
+    "addExercise": "Add Exercise",
+    "sessionAM": "AM",
+    "sessionPM": "PM",
+    "addSession": "+ PM Session",
+    "warmupBlock": "Warm-Up",
+    "mainBlock": "Main Work",
+    "warmupPicker": "Warm-Up Template",
+    "warmupPickerEmpty": "No warm-up templates",
+    "ejectWarmup": "Remove Warm-Up",
+    "addWarmupStep": "+ Warm-Up Step",
+    "dayNote": "Coach Note",
+    "dayNotePlaceholder": "Focus, cues, special instructions...",
+    "assign": "Assign",
+    "assignToGroup": "To group",
+    "assignToAthlete": "To athlete",
+    "selectGroup": "— Select group —",
+    "assignHint": "Paste a group ID to assign the published plan to all group members.",
+    "groupIdPlaceholder": "Group ID",
+    "mySeasons": "My Seasons",
+    "createOverride": "Personal Plan",
+    "overrideFor": "Copy for {name}",
+    "overrides": "personal plans",
+    "overrideWarning": "Athlete will get an independent copy of the published plan",
+    "overrideSuccess": "Personal plan created ✓",
+    "selectAthleteForOverride": "— Select athlete —",
+    "trainingTemplatePicker": "Templates",
+    "templatePickerEmpty": "No day templates",
+    "saveAsTemplate": "Save day as template",
+    "enterTemplateName": "Template name...",
+    "manageGroups": "Manage members",
+    "searchExercises": "Search exercises...",
+    "filterByPhase": "Phase",
+    "category": "Category",
+    "level": "Level",
+    "noExercises": "No exercises found",
+    "exercisesFound": "exercises",
+    "sets": "Sets",
+    "reps": "Reps",
+    "intensity": "Intensity",
+    "cnsLoad": "CNS Load",
+    "planStatus_draft": "Draft",
+    "planStatus_published": "Published",
+    "planStatus_archived": "Archived",
+    "managePlans": "Manage Plans",
+    "autoFill": "Auto-Fill",
+    "cnsLabel": "Weekly CNS",
+    "cnsLow": "Low",
+    "cnsMed": "Med",
+    "cnsHigh": "High",
+    "confirmAutoFill": "Auto-fill will add exercises to this week. Continue?",
+    "confirmPublish": "Publish this week? Editing will be locked after publishing.",
+    "peakingWarnings": "Peaking Warnings",
+    "deleteSeasonTitle": "Delete Season?",
+    "deleteSeasonConfirm": "Delete season \"{name}\"? All phases and plans will be removed. This cannot be undone.",
+    "seasonDeleted": "Season deleted",
+    "noPublishedPlan": "No published plan in this phase",
+    "peaking": {
+      "noPreComp": "No PRE_COMP phase before this competition",
+      "gapTooLong": "Gap after taper is too long: {days} days (max {required})",
+      "phaseTooShort": "PRE_COMP phase too short: {days} days (min {required})"
     },
-    "nav": {
-        "home": "Home",
-        "exercises": "Exercises",
-        "training": "Training",
-        "analytics": "Analytics",
-        "settings": "Settings",
-        "profile": "Profile",
-        "logout": "Log out"
+    "adaptationBadge": "Auto-Adaptation Active",
+    "preCompReduction": "Pre-comp reduction: {competition} in {days} day(s)",
+    "createFailed": "Failed to create season: {message}",
+    "phaseGuideline_GPP": "Guidelines: High Volume • Low Intensity",
+    "phaseGuideline_SPP": "Guidelines: Moderate Volume • Med Intensity",
+    "phaseGuideline_PRE_COMP": "Guidelines: Low Volume • Mixed Intensity",
+    "phaseGuideline_COMP": "Guidelines: Min Volume • Max Intensity",
+    "phaseGuideline_TRANSITION": "Guidelines: Active Recovery",
+    "autoFillNoExercises": "No suitable exercises found for this phase.",
+    "lowReadinessWarning": "Readiness Low",
+    "reduceVolume": "Reduce Volume -20%",
+    "print": "Print",
+    "savePdf": "Save as PDF",
+    "history": "Version History",
+    "noSnapshots": "No versions saved yet.",
+    "restore": "Restore",
+    "saveVersion": "Save Version",
+    "multiWeekView": "Multi-Week View",
+    "openWeek": "Open Week",
+    "readiness": "Readiness",
+    "log": {
+      "title": "Log Workout",
+      "record": "Record Result",
+      "edit": "Edit Result",
+      "save": "Save",
+      "planned": "Plan",
+      "noExercises": "No exercises for this day",
+      "reps": "Reps",
+      "weightKg": "Weight (kg)",
+      "duration": "Time (sec)",
+      "distance": "Distance (m)",
+      "addSet": "Add Set",
+      "bodyweightNote": "Bodyweight exercise",
+      "rpe": "Perceived effort",
+      "rpeEasy": "Easy",
+      "rpeMax": "Max",
+      "saved": "Saved"
     },
-    "auth": {
-        "login": "Log in",
-        "register": "Sign up",
-        "email": "Email",
-        "password": "Password",
-        "confirmPassword": "Confirm password",
-        "name": "Name",
-        "forgotPassword": "Forgot password?",
-        "resetPassword": "Reset password",
-        "sendResetLink": "Send reset link",
-        "loginWithGoogle": "Log in with Google",
-        "registerWithGoogle": "Sign up with Google",
-        "noAccount": "Don't have an account?",
-        "hasAccount": "Already have an account?",
-        "signUp": "Sign up",
-        "signIn": "Log in",
-        "emailVerification": "Verify your email",
-        "emailVerificationSent": "Verification email sent to {email}",
-        "orContinueWith": "or continue with",
-        "termsAgree": "By signing up, you agree to the Terms of Service"
+    "athleteNotePlaceholder": "Training notes...",
+    "adaptationBanner": "Low readiness — reduce load or substitute exercises",
+    "saving": "Saving...",
+    "skipReason": "Skip reason",
+    "skipReasons": {
+      "Equipment": "Equipment",
+      "Pain": "Pain",
+      "Time": "Time",
+      "CoachDecision": "Coach",
+      "Other": "Other"
+    }
+  },
+  "loading": "Loading...",
+  "back": "Back",
+  "close": "Close",
+  "readiness": {
+    "title": "Daily Check-in",
+    "sleep": "Sleep",
+    "sleepDuration": "Duration (hours)",
+    "sleepQuality": "Quality",
+    "soreness": "Muscle Soreness",
+    "mood": "Mood / Stress",
+    "submit": "Submit Check-in",
+    "score": "Readiness Score",
+    "status_optimal": "Ready to Train!",
+    "status_good": "Good to Go",
+    "status_average": "Be Careful",
+    "status_poor": "Take it Easy",
+    "status_recovery_needed": "Recovery Needed"
+  },
+  "settings": {
+    "appLanguage": "App Language",
+    "appLanguageDesc": "Changes the entire app language",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeAuto": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "training": "Training",
+    "units": "Units",
+    "unitsDesc": "For weight and distance",
+    "metric": "Metric (kg, m)",
+    "imperial": "Imperial (lb, ft)",
+    "autoAdaptation": "Auto-Adaptation",
+    "autoAdaptationDesc": "Reduces volume when readiness is low",
+    "save": "Save Changes",
+    "saved": "Settings saved",
+    "security": "Security",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "passwordChanged": "Password changed successfully",
+    "passwordChangeFailed": "Failed to change password. Please check your current password.",
+    "profileUpdated": "Profile updated successfully",
+    "profileUpdateFailed": "Failed to update profile",
+    "version": "Version",
+    "account": "Account",
+    "height": "Height",
+    "cm": "cm",
+    "birthDate": "Date of birth"
+  },
+  "groups": {
+    "title": "Groups & Invites",
+    "myGroups": "My Groups",
+    "create": "Create",
+    "save": "Create Group",
+    "cancel": "Cancel",
+    "groupNamePlaceholder": "Group name...",
+    "noGroups": "No groups yet. Create one to invite athletes!",
+    "generateCode": "Generate Invite Code",
+    "copy": "Copy code",
+    "regenerate": "Generate new code",
+    "joinGroup": "Join a Group",
+    "joinDescription": "Enter the 6-character invite code your coach sent you.",
+    "join": "Join",
+    "joinSuccess": "You joined group \"{name}\"!",
+    "invalidCode": "Invalid or expired code. Please try again.",
+    "manageGroups": "Groups & Invites",
+    "createError": "Failed to create group. Please try again.",
+    "deleteGroupTitle": "Delete Group?",
+    "deleteGroupConfirm": "Delete group \"{name}\"? All members will be removed.",
+    "confirmDelete": "Delete",
+    "confirmCancel": "Cancel"
+  },
+  "onboarding": {
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Get Started",
+    "step": "Step {current} of {total}",
+    "welcome": {
+      "title": "Welcome to Jumpedia",
+      "subtitle": "Training platform for high jump athletes",
+      "chooseLanguage": "Choose your language"
+    },
+    "profile": {
+      "title": "Tell us about yourself",
+      "subtitle": "We'll set up the app for you",
+      "yourName": "Your name",
+      "namePlaceholder": "John Smith",
+      "role": "Your role",
+      "roleCoach": "Coach",
+      "roleCoachDesc": "I plan training for athletes",
+      "roleAthlete": "Athlete",
+      "roleAthleteDesc": "I follow training plans"
+    },
+    "prefs": {
+      "title": "Preferences",
+      "subtitle": "You can always change these in Settings",
+      "units": "Units of measurement",
+      "metric": "Metric (kg, cm)",
+      "imperial": "Imperial (lb, in)",
+      "autoAdapt": "Auto-adapt training load",
+      "autoAdaptDesc": "Reduces training volume when readiness is low"
+    },
+    "done": {
+      "title": "You're all set!",
+      "subtitle": "Here's what awaits you in Jumpedia",
+      "feature1": "Season Planning",
+      "feature1Desc": "Create seasons with phases and competitions",
+      "feature2": "Week Constructor",
+      "feature2Desc": "Build training plans day by day",
+      "feature3": "Readiness Tracker",
+      "feature3Desc": "10-second check-in for daily assessment",
+      "feature4": "Auto-Adaptation",
+      "feature4Desc": "Smart load adjustment based on readiness",
+      "athleteFeature1": "Daily Check-in",
+      "athleteFeature1Desc": "10 seconds to rate your condition and help your coach",
+      "athleteFeature2": "My Training Plan",
+      "athleteFeature2Desc": "See your coach's assignments for each day",
+      "athleteFeature3": "Progress & Achievements",
+      "athleteFeature3Desc": "Jump charts, check-in streaks and medals",
+      "athleteFeature4": "Athlete Reference",
+      "athleteFeature4Desc": "Technique, warm-up and mental prep guides"
+    }
+  },
+  "dashboard": {
+    "title": "Coach Dashboard",
+    "athletes": "Athletes",
+    "noAthletes": "No athletes yet. Add your first athlete!",
+    "addAthlete": "Add Athlete",
+    "editAthlete": "Edit Athlete",
+    "readiness": "Readiness",
+    "lastLog": "Last Workout",
+    "noCheckin": "No data",
+    "noLog": "No logs",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{n}d ago",
+    "deleteConfirm": "Delete \"{name}\" with all data? This action is irreversible.",
+    "yearsOld": "{age} y.o.",
+    "stats": {
+      "totalAthletes": "Total Athletes",
+      "activeToday": "Active Today",
+      "avgReadiness": "Avg Readiness"
+    },
+    "newAthlete": {
+      "title": "New Athlete",
+      "name": "Name",
+      "namePlaceholder": "John Doe",
+      "birthDate": "Birth Date",
+      "gender": "Gender",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "heightCm": "Height (cm)",
+      "save": "Add",
+      "cancel": "Cancel",
+      "createFailed": "Failed to add athlete. Please try again."
+    },
+    "updateFailed": "Failed to update. Please try again.",
+    "loading": "Loading...",
+    "loadError": "Failed to load athlete list.",
+    "allGroups": "All",
+    "filterByGroup": "Filter by group",
+    "noAthletesInGroup": "No athletes in this group",
+    "group": "Group",
+    "quickPlan": "Quick Plan",
+    "compliance": "Compliance"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "selectAthlete": "Select Athlete",
+    "noData": "No data to display",
+    "noAthletes": "No athletes. Create one in the Dashboard first.",
+    "testResults": "Test Results",
+    "addTest": "Add Test",
+    "personalBest": "PB",
+    "progress": "Progress",
+    "readinessTrend": "Readiness Trend",
+    "noTestsYet": "No results yet. Add the first one!",
+    "trainingLoad": "Training Load Distribution",
+    "cnsHeatmap": "Readiness Heatmap",
+    "selectSeason": "Select Season",
+    "loadError": "Failed to load data",
+    "loadResultsError": "Failed to load results",
+    "goToDashboard": "Go to Dashboard",
+    "cnsLow": "Low",
+    "cnsHigh": "High",
+    "sleep": "Sleep",
+    "sleepQuality": "Sleep Quality",
+    "mood": "Mood",
+    "soreness": "Muscle Soreness",
+    "readiness": "Readiness",
+    "close": "Close",
+    "noCheckinData": "No check-in for this day",
+    "category_streak": "Streaks",
+    "category_training": "Training",
+    "category_testing": "Testing",
+    "category_compete": "Competitions",
+    "tests": {
+      "standing_jump": "Standing Jump",
+      "approach_jump": "Approach Jump",
+      "sprint_30m": "Sprint 30m",
+      "sprint_60m": "Sprint 60m",
+      "squat_max": "Squat Max",
+      "clean_max": "Clean Max",
+      "snatch_max": "Snatch Max"
+    },
+    "addTestForm": {
+      "title": "New Test",
+      "testType": "Test Type",
+      "value": "Result",
+      "date": "Date",
+      "notes": "Notes",
+      "save": "Save",
+      "cancel": "Cancel",
+      "invalidValue": "Enter a valid value > 0",
+      "futureDateError": "Date cannot be in the future",
+      "saveFailed": "Failed to save result. Please try again.",
+      "notesPlaceholder": "Conditions, well-being...",
+      "existingResult": "A result already exists for this date: {value} {unit}. Replace it?",
+      "confirmReplace": "Replace"
+    },
+    "minResults": "Need at least 2 results for chart",
+    "chartLoading": "Loading chart",
+    "achievements": "Achievements",
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Mark all read",
+      "empty": "No new notifications"
+    }
+  },
+  "reference": {
+    "title": "Reference",
+    "subtitle": "Technique, errors, periodization, injuries and science",
+    "categories": {
+      "technique": {
+        "title": "Jump Technique",
+        "desc": "Phases of high jump: approach, takeoff, flight"
+      },
+      "errors": {
+        "title": "Common Errors",
+        "desc": "Analysis of frequent mistakes and corrections"
+      },
+      "periodization": {
+        "title": "Periodization",
+        "desc": "GPP → SPP → PRE_COMP → COMP → TRANSITION"
+      },
+      "injuries": {
+        "title": "Injuries & Prevention",
+        "desc": "Common injuries, rehab and prevention"
+      },
+      "warmup": {
+        "title": "Warm-Up",
+        "desc": "Warm-up protocols and box breathing timer"
+      },
+      "mental": {
+        "title": "Mental Prep",
+        "desc": "Visualization cards and pre-competition routine"
+      }
+    },
+    "scientific": {
+      "title": "Scientific Basis",
+      "subtitle": "Periodization comparison and peaking rules",
+      "tra_dup": {
+        "heading": "TRA vs DUP — Periodization Comparison",
+        "tra_label": "Traditional (TRA)",
+        "dup_label": "Undulating (DUP)",
+        "rows": [
+          {
+            "aspect": "Load",
+            "tra": "Linearly increases",
+            "dup": "Changes each week"
+          },
+          {
+            "aspect": "Intensity",
+            "tra": "Gradually rises",
+            "dup": "Alternates High/Low"
+          },
+          {
+            "aspect": "Volume",
+            "tra": "Decreases to comp",
+            "dup": "Undulating"
+          },
+          {
+            "aspect": "Use case",
+            "tra": "Classic season",
+            "dup": "Short mesocycles"
+          },
+          {
+            "aspect": "Strength gain",
+            "tra": "+",
+            "dup": "++"
+          },
+          {
+            "aspect": "Monotony",
+            "tra": "High",
+            "dup": "Low"
+          }
+        ]
+      },
+      "peaking": {
+        "heading": "Peaking Rules",
+        "rules": [
+          "10-14 days before competition — reduce volume 40-60%",
+          "Intensity maintained or slightly increased",
+          "No new exercises within 3 weeks of competition",
+          "Minimum 2 specific sessions per week in PRE_COMP",
+          "Sleep: priority ≥ 8h in final 2 weeks",
+          "Competition warm-up — rehearse 2-3 weeks before"
+        ]
+      }
+    },
+    "technique": {
+      "title": "High Jump Technique",
+      "phases": [
+        {
+          "name": "Approach",
+          "desc": "8-10 curved steps. Last 3 steps — increasing speed. Arc angle 30-45° to bar."
+        },
+        {
+          "name": "Penultimate step",
+          "desc": "Longer last step — center of mass lowers. Foot placed heel-first, roll."
+        },
+        {
+          "name": "Takeoff",
+          "desc": "Explosive extension at ankle, knee, hip. Swing free leg and arms upward."
+        },
+        {
+          "name": "Flight (Fosbury Flop)",
+          "desc": "Arch at lower back, clear bar sequentially: back → hips → legs."
+        },
+        {
+          "name": "Landing",
+          "desc": "On mat, back first. Delay leg extension until hips clear bar."
+        }
+      ]
     },
     "errors": {
-        "required": "This field is required",
-        "invalidEmail": "Invalid email format",
-        "passwordMin": "Minimum 8 characters",
-        "passwordMismatch": "Passwords don't match",
-        "loginFailed": "Invalid email or password",
-        "registerFailed": "Registration failed",
-        "networkError": "Network error. Check your connection",
-        "unknown": "An unknown error occurred",
-        "sessionExpired": "Session expired. Please log in again"
+      "title": "Common Errors",
+      "items": [
+        {
+          "error": "Straight-line approach",
+          "fix": "Start arc at step 4-5, gradually increase curve radius"
+        },
+        {
+          "error": "Takeoff too far from bar",
+          "fix": "Takeoff point 60-80 cm from bar projection"
+        },
+        {
+          "error": "Weak arm swing",
+          "fix": "Synchronized explosive arm drive upward at takeoff"
+        },
+        {
+          "error": "Early back arch",
+          "fix": "Arch only after shoulders have cleared bar"
+        },
+        {
+          "error": "Bent legs in flop",
+          "fix": "Extend legs upward after hips clear bar"
+        }
+      ]
     },
-    "language": {
-        "label": "Language",
-        "ru": "Русский",
-        "en": "English",
-        "cn": "中文"
+    "periodization": {
+      "title": "Season Periodization",
+      "phases": [
+        {
+          "name": "GPP",
+          "duration": "6-10 wks",
+          "focus": "Base strength, high volume, low intensity"
+        },
+        {
+          "name": "SPP",
+          "duration": "4-6 wks",
+          "focus": "Sport-specific prep, jump work, rising intensity"
+        },
+        {
+          "name": "PRE_COMP",
+          "duration": "2-3 wks",
+          "focus": "Speed sharpening, volume drops, high intensity"
+        },
+        {
+          "name": "COMP",
+          "duration": "1-3 wks",
+          "focus": "Competition peak, minimal volume, max intensity"
+        },
+        {
+          "name": "TRANSITION",
+          "duration": "2-4 wks",
+          "focus": "Recovery, light general activity"
+        }
+      ]
+    },
+    "injuries": {
+      "title": "Injuries & Prevention",
+      "items": [
+        {
+          "injury": "Achilles tendinitis",
+          "cause": "Excess jump volume, hard footwear",
+          "prevention": "Eccentric exercises, gradual load progression"
+        },
+        {
+          "injury": "Patellofemoral syndrome",
+          "cause": "Quad weakness, poor landing mechanics",
+          "prevention": "Glute strengthening, proper foot roll"
+        },
+        {
+          "injury": "Ankle sprain",
+          "cause": "Uneven surface, fatigue",
+          "prevention": "Proprioception drills, ankle warm-up"
+        },
+        {
+          "injury": "Low back pain",
+          "cause": "Excessive lordosis in flop, weak core",
+          "prevention": "Core strengthening, arch technique"
+        }
+      ]
+    },
+    "back": "Back to Reference"
+  },
+  "exercises": {
+    "title": "Exercise Library",
+    "subtitle": "Exercises for high jump athletes",
+    "search": "Search exercises...",
+    "filterAll": "All",
+    "filterCategory": "Category",
+    "filterLevel": "Level",
+    "filterEquipment": "Equipment",
+    "filterPhase": "Phase",
+    "noResults": "No exercises found",
+    "noResultsHint": "Try changing filters or search query",
+    "found": "found",
+    "favorites": "Favorites",
+    "allExercises": "All Exercises",
+    "loading": "Loading exercises...",
+    "loadError": "Failed to load exercises",
+    "retry": "Retry",
+    "close": "Close",
+    "dosage": "Dosage",
+    "coachTips": "Coach Tips",
+    "ttsSpeak": "Read aloud",
+    "ttsStop": "Stop",
+    "noTips": "No coach tips added",
+    "showAthlete": "Show to Athlete",
+    "addFavorite": "Add to Favorites",
+    "inFavorites": "In Favorites",
+    "removeFavorite": "Remove from Favorites",
+    "communityBadge": "Community",
+    "equipment": "Equipment",
+    "muscles": "Muscles",
+    "cns": "CNS",
+    "category": {
+      "plyometric": "Plyometric",
+      "highjump": "High Jump",
+      "strength": "Strength",
+      "gpp": "GPP",
+      "speed": "Speed",
+      "flexibility": "Flexibility",
+      "jump": "Jumps"
+    },
+    "level": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "referenceCard": {
+      "title": "Exercise Library",
+      "desc": "All exercises with filters, coach tips and TTS"
     }
+  },
+  "constructor": {
+    "title": "Exercise Constructor",
+    "assignToAthlete": "Assign to athlete",
+    "myself": "Myself",
+    "allAthletes": "All athletes",
+    "emptyTitle": "No seasons created",
+    "step1Title": "Basic Info",
+    "step2Title": "Details",
+    "step3Title": "Coach Cues",
+    "step3Hint": "These cues will be read aloud via TTS",
+    "step4Title": "Review",
+    "nameEn": "Name (EN)",
+    "nameRu": "Name (RU)",
+    "category": "Category",
+    "level": "Level",
+    "cns": "CNS Load",
+    "dosage": "Dosage",
+    "equipment": "Equipment",
+    "equipmentHint": "Comma-separated: barbell, box",
+    "muscles": "Muscles",
+    "phases": "Training Phases",
+    "commaSeparated": "Comma-separated...",
+    "cuesEn": "Coach Cues (EN)",
+    "cuesRu": "Coach Cues (RU)",
+    "next": "Next",
+    "back": "Back",
+    "cancel": "Cancel",
+    "savePersonal": "Save as Personal",
+    "submitReview": "Submit for Review",
+    "reviewNote": "After approval, the exercise will appear in the global catalog",
+    "saveError": "Failed to save. Please try again.",
+    "myExercises": "My Exercises",
+    "noCustomExercises": "No custom exercises yet. Create your first!",
+    "nameRuPlaceholder": "e.g. Box Jump",
+    "cuesRuPlaceholder": "e.g. Drive knees up..."
+  },
+  "quickPlan": {
+    "title": "Quick Workout",
+    "subtitle": "Build a workout for today without a training plan",
+    "date": "Date",
+    "today": "Today",
+    "addExercise": "Add Exercise",
+    "exercises": "Exercises",
+    "noExercises": "No exercises added. Tap «+»",
+    "sets": "sets",
+    "reps": "reps",
+    "notes": "Workout Notes",
+    "notesPlaceholder": "Goal, feelings, conditions...",
+    "save": "Save Workout",
+    "saved": "Workout saved!",
+    "saveError": "Failed to save",
+    "clear": "Clear",
+    "confirmClear": "Clear the entire workout?",
+    "history": "History",
+    "noHistory": "No saved workouts",
+    "duration": "Duration (min)",
+    "cnsTotal": "CNS Load",
+    "remove": "Remove",
+    "saveToLibrary": "Save to Library",
+    "savedToLibrary": "Saved ✓"
+  },
+  "athleteDashboard": {
+    "welcome": "Hey, {name}!",
+    "todayDate": "Today is {date}",
+    "todayPlan": "My Workout Today",
+    "noPublishedPlan": "You have no assigned plan for today",
+    "todayExercises": "exercises today",
+    "checkinTitle": "Daily Check-in",
+    "checkinSubtitle": "Help your coach understand how you're feeling",
+    "checkinDone": "Check-in complete ✓",
+    "checkinDoneSubtitle": "Thanks! Your coach can see your status",
+    "checkinBtn": "Fill Check-in",
+    "sleep": "Sleep Hours",
+    "sleepQuality": "Sleep Quality",
+    "mood": "Mood",
+    "soreness": "Muscle Soreness",
+    "submit": "Save",
+    "submitting": "Saving...",
+    "submitError": "Error. Please try again",
+    "lastScore": "Last Score",
+    "streak": "days in a row",
+    "statsTitle": "Your Stats",
+    "noStats": "No data",
+    "progressTitle": "My Progress",
+    "jumpChartTitle": "Standing Jump",
+    "achievementsTitle": "Achievements",
+    "reCheckin": "Update",
+    "competition": "Competition",
+    "daysUntil": "days until"
+  },
+  "warmupPage": {
+    "back": "Back",
+    "title": "Warm-Up",
+    "subtitle": "Protocols for training, competition and recovery",
+    "protocolsTitle": "Warm-Up Protocols",
+    "protocol": {
+      "training": "Training",
+      "competition": "Competition",
+      "recovery": "Recovery"
+    },
+    "phase": {
+      "walk": "Walking",
+      "jog": "Light jog",
+      "dynamic": "Dynamic stretching",
+      "runs": "Strides",
+      "accelerations": "Accelerations",
+      "specific": "Specific warm-up",
+      "static": "Static stretching",
+      "breathe": "Breathing exercises"
+    },
+    "breathingTitle": "Box Breathing 4-4-4-4",
+    "breathingSub": "Inhale — hold — exhale — hold, 4 seconds each",
+    "breath": {
+      "inhale": "Inhale",
+      "hold1": "Hold",
+      "exhale": "Exhale",
+      "hold2": "Hold"
+    },
+    "start": "Start",
+    "pause": "Pause",
+    "reset": "Reset",
+    "min": "min",
+    "loading": "Loading...",
+    "loadError": "Failed to load protocols",
+    "noTemplates": "No protocols yet. Add via Reference → Templates",
+    "retry": "Retry"
+  },
+  "mentalPage": {
+    "back": "Back",
+    "title": "Mental Prep",
+    "subtitle": "Visualization techniques and pre-competition routine",
+    "cardsTitle": "Cards",
+    "tipLabel": "Exercise",
+    "card": {
+      "success_visualization": {
+        "title": "Success Visualization",
+        "body": "Mentally replay your perfect jump: approach, takeoff, flight. In full detail.",
+        "tip": "3 min before sleep: picture 5 perfect jumps"
+      },
+      "pre_comp_routine": {
+        "title": "Pre-Competition Routine",
+        "body": "A standard sequence of actions reduces anxiety and sharpens focus.",
+        "tip": "Build your own 5-7 step checklist"
+      },
+      "breathing_focus": {
+        "title": "Breathing Focus",
+        "body": "Controlled breathing slows your heart rate and brings you into the zone.",
+        "tip": "4-4-4-4 box breathing: 3 cycles before the start"
+      },
+      "positive_self_talk": {
+        "title": "Positive Self-Talk",
+        "body": "Replace 'don't mess up' with 'I am ready' — words shape your mental state.",
+        "tip": "Create 2-3 personal mantras and repeat during warm-up"
+      },
+      "pressure_release": {
+        "title": "Pressure Release",
+        "body": "Pressure is a privilege. It means you are good enough for this moment.",
+        "tip": "Ask yourself: 'What's the worst that can happen?' — then accept it"
+      },
+      "performance_mindset": {
+        "title": "Performance Mindset",
+        "body": "Only evaluate what you control: technique, approach, focus.",
+        "tip": "Forget the result in the moment — focus on the process"
+      }
+    },
+    "routineTitle": "Pre-Competition Routine",
+    "routine": {
+      "step1": {
+        "title": "60 min out: Physical warm-up",
+        "desc": "Standard warm-up protocol, don't experiment"
+      },
+      "step2": {
+        "title": "30 min out: Visualization",
+        "desc": "5 perfect jumps in your head, find a quiet place"
+      },
+      "step3": {
+        "title": "15 min out: Box breathing",
+        "desc": "3 cycles of 4-4-4-4 to release tension"
+      },
+      "step4": {
+        "title": "5 min out: Self-talk",
+        "desc": "Personal mantras, positive mindset"
+      },
+      "step5": {
+        "title": "Go",
+        "desc": "Trust your training. You are ready."
+      }
+    }
+  },
+  "streakHero": {
+    "title": "Check-in Streak",
+    "days": "days",
+    "best": "Best streak",
+    "nextMilestone": "Until {target} days",
+    "eveningWarning": "Don't forget today! Keep your streak"
+  },
+  "athleteDetail": {
+    "back": "Back",
+    "overview": "Overview",
+    "training": "Training",
+    "tests": "Tests",
+    "readiness": "Readiness",
+    "noData": "No data yet",
+    "loadError": "Failed to load athlete data",
+    "currentSeason": "Current Season",
+    "pastSeasons": "Past Seasons",
+    "noSeason": "No training seasons found",
+    "avgReadiness": "Avg. Readiness (12 weeks)",
+    "testType": {
+      "standing_jump": "Standing Jump",
+      "approach_jump": "Approach Jump",
+      "sprint_30m": "Sprint 30m",
+      "sprint_60m": "Sprint 60m",
+      "squat_max": "Squat 1RM",
+      "clean_max": "Clean 1RM",
+      "snatch_max": "Snatch 1RM"
+    },
+    "yearsOld": "y.o.",
+    "cm": "cm",
+    "male": "Male",
+    "female": "Female"
+  },
+  "celebration": {
+    "awesome": "Awesome!",
+    "newAchievement": "New Achievement!",
+    "dismiss": "Dismiss"
+  },
+  "templates": {
+    "title": "Training Templates",
+    "subtitle": "Create warm-up and training day templates",
+    "warmupTab": "Warm-Ups",
+    "dayTab": "Training Days",
+    "systemSection": "System",
+    "mySection": "My Templates",
+    "noMy": "No custom templates yet. Create your first!",
+    "create": "+ Create",
+    "copy": "Copy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete template \"{name}\"?",
+    "min": "min",
+    "items": "steps",
+    "editorTitle": "Template Editor",
+    "editorTitleNew": "New Template",
+    "nameRu": "Name (RU)",
+    "nameEn": "Name (EN)",
+    "nameCn": "Name (CN)",
+    "type": "Type",
+    "typeWarmup": "Warm-Up",
+    "typeDay": "Training Day",
+    "totalMinutes": "Total Time (min)",
+    "warmupSection": "🔥 Warm-Up",
+    "mainSection": "🏋 Main Section",
+    "addFromCatalog": "+ From Catalog",
+    "addCustomStep": "+ Custom Step",
+    "customTextPlaceholder": "Step description...",
+    "durationSec": "Duration (sec)",
+    "sets": "Sets",
+    "reps": "Reps",
+    "removeItem": "Remove",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saving": "Saving...",
+    "loadError": "Failed to load templates",
+    "saveError": "Failed to save. Please try again.",
+    "deleteError": "Failed to delete template.",
+    "copySuccess": "Template copied to your templates",
+    "back": "Back to Reference",
+    "referenceCard": {
+      "title": "Training Templates",
+      "desc": "Create warm-ups and training days, apply in the week constructor"
+    }
+  },
+  "coachLog": {
+    "title": "Plan vs Actual",
+    "exercise": "Exercise",
+    "planned": "Planned",
+    "actual": "Actual",
+    "status": "Status",
+    "sets": "sets",
+    "status_matched": "Completed",
+    "status_partial": "Partial",
+    "status_missed": "Missed",
+    "status_added": "Extra",
+    "noData": "No data for comparison",
+    "skipLabel": "Skip reason"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Mark all read",
+    "markAllRead": "Mark all read",
+    "empty": "No new notifications",
+    "showAll": "Show all",
+    "preferences": "Notification settings",
+    "allow": "Allow",
+    "dismiss": "Not now",
+    "pushTitle": "Enable Notifications",
+    "pushText": "Get alerts for training plans, check-in reminders, and achievements.",
+    "iosTitle": "Install App for Notifications",
+    "iosStep1": "Tap Share",
+    "iosStep2": "\"Add to Home Screen\"",
+    "iosStep3": "Open from Home Screen",
+    "types": {
+      "all": "All",
+      "plan_published": "Plans",
+      "checkin_reminder": "Check-ins",
+      "achievement": "Achievements",
+      "low_readiness": "Readiness",
+      "coach_note": "Coach Notes",
+      "system": "System",
+      "invite_accepted": "Invitations",
+      "competition_upcoming": "Competitions"
+    },
+    "quietHours": {
+      "title": "Quiet Hours",
+      "from": "From",
+      "to": "To",
+      "timezone": "Timezone",
+      "disabled": "Disabled"
+    },
+    "pushEnabled": "Push notifications",
+    "emailEnabled": "Email notifications"
+  },
+  "notificationSettings": {
+    "title": "Notification Settings",
+    "back": "Back to Settings",
+    "channels": "Channels",
+    "pushDesc": "Receive in-app and device push notifications",
+    "emailDesc": "Receive important updates by email",
+    "notifTypes": "Notification Types",
+    "typesDesc": "Muted types will not generate notifications",
+    "save": "Save",
+    "saved": "Settings saved",
+    "saveFailed": "Failed to save settings. Please try again.",
+    "loadFailed": "Failed to load preferences",
+    "pushActive": "Push active",
+    "pushSubscribe": "Enable Push",
+    "pushUnsubscribe": "Unsubscribe",
+    "pushDenied": "Blocked in browser settings",
+    "pushUnsupported": "Push not supported"
+  }
 }

@@ -1,0 +1,181 @@
+/* ===========================================
+   StreakHeroCard.module.css
+   Glassmorphism streak card for athlete dashboard
+   =========================================== */
+
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    padding: var(--space-4);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .card {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+/* ── Header ──────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.icon {
+    color: var(--color-warning);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+/* ── Content ─────────────────────────── */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* ── Hero number ─────────────────────── */
+.heroNumber {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.streakActive {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-extrabold);
+    color: var(--color-warning);
+    line-height: var(--leading-tight);
+    animation: pulse 2s var(--ease-spring) infinite;
+}
+
+.streakZero {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-extrabold);
+    color: var(--color-text-tertiary);
+    line-height: var(--leading-tight);
+}
+
+.streakUnit {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* ── Best streak ─────────────────────── */
+.bestStreak {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+/* ── Milestone progress ──────────────── */
+.milestoneSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.milestoneLabel {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.progressBar {
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: linear-gradient(90deg, var(--color-warning), var(--color-accent-primary));
+    transition: width var(--duration-slow) var(--ease-default);
+}
+
+.progressText {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-align: right;
+}
+
+/* ── Evening warning ─────────────────── */
+.warning {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-warning);
+}
+
+/* ── Skeleton ────────────────────────── */
+.skeleton {
+    height: 140px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(90deg,
+            var(--color-bg-secondary) 25%,
+            var(--color-bg-tertiary) 50%,
+            var(--color-bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Reduced motion ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .streakActive {
+        animation: none;
+    }
+
+    .progressFill {
+        transition: none;
+    }
+
+    .skeleton {
+        animation: none;
+    }
+}

@@ -56,3 +56,9 @@ export {
     NotificationsSchema,
     ErrorLogsSchema,
 } from './content';
+
+// Plan Assignments
+export {
+    PlanAssignmentStatusSchema,
+    PlanAssignmentsSchema,
+} from './planAssignments';

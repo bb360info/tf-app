@@ -1,0 +1,301 @@
+/* =========================================================
+   dashboard.module.css
+   Coach Dashboard — Mobile-first, Athletic Minimal + Glassmorphism
+   All tokens from: src/styles/tokens.css
+   ========================================================= */
+
+/* ── Page ────────────────────────────────────────────────── */
+
+.page {
+    min-height: 100dvh;
+    background: var(--color-bg-primary);
+    padding-bottom: calc(var(--space-20) + var(--space-4));
+    /* ~96px — bottom nav clearance */
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.stickyHeader {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
+    /* margin-top to offset the wrapper padding if needed, but wrapper padding is horizontal */
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .stickyHeader {
+        background: var(--color-bg-primary);
+    }
+}
+
+/* ── Quick Stats Bar ─────────────────────────────────────── */
+
+.statsBar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-2) 0 var(--space-6) 0;
+}
+
+@media (min-width: 768px) {
+    .statsBar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .statsBar {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.statCard {
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-3) var(--space-4);
+    text-align: center;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .statCard {
+        background: var(--color-bg-secondary);
+    }
+}
+
+.statValue {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+}
+
+.statLabel {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-1);
+    line-height: var(--leading-normal);
+}
+
+.statValueSuccess {
+    color: var(--color-success);
+}
+
+/* ── Section ─────────────────────────────────────────────── */
+
+.section {
+    padding: 0;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) 0 var(--space-3);
+}
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0;
+}
+
+/* ── Add Button ──────────────────────────────────────────── */
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+    min-height: 44px;
+}
+
+.addBtn:hover {
+    background: var(--color-accent-hover);
+}
+
+.quickPlanBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    color: var(--color-accent-primary);
+    border: 1px solid var(--color-accent-primary);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    min-height: 44px;
+    text-decoration: none;
+}
+
+.quickPlanBtn:hover {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+/* ── Athlete Grid ─────────────────────────────────────────── */
+
+.athleteGrid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+    .athleteGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .athleteGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ── Empty State ─────────────────────────────────────────── */
+
+.emptyState {
+    text-align: center;
+    padding: var(--space-16) var(--space-4);
+    color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+}
+
+.emptyTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.emptyDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+}
+
+/* ── Loading (Skeleton) ────────────────────────────────────────── */
+
+.skeletonGrid {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+}
+
+@media (min-width: 640px) {
+    .skeletonGrid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        padding: var(--space-6) 0;
+    }
+}
+
+/* ── Error State ─────────────────────────────────────────── */
+
+.errorState {
+    padding: var(--space-4);
+    background: var(--color-accent-light);
+    /* closest token — light blue tint */
+    border-radius: var(--radius-lg);
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin: var(--space-4);
+    border: 1px solid var(--color-error);
+}
+
+/* ── Group Filter Chips ──────────────────────────────────── */
+
+.groupChips {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding: 0 0 var(--space-3);
+    margin-bottom: var(--space-3);
+    scrollbar-width: none;
+}
+
+.groupChips::-webkit-scrollbar {
+    display: none;
+}
+
+.groupChip {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    min-height: 36px;
+    white-space: nowrap;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-elevated, #fff);
+    color: var(--color-text-secondary);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    flex-shrink: 0;
+}
+
+.groupChip:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+}
+
+.groupChipActive {
+    background: var(--color-accent-primary);
+    border-color: transparent;
+    color: var(--color-text-inverse);
+    font-weight: var(--weight-semibold);
+}
+
+.groupChipActive:hover {
+    background: var(--color-accent-hover, #1a6bc4);
+    color: var(--color-text-inverse);
+    border-color: transparent;
+}
+
+/* ── Centered add button (empty state) ─────────────── */
+
+.addBtnCentered {
+    margin: 0 auto;
+}
+
+/* ── Full-width empty state inside grid ─────────────── */
+
+.emptyStateFull {
+    grid-column: 1 / -1;
+}

@@ -1,0 +1,6 @@
+/* Protected layout — compensate for BottomTabBar height */
+
+.protectedContainer {
+    /* TabBar height (64px) + safe area */
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}

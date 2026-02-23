@@ -9,7 +9,7 @@
 | Frontend | Next.js 15 App Router | Static Export (`output: 'export'`) |
 | Backend | PocketBase | Self-hosted on HK VPS |
 | Storage | Cloudflare R2 | Via PocketBase S3 adapter |
-| Offline | Dexie.js (IndexedDB) | Mirrors PocketBase schema |
+| Offline | Dexie.js (IndexedDB) | Mirrors PocketBase schema *(planned — Track 6)* |
 | PWA | Serwist | Service worker for offline |
 | i18n | next-intl | RU, EN, CN with `[locale]` routing |
 | Validation | Zod | Schema for every collection |
@@ -81,7 +81,7 @@ CREATE INDEX idx_athletes_coach ON athletes(coach_id);
 CREATE INDEX idx_training_logs_athlete ON training_logs(athlete_id);
 CREATE INDEX idx_training_logs_date ON training_logs(date);
 CREATE INDEX idx_daily_checkins_athlete_date ON daily_checkins(athlete_id, date);
-CREATE INDEX idx_plan_exercises_plan ON plan_exercises(plan_id);
+CREATE INDEX idx_planex_plan_deleted ON plan_exercises(plan_id, deleted_at);
 CREATE INDEX idx_log_exercises_log ON log_exercises(log_id);
 CREATE INDEX idx_test_results_athlete ON test_results(athlete_id);
 CREATE INDEX idx_notifications_user ON notifications(user_id, read);

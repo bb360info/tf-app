@@ -28,7 +28,7 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, name: string) => Promise<void>;
+    register: (email: string, password: string, name: string, role?: 'coach' | 'athlete') => Promise<void>;
     loginGoogle: () => Promise<void>;
     logout: () => void;
     resetPassword: (email: string) => Promise<void>;
@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize auth state from stored token
     useEffect(() => {
         const user = getCurrentUser();
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: initial sync from authStore
         setState({
             user,
             isLoading: false,
@@ -70,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const register = useCallback(
-        async (email: string, password: string, name: string) => {
-            await registerWithEmail(email, password, name);
+        async (email: string, password: string, name: string, role: 'coach' | 'athlete' = 'athlete') => {
+            await registerWithEmail(email, password, name, role);
         },
         []
     );
@@ -104,6 +105,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
+/**
+ * Auth context hook — provides auth ACTIONS: login, logout, register, resetPassword.
+ * Use this when you need to PERFORM auth operations (forms, auth guards).
+ *
+ * For read-only role/state checks use `@/lib/hooks/useAuth` instead —
+ * it provides: isCoach, isAthlete, isLoggedIn, role.
+ */
 export function useAuth(): AuthContextValue {
     const context = useContext(AuthContext);
     if (!context) {

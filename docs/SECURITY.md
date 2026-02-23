@@ -82,7 +82,7 @@ flowchart TD
 | `custom_exercises` | coach | coach | coach | coach |
 | `training_logs` | coach+athlete | athlete | athlete | — |
 | `log_exercises` | coach+athlete | athlete | athlete | — |
-| `daily_checkins` | coach+athlete | athlete | athlete | — |
+| `daily_checkins` | auth | auth (own athletes) | auth (own athletes) | — |
 | `test_results` | coach+athlete | athlete | athlete | — |
 | `exercise_videos` | all auth | coach | coach | coach |
 | `athlete_videos` | coach+athlete | athlete | coach+athlete | coach |

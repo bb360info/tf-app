@@ -1,0 +1,53 @@
+/* =======================================================
+   LocaleSwitcher.module.css
+   Language pill switcher: RU / EN / 中文
+   ======================================================= */
+
+.wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 36px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-full);
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-default);
+    white-space: nowrap;
+}
+
+.btn:hover {
+    color: var(--color-text-primary);
+}
+
+.btn.active {
+    background: var(--color-bg-primary);
+    color: var(--color-accent-primary);
+    font-weight: var(--weight-semibold);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Expanded touch target */
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+}

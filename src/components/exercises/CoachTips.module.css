@@ -1,0 +1,67 @@
+/* CoachTips.module.css */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ttsBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-ghost);
+    color: var(--color-accent-primary);
+    cursor: pointer;
+    transition: background var(--duration-fast), transform var(--duration-fast);
+    flex-shrink: 0;
+}
+
+.ttsBtn:hover {
+    background: var(--color-accent-light);
+}
+
+.ttsBtn:active {
+    transform: scale(0.95);
+}
+
+.ttsBtn[aria-pressed="true"] {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+.cues {
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+    line-height: var(--leading-relaxed);
+}
+
+.empty {
+    padding: var(--space-3) 0;
+}
+
+.emptyText {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    font-style: italic;
+}

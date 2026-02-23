@@ -16,7 +16,7 @@ export const SeasonsSchema = z.object({
 
 // ─── Training Phases ───────────────────────────────────────────────
 
-export const PhaseTypeSchema = z.enum(['GPP', 'SPP', 'COMP', 'TRANSITION']);
+export const PhaseTypeSchema = z.enum(['GPP', 'SPP', 'PRE_COMP', 'COMP', 'TRANSITION']);
 
 export const TrainingPhasesSchema = z.object({
     season_id: pbId,
@@ -24,6 +24,7 @@ export const TrainingPhasesSchema = z.object({
     order: z.number().int().min(0),
     start_date: optionalDatetime,
     end_date: optionalDatetime,
+    focus: z.string().max(255).optional(),
 });
 
 // ─── Training Plans ────────────────────────────────────────────────
@@ -36,19 +37,32 @@ export const TrainingPlansSchema = z.object({
     status: PlanStatusSchema,
     notes: z.string().optional(),
     sync_id: z.string().optional(),
+    athlete_id: pbId.optional(),
+    parent_plan_id: pbId.optional(),
+    day_notes: z.record(z.string(), z.string().max(500)).optional(),
 });
 
 // ─── Plan Exercises ────────────────────────────────────────────────
 
 export const PlanExercisesSchema = z.object({
     plan_id: pbId,
-    exercise_id: pbId,
+    exercise_id: pbId.optional(), // nullable for warmup custom_text items
     order: z.number().int().min(0),
     day_of_week: z.number().int().min(1).max(7).optional(),
+    session: z.number().int().min(0).optional(),
+    block: z.enum(['warmup', 'main']).optional(),
     sets: z.number().int().min(1).optional(),
     reps: z.string().optional(),
     intensity: z.string().optional(),
     notes: z.string().optional(),
+    weight: z.number().min(0).optional(),
+    duration: z.number().min(0).optional(),
+    distance: z.number().min(0).optional(),
+    rest_seconds: z.number().int().min(0).optional(),
+    custom_text_ru: z.string().max(1000).optional(),
+    custom_text_en: z.string().max(1000).optional(),
+    custom_text_cn: z.string().max(1000).optional(),
+    source_template_id: pbId.optional(),
 });
 
 // ─── Plan Snapshots ────────────────────────────────────────────────

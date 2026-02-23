@@ -1,0 +1,376 @@
+/* =======================================================
+   reference.module.css
+   Reference Hub + Article Pages — Athletic Minimal + Glass
+   Mobile-first: 375px base → 768px → 1024px
+   ======================================================= */
+
+/* ── Page ────────────────────────────────────────────── */
+.page {
+    min-height: 100dvh;
+    padding-bottom: var(--space-8);
+}
+
+/* ── Hero subtitle ───────────────────────────────────── */
+.hero {
+    padding: var(--space-8) var(--space-4) var(--space-6);
+    text-align: center;
+}
+
+.heroSubtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: var(--space-2) auto 0;
+    max-width: 420px;
+}
+
+/* ── Content container ───────────────────────────────── */
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 var(--space-8);
+    }
+}
+
+/* ── Category grid ───────────────────────────────────── */
+.categoryGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .categoryGrid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ── Category card ───────────────────────────────────── */
+.categoryCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--color-border);
+    box-shadow: var(--glass-shadow);
+    text-decoration: none;
+    transition: transform var(--duration-fast) var(--ease-spring),
+        box-shadow var(--duration-fast) var(--ease-default);
+    min-height: 120px;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .categoryCard {
+        background: var(--color-bg-secondary);
+    }
+}
+
+.categoryCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.categoryIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    background: var(--color-accent-light);
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+}
+
+.categoryTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: var(--leading-tight);
+}
+
+.categoryDesc {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--leading-normal);
+}
+
+/* ── Scientific link card ────────────────────────────── */
+.sciCard {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg,
+            color-mix(in srgb, var(--color-accent-primary) 8%, transparent),
+            color-mix(in srgb, var(--color-strength) 6%, transparent));
+    border: 1px solid var(--color-accent-light);
+    text-decoration: none;
+    transition: transform var(--duration-fast) var(--ease-spring),
+        box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.sciCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.sciCardText {
+    flex: 1;
+}
+
+.sciCardTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+}
+
+.sciCardDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* ── Article content ─────────────────────────────────── */
+.articleSection {
+    margin-bottom: var(--space-6);
+}
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 var(--space-3);
+}
+
+/* Phase / step list */
+.phaseList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.phaseItem {
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.phaseNum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    flex-shrink: 0;
+}
+
+.phaseName {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+}
+
+.phaseDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--leading-normal);
+}
+
+/* Error cards */
+.errorList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.errorItem {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    border-left: 4px solid var(--color-error);
+}
+
+.errorLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-error);
+    margin: 0 0 var(--space-1);
+}
+
+.errorFix {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.errorFixLabel {
+    font-weight: var(--weight-semibold);
+    color: var(--color-success);
+}
+
+/* Periodization phase row */
+.periodTable {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.periodRow {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    align-items: start;
+}
+
+.periodName {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    color: var(--color-accent-primary);
+    white-space: nowrap;
+}
+
+.periodDuration {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-1);
+}
+
+.periodFocus {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Injury cards */
+.injuryList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.injuryItem {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    border-left: 4px solid var(--color-warning);
+}
+
+.injuryName {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+}
+
+.injuryCause,
+.injuryPrevention {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-1);
+}
+
+.injuryPrevLabel {
+    font-weight: var(--weight-semibold);
+    color: var(--color-success);
+}
+
+/* ── Scientific page ─────────────────────────────────── */
+.sciTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--space-6);
+}
+
+.sciTable th {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+}
+
+.sciTable td {
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.sciTable tr:hover td {
+    background: var(--color-bg-secondary);
+}
+
+.sciTable td:first-child {
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+}
+
+.peakingList {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: 0;
+    margin: 0;
+}
+
+.peakingItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.peakingDot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-success);
+    flex-shrink: 0;
+    margin-top: 5px;
+}

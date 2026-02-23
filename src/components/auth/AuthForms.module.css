@@ -29,8 +29,8 @@
 
 .errorBanner {
     padding: var(--space-3) var(--space-4);
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: var(--color-danger-light);
+    border: 1px solid var(--color-error);
     border-radius: var(--radius-md);
     color: var(--color-error);
     font-size: var(--text-sm);
@@ -190,4 +190,109 @@
 
 .switchLink a:hover {
     color: var(--color-accent-hover);
+}
+
+/* ── Role selector ── */
+.roleRow {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-1);
+}
+
+.roleOption {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.roleOption input[type='radio'] {
+    display: none;
+}
+
+.roleOption:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-primary);
+}
+
+.roleActive {
+    border-color: var(--color-accent-primary);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    color: var(--color-accent-primary);
+    font-weight: var(--weight-semibold);
+}
+
+/* ── Description text ── */
+.description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+    line-height: var(--leading-relaxed);
+}
+
+/* ── Back link ── */
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-default);
+}
+
+.backLink:hover {
+    color: var(--color-accent-primary);
+}
+
+/* ── Success block ── */
+.successBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    text-align: center;
+    color: var(--color-success);
+}
+
+.successBlock svg {
+    color: var(--color-success);
+}
+
+/* ── Extra utilities ── */
+.submitBtnBlock {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    min-height: 44px;
+    line-height: 44px;
+    padding: 0 var(--space-3);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    transition: background var(--duration-normal) var(--ease-default);
+}
+
+.submitBtnBlock:hover {
+    background: var(--color-accent-hover);
+}
+
+.iconLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
 }

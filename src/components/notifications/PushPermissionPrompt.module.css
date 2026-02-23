@@ -1,0 +1,204 @@
+/* PushPermissionPrompt.module.css */
+/* Design tokens from src/styles/tokens.css — Athletic Minimal + Glassmorphism */
+
+.prompt {
+    position: fixed;
+    bottom: var(--space-6);
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    width: min(calc(100vw - var(--space-8)), 360px);
+    z-index: calc(var(--z-modal) - 1);
+
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-6);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+
+    /* Animate in from bottom */
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.closeBtn {
+    position: absolute;
+    top: var(--space-3);
+    inset-inline-end: var(--space-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.closeBtn:hover {
+    color: var(--color-text-primary);
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-light);
+    color: var(--color-accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 280px;
+}
+
+/* ─── Actions ─────────────────────────────────────── */
+
+.actions {
+    display: flex;
+    gap: var(--space-2);
+    width: 100%;
+    margin-top: var(--space-1);
+}
+
+.allowBtn {
+    flex: 1;
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.allowBtn:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+}
+
+.allowBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.allowBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dismissBtn {
+    flex: 1;
+    background: none;
+    border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.dismissBtn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: var(--color-text-secondary);
+}
+
+/* ─── iOS A2HS List ────────────────────────────────── */
+
+.iosList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: start;
+}
+
+.iosList li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+}
+
+.iosList li svg {
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .iosList li {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dismissBtn {
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+}
+
+/* Mobile: bottom sheet style */
+@media (max-width: 480px) {
+    .prompt {
+        bottom: 0;
+        inset-inline-start: 0;
+        transform: none;
+        width: 100%;
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        border-bottom: none;
+    }
+}
+/* WCAG 2.2.2 — Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .prompt {
+        animation: none !important;
+        transition: none !important;
+    }
+}

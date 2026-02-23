@@ -1,4 +1,6 @@
 #!/usr/bin/env npx tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Schema update script — strict typing not required
 /**
  * Add missing fields to the `exercises` collection in PocketBase.
  * Fields: equipment, muscles, dosage, coach_cues_ru, coach_cues_en, coach_cues_cn

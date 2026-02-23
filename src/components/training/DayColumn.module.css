@@ -1,0 +1,748 @@
+/* ==========================================================================
+   DayColumn — Single day column in the week grid
+   Unified style (matches SeasonDetail cards)
+   ========================================================================== */
+
+/* ─── Column ──────────────────────────────────────────────── */
+
+.column {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+}
+
+/* ─── Day Header ──────────────────────────────────────────── */
+
+.dayHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-bg-tertiary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dayHeaderContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.readinessBadgesRow {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    margin-left: var(--space-2);
+    overflow-x: hidden;
+}
+
+.readinessBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: var(--color-text-inverse);
+    font-weight: var(--weight-bold);
+}
+
+.dayName {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    text-transform: capitalize;
+    line-height: 1.2;
+}
+
+.dayDate {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-weight: var(--weight-medium);
+    font-family: var(--font-mono);
+}
+
+.exerciseCount {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-tertiary);
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-full);
+}
+
+/* ─── Exercise List ───────────────────────────────────────── */
+
+.exerciseList {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    min-height: 80px;
+}
+
+/* ─── Exercise Card ───────────────────────────────────────── */
+
+.card {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2);
+    transition: box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+}
+
+.cnsDot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    color: var(--color-text-inverse);
+    flex-shrink: 0;
+}
+
+.cardName {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+/* ─── Dosage Display ──────────────────────────────────────── */
+
+.dosage {
+    display: block;
+    width: 100%;
+    padding: var(--space-1) var(--space-2);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    background: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--duration-fast) var(--ease-default);
+    min-height: 28px;
+}
+
+.dosage:hover {
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-light);
+}
+
+/* ─── Inline Edit Form ────────────────────────────────────── */
+
+.editForm {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+}
+
+.editInput {
+    width: 48px;
+    height: 28px;
+    padding: 0 var(--space-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
+    outline: none;
+    text-align: center;
+}
+
+.editInput:focus {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+}
+
+.editInputSmall {
+    width: 36px;
+}
+
+.editSeparator {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-weight: var(--weight-bold);
+}
+
+.saveBtn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: var(--color-success);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.saveBtn:hover {
+    opacity: 0.9;
+}
+
+/* ─── Card Actions ────────────────────────────────────────── */
+
+.cardActions {
+    display: flex;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+    justify-content: flex-end;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.actionBtn:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.actionBtn:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.actionBtn:last-child:hover {
+    color: var(--color-error);
+}
+
+/* ─── Add Button ──────────────────────────────────────────── */
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: none;
+    border-top: 1px solid var(--color-border);
+    background: none;
+    color: var(--color-accent-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+    min-height: 44px;
+}
+
+.addBtn:hover {
+    background: var(--color-accent-light);
+}
+
+/* ─── Main Toolbar (Phase 4) ──────────────────────────────── */
+/* Wraps Add Exercise + Template picker + Save as Template btn */
+
+.mainToolbar {
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+}
+
+.mainToolbar .addBtn {
+    flex: 1;
+    border-top: none;
+    border-right: 1px solid var(--color-border);
+    justify-content: flex-start;
+    padding-left: var(--space-3);
+}
+
+.mainToolbar .warmupPickerWrap,
+.mainToolbar .adHocForm {
+    flex-shrink: 0;
+}
+
+.mainToolbar .warmupBtn {
+    border: none;
+    border-radius: 0;
+    border-left: 1px solid var(--color-border);
+    background: none;
+    color: var(--color-text-secondary);
+    min-height: 44px;
+    padding: var(--space-1) var(--space-2);
+}
+
+.mainToolbar .warmupBtn:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border);
+    color: var(--color-accent-primary);
+}
+
+.mainToolbar .warmupDropdown {
+    top: calc(100% + 2px);
+    right: 0;
+    left: auto;
+}
+
+
+
+/* ─── Log Result Button ────────────────────────────────── */
+
+.logBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: none;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-primary-ghost, rgba(35, 131, 226, 0.06));
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+    min-height: 44px;
+    width: 100%;
+}
+
+.logBtn:hover {
+    background: var(--color-primary-light, #e8f0fe);
+}
+
+/* ─── Session Block ────────────────────────────────────────── */
+
+.sessionBlock {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-border);
+}
+
+.sessionBlock:first-of-type {
+    border-top: none;
+}
+
+.sessionHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-bg-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sessionHeaderPM {
+    background: rgba(var(--color-accent-primary-rgb, 94, 92, 230), 0.06);
+    color: var(--color-accent-primary);
+}
+
+/* ─── Add Session Button ───────────────────────────────────── */
+
+.addSessionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    border-top: 1px dashed var(--color-border);
+    background: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    min-height: 36px;
+}
+
+.addSessionBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-accent-primary);
+}
+
+/* ─── Warmup / Main Section Split ─────────────────────────── */
+
+.warmupSection {
+    display: flex;
+    flex-direction: column;
+    background: color-mix(in srgb, #f2994a 5%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, #f2994a 20%, transparent);
+}
+
+.mainSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.sectionDivider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: color-mix(in srgb, #f2994a 80%, var(--color-text-secondary));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mainDivider {
+    color: var(--color-text-tertiary);
+}
+
+.ejectBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: auto;
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.ejectBtn:hover {
+    background: rgba(235, 87, 87, 0.12);
+    color: var(--color-error);
+}
+
+/* ─── Warmup Card ─────────────────────────────────────────── */
+
+.warmupCard {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: color-mix(in srgb, #f2994a 8%, var(--color-bg-primary));
+    border: 1px solid color-mix(in srgb, #f2994a 25%, transparent);
+    border-radius: var(--radius-sm);
+    margin: 0 var(--space-2) var(--space-1);
+}
+
+.warmupCardIcon {
+    color: color-mix(in srgb, #f2994a 80%, var(--color-text-secondary));
+    flex-shrink: 0;
+}
+
+.warmupCardName {
+    font-size: var(--text-xs);
+    color: var(--color-text-primary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.warmupCardDur {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.warmupCardRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.warmupCardRemove:hover {
+    background: rgba(235, 87, 87, 0.12);
+    color: var(--color-error);
+}
+
+/* ─── Warmup Add Row ──────────────────────────────────────── */
+
+.warmupAddRow {
+    display: flex;
+    gap: var(--space-1);
+    padding: 0 var(--space-2) var(--space-2);
+    flex-wrap: wrap;
+}
+
+.warmupBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid color-mix(in srgb, #f2994a 40%, transparent);
+    background: color-mix(in srgb, #f2994a 8%, transparent);
+    color: color-mix(in srgb, #f2994a 85%, var(--color-text-primary));
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+    min-height: 30px;
+    white-space: nowrap;
+}
+
+.warmupBtn:hover {
+    background: color-mix(in srgb, #f2994a 15%, transparent);
+    border-color: #f2994a;
+}
+
+/* ─── WarmupPicker Dropdown ───────────────────────────────── */
+
+.warmupPickerWrap {
+    position: relative;
+}
+
+.rotated {
+    transform: rotate(180deg);
+}
+
+.warmupDropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 50;
+    min-width: 180px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.warmupDropdownLoading {
+    height: 40px;
+    background: linear-gradient(90deg,
+            var(--color-bg-secondary) 25%,
+            var(--color-bg-tertiary) 50%,
+            var(--color-bg-secondary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.warmupDropdownEmpty {
+    padding: var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    text-align: center;
+}
+
+.warmupDropdownItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    background: none;
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.warmupDropdownItem:hover {
+    background: var(--color-bg-secondary);
+}
+
+.warmupDropdownMin {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+/* ─── Ad-hoc Warmup Step Form ─────────────────────────────── */
+
+.adHocForm {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 0 var(--space-2) var(--space-2);
+    width: 100%;
+}
+
+.adHocInput {
+    flex: 1;
+    height: 30px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    font-size: var(--text-xs);
+    color: var(--color-text-primary);
+    outline: none;
+    min-width: 0;
+}
+
+.adHocInput:focus {
+    border-color: #f2994a;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #f2994a 20%, transparent);
+}
+
+.adHocSec {
+    width: 48px;
+    height: 30px;
+    padding: 0 var(--space-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    text-align: center;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.adHocSave,
+.adHocCancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.adHocSave {
+    background: var(--color-success);
+    color: white;
+}
+
+.adHocCancel {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-tertiary);
+}
+
+.adHocSave:hover,
+.adHocCancel:hover {
+    opacity: 0.85;
+}
+
+/* ─── Day Note ────────────────────────────────────────── */
+
+.dayNote {
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+}
+
+.dayNoteHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
+    color: var(--color-text-tertiary);
+}
+
+.dayNoteLabel {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.dayNoteTextarea {
+    width: 100%;
+    resize: vertical;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xs);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 12px;
+    line-height: 1.5;
+    padding: var(--space-1) var(--space-2);
+    transition: border-color var(--duration-fast) var(--ease-default);
+    min-height: 48px;
+}
+
+.dayNoteTextarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.dayNoteReadOnly {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

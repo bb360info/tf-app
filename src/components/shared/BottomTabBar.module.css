@@ -1,0 +1,72 @@
+/* ==========================================================================
+   BottomTabBar — Main navigation
+   Mobile-first, glassmorphism, safe area support
+   ========================================================================== */
+
+.tabBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-overlay);
+
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Glassmorphism */
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-top: 1px solid var(--color-border-light);
+
+    /* Fallback for no backdrop-filter support */
+    @supports not (backdrop-filter: blur(1px)) {
+        background: var(--color-bg-elevated);
+    }
+}
+
+.tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+
+    /* Touch target: 44×44px minimum */
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--space-1) var(--space-2);
+
+    color: var(--color-text-tertiary);
+    text-decoration: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-default);
+
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.tab:hover {
+    color: var(--color-text-secondary);
+}
+
+.tab.active {
+    color: var(--color-accent-primary);
+}
+
+.label {
+    font-size: 0.625rem;
+    /* 10px — compact for 5 tabs */
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+/* Desktop: TabBar stays visible for now. Sidebar will replace in Track 6.
+   @media (min-width: 768px) { ... } */

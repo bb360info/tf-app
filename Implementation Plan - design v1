@@ -1,0 +1,207 @@
+# 🔍 Полный Дизайн-Аудит — Jumpedia v2
+
+> **Дата:** 2026-02-20  
+> **Скиллы:** jumpedia-design-system, brainstorming, react-ui-patterns  
+> **Охват:** 54 CSS модуля, 18 page.tsx, 6 скриншотов live-аудита
+
+---
+
+## Визуальный аудит (скриншоты)
+
+````carousel
+![Dashboard — full-width, stat cards растянуты на всю ширину](/Users/bogdan/.gemini/antigravity/brain/bff03d81-0f56-4691-b2f0-08eea2bfae58/dashboard_audit_1771614603847.png)
+<!-- slide -->
+![Training — limited-width контейнер ~1200px, пустое состояние по центру](/Users/bogdan/.gemini/antigravity/brain/bff03d81-0f56-4691-b2f0-08eea2bfae58/training_audit_1771614614125.png)
+<!-- slide -->
+![Analytics — full-width, select и карточки растянуты edge-to-edge](/Users/bogdan/.gemini/antigravity/brain/bff03d81-0f56-4691-b2f0-08eea2bfae58/analytics_audit_1771614626669.png)
+````
+
+![Видеозапись аудита всех 6 страниц](/Users/bogdan/.gemini/antigravity/brain/bff03d81-0f56-4691-b2f0-08eea2bfae58/visual_audit_pages_1771614594426.webp)
+
+---
+
+## 🚨 Критические проблемы
+
+### 1. Хаос ширины контента (CRITICAL)
+
+**Проблема:** Нет единого layout-wrapper. Каждая страница задаёт свою `max-width`, создавая эффект "прыгающих" стен контента:
+
+| Страница | max-width | Визуально |
+|----------|-----------|-----------|
+| Dashboard | **нет** (100%) | Edge-to-edge, статы растянуты |
+| Analytics | **нет** (100%) | Select и карточки на всю ширину |
+| Training | `1200px` | Ограничен, но заголовок шире |
+| Reference | `720px` | Узкий центрированный блок |
+| Settings | `640px` | Ещё уже |
+| Warmup/Mental | `680px` | Отличается от Reference |
+| Exercises | `900px` | Другое значение |
+| Athlete Detail | `900px` | На десктопе |
+
+> [!CAUTION]  
+> По DESIGN_SYSTEM.md правила ширины чёткие:  
+> Mobile: 100%, Tablet: 720px, Desktop: 960px, Wide: 1120px.  
+> **Ни одна страница не следует этим правилам.**
+
+### 2. Нет глобального `PageWrapper` (HIGH)
+
+`protected.module.css` содержит **только** `padding-bottom` для TabBar:
+```css
+.protectedContainer {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+```
+Нет `max-width`, нет `margin: 0 auto`, нет `padding-inline`. Каждая страница сама контролирует ширину, **дублируя** логику.
+
+### 3. Inconsistent заголовки страниц (MEDIUM)
+
+| Страница | Стиль заголовка |
+|----------|----------------|
+| Dashboard | Крупный bold, icon справа вплотную к краю |
+| Training | Крупный bold + кнопки-действия справа |
+| Analytics | Мелкий bold + кнопка справа |
+| Reference | Крупный bold + подзаголовок |
+| Settings | Стрелка назад + маленький заголовок |
+
+Нет единого компонента `PageHeader` — каждая страница строит заголовок ad-hoc.
+
+### 4. Hex Fallbacks засоряют CSS (LOW)
+
+**78+ вхождений** `var(--token, #hex)` паттерна — в основном в `ExercisePicker.module.css` (48 штук). Формально не баг (CSS fallback), но:
+- Засоряет чтение кода
+- При изменении токена fallback устаревает
+- В `tokens.css` уже определены значения по умолчанию через `:root` — двойной fallback избыточен
+
+### 5. UX-несогласованности
+
+| Проблема | Где | Деталь |
+|----------|-----|--------|
+| Кнопки разного размера | Training header | Settings gear vs New Season button |
+| i18n leak | Analytics | "Нет данных об упражнениях" на русском при EN locale |
+| Stat cards слишком широкие | Dashboard desktop | 3 карточки растянуты на 1400px+ |
+| "ATHLETES" vs "Add Athlete" | Dashboard | Label слева, кнопка справа — нет визуальной связи |
+| Пустые состояния | Analytics, Training | Занимают слишком много вертикального пространства |
+
+---
+
+## ✅ Что сделано хорошо
+
+| Аспект | Статус |
+|--------|--------|
+| `@supports not (backdrop-filter)` fallbacks | ✅ 43 файла — отлично |
+| Design tokens usage | ✅ 95%+ значений через `var()` |
+| Lucide icons everywhere | ✅ Нет emoji-иконок |
+| Self-hosted fonts | ✅ 14 woff2 файлов |
+| Mobile padding (`var(--space-4)`) | ✅ Консистентно |
+| Dark mode tokens | ✅ Полная coverage |
+| Touch targets ≥44px | ✅ В большинстве компонентов |
+| BottomTabBar glassmorphism | ✅ Красиво с fallback |
+
+---
+
+## 💡 Предложение: 3 варианта улучшения
+
+### Вариант A — "Quick Normalize" (2-3 дня)
+
+Минимальные изменения для устранения самого заметного бага — ширины контента.
+
+1. Добавить в `protected.module.css`:
+```css
+.protectedContainer {
+    max-width: var(--page-max-width, 960px);
+    margin: 0 auto;
+    padding-inline: var(--space-4);
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+}
+```
+
+2. Ввести CSS-переменную `--page-max-width` в `tokens.css` с значениями:
+   - Mobile: `100%`
+   - Desktop: `960px`
+   - Wide: `1120px`
+
+3. Удалить индивидуальные `max-width` из 10+ страничных CSS.
+
+**Плюсы:** Быстро, минимальный риск.  
+**Минусы:** Не решает проблему заголовков и мелких UX-деталей.
+
+---
+
+### Вариант B — "PageWrapper + PageHeader" (5-7 дней) ⭐ РЕКОМЕНДУЕТСЯ
+
+Структурное решение — 2 новых shared-компонента:
+
+#### `<PageWrapper>` — глобальный layout контроль
+```tsx
+// Responsive max-width по DESIGN_SYSTEM.md:
+// Mobile: 100%, Tablet: 720px, Desktop: 960px, Wide: 1120px
+<PageWrapper maxWidth="standard">  {/* 960px */}
+<PageWrapper maxWidth="narrow">    {/* 640px — Settings */}
+<PageWrapper maxWidth="wide">      {/* 1120px — Training */}
+```
+
+#### `<PageHeader>` — единый заголовок страниц
+```tsx
+<PageHeader
+  title="Dashboard"         // always font-display
+  subtitle="Manage athletes" // optional, text-secondary
+  backHref="/settings"       // optional, shows ← arrow
+  actions={<Button>Add</Button>} // optional, right-aligned
+  notification={<NotificationBell />}
+/>
+```
+
+#### Масштаб изменений:
+- **[NEW]** `src/components/shared/PageWrapper.tsx` + `.module.css`
+- **[NEW]** `src/components/shared/PageHeader.tsx` + `.module.css`
+- **[MODIFY]** 12 страниц: заменить ad-hoc хедеры на `<PageHeader>`
+- **[MODIFY]** `tokens.css`: добавить `--page-width-*` токены
+- **[MODIFY]** `protected.module.css`: подключить PageWrapper логику
+- **[CLEANUP]** Удалить 78+ hex fallbacks из компонентов
+
+**Плюсы:** Полное решение проблемы, DRY, будущие страницы автоматически consistent.  
+**Минусы:** Больше времени, нужно тестировать все 12 страниц.
+
+---
+
+### Вариант C — "Full DS Polish" (10-14 дней)
+
+Всё из Варианта B + глубокие UX-улучшения:
+
+- **Skeleton loading** для Dashboard и Analytics (вместо пустых карточек)
+- **Page transition** анимация (fade-slide при навигации)
+- **Улучшенные пустые состояния** (иллюстрации, CTA, не занимают 500px высоты)
+- **Stat cards redesign** — adaptive grid (1→2→3 колонки)
+- **Header gradient** на iOS (smooth blend с status bar)
+- **Глобальный Toast system** (вместо alert)
+- **Dark mode visual QA** (полный проход по всем 18 страницам)
+
+**Плюсы:** Премиальное качество, production-ready.  
+**Минусы:** Много работы, может задержать Track 5.
+
+---
+
+## Рекомендация
+
+> [!IMPORTANT]  
+> **Рекомендую Вариант B ("PageWrapper + PageHeader").**  
+> Это структурное решение устранит корневую причину проблемы (отсутствие единого layout) и автоматически обеспечит консистентность для всех будущих страниц. Время: 5-7 дней.
+>
+> Элементы из Варианта C (skeleton, transitions, toasts) можно добавить в Track 6: Polish & Launch.
+
+---
+
+## Верификация
+
+### Автоматические тесты
+```bash
+pnpm type-check   # TypeScript — проверить новые компоненты
+pnpm build         # Static export — все страницы билдятся
+pnpm lint          # ESLint — нет регрессий
+```
+
+### Визуальная проверка (вручную)
+1. Открыть каждую из 12 страниц при 375px, 768px, 1024px, 1440px
+2. Убедиться, что контент центрирован с одинаковыми полями
+3. Проверить заголовки — единый стиль на всех страницах
+4. Переключить dark mode — убедиться в корректности
+5. Переключить locale (RU/EN/CN) — нет overflow текста

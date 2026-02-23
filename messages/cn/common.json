@@ -1,54 +1,1036 @@
 {
-    "app": {
-        "title": "跳高百科",
-        "description": "跳高运动员训练平台",
-        "loading": "加载中..."
+  "app": {
+    "title": "跳高百科",
+    "description": "跳高运动员训练平台",
+    "loading": "加载中...",
+    "close": "关闭",
+    "cancel": "取消",
+    "notFound": "页面未找到",
+    "notFoundDescription": "您访问的页面不存在或已被移动。",
+    "goHome": "返回首页"
+  },
+  "nav": {
+    "home": "首页",
+    "dashboard": "主页",
+    "exercises": "练习",
+    "training": "训练",
+    "analytics": "分析",
+    "reference": "参考",
+    "settings": "设置",
+    "profile": "个人资料",
+    "logout": "退出"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "name": "姓名",
+    "forgotPassword": "忘记密码？",
+    "resetPassword": "重置密码",
+    "sendResetLink": "发送重置链接",
+    "resendVerification": "重新发送验证邮件",
+    "resetSuccess": "请查看您的邮箱，我们已发送密码重置链接。",
+    "resetDescription": "输入您的邮箱，我们将发送密码重置链接。",
+    "loginWithGoogle": "使用 Google 登录",
+    "registerWithGoogle": "使用 Google 注册",
+    "noAccount": "没有账号？",
+    "hasAccount": "已有账号？",
+    "signUp": "注册",
+    "signIn": "登录",
+    "emailVerification": "验证邮箱",
+    "emailVerificationSent": "验证邮件已发送至 {email}",
+    "orContinueWith": "或通过以下方式继续",
+    "termsAgree": "注册即表示您同意服务条款",
+    "role": "我是...",
+    "roleAthlete": "运动员",
+    "roleCoach": "教练",
+    "close": "关闭"
+  },
+  "errors": {
+    "required": "此字段为必填项",
+    "invalidEmail": "邮箱格式无效",
+    "passwordMin": "最少8个字符",
+    "passwordMismatch": "两次密码不一致",
+    "loginFailed": "邮箱或密码错误",
+    "registerFailed": "注册失败",
+    "networkError": "网络错误，请检查连接",
+    "unknown": "发生未知错误",
+    "sessionExpired": "会话已过期，请重新登录",
+    "authLoading": "正在加载认证...请稍候。",
+    "notLoggedIn": "未登录。请登录后重试。",
+    "title": "出了点问题",
+    "fallbackMessage": "发生了意外错误",
+    "retry": "重试",
+    "assignFailed": "分配计划失败，请重试。"
+  },
+  "language": {
+    "label": "语言",
+    "ru": "Русский",
+    "en": "English",
+    "cn": "中文"
+  },
+  "training": {
+    "title": "训练",
+    "selectAthlete": "— 选择运动员 —",
+    "noAthletesHint": "请先在仪表盘添加运动员。",
+    "myself": "自己",
+    "allAthletes": "所有运动员",
+    "newSeason": "新赛季",
+    "emptyTitle": "暂无赛季",
+    "emptyDescription": "创建您的第一个训练赛季以开始规划周期化",
+    "createFirst": "创建第一个赛季",
+    "retry": "重试",
+    "checkin": "签到",
+    "checkinDone": "已签到",
+    "checkinCreateFailed": "无法保存签到：运动员档案未创建。",
+    "checkinSaveFailed": "保存签到失败，请查看控制台。",
+    "backToSeasons": "返回赛季列表",
+    "wizardTitle": "创建赛季",
+    "step_basics": "基本信息",
+    "step_phases": "阶段",
+    "step_competitions": "比赛",
+    "step_review": "预览",
+    "seasonName": "赛季名称",
+    "seasonNamePlaceholder": "例如：2026室内赛季",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "dates": "日期",
+    "phasesHint": "根据赛季日期自动生成阶段，或手动添加",
+    "autoGenerate": "自动生成阶段",
+    "addPhase": "添加阶段",
+    "focusPlaceholder": "重点（可选）",
+    "phases": "阶段",
+    "competitionsHint": "添加比赛以在时间线上标记关键日期（可选）",
+    "addCompetition": "添加比赛",
+    "compName": "比赛名称",
+    "compLocation": "地点（可选）",
+    "competitions": "比赛",
+    "priorityA": "主要目标",
+    "priorityB": "重要",
+    "priorityC": "准备赛",
+    "timeline": "时间线",
+    "back": "返回",
+    "next": "下一步",
+    "createSeason": "创建赛季",
+    "weekConstructor": "第",
+    "weeks": "周",
+    "day_mon": "周一",
+    "day_tue": "周二",
+    "day_wed": "周三",
+    "day_thu": "周四",
+    "day_fri": "周五",
+    "day_sat": "周六",
+    "day_sun": "周日",
+    "addExercise": "添加训练",
+    "sessionAM": "上午",
+    "sessionPM": "下午",
+    "addSession": "+ 下午训练",
+    "warmupBlock": "热身",
+    "mainBlock": "主要训练",
+    "warmupPicker": "热身模板",
+    "warmupPickerEmpty": "没有热身模板",
+    "ejectWarmup": "移除热身",
+    "addWarmupStep": "+ 热身步骤",
+    "dayNote": "训练备注",
+    "dayNotePlaceholder": "重点、提示、特殊要求...",
+    "assign": "分配",
+    "assignToGroup": "分配到小组",
+    "assignToAthlete": "分配给运动员",
+    "selectGroup": "— 选择小组 —",
+    "assignHint": "粘贴小组ID，将已发布的计划分配给所有小组成员。",
+    "groupIdPlaceholder": "小组ID",
+    "mySeasons": "我的赛季",
+    "createOverride": "个人训练计划",
+    "overrideFor": "{name}的副本",
+    "overrides": "个人计划",
+    "overrideWarning": "运动员将得到已发布计划的独立副本",
+    "overrideSuccess": "个人计划已创建 ✓",
+    "selectAthleteForOverride": "— 选择运动员 —",
+    "trainingTemplatePicker": "模板",
+    "templatePickerEmpty": "无日模板",
+    "saveAsTemplate": "将当琎保存为模板",
+    "enterTemplateName": "模板名称...",
+    "manageGroups": "管理成员",
+    "searchExercises": "搜索训练...",
+    "filterByPhase": "阶段",
+    "category": "分类",
+    "level": "级别",
+    "noExercises": "未找到训练",
+    "exercisesFound": "个训练",
+    "sets": "组数",
+    "reps": "次数",
+    "intensity": "强度",
+    "cnsLoad": "神经负荷",
+    "planStatus_draft": "草稿",
+    "planStatus_published": "已发布",
+    "planStatus_archived": "已归档",
+    "managePlans": "管理计划",
+    "autoFill": "自动填充",
+    "cnsLabel": "每周神经系统负荷",
+    "cnsLow": "低",
+    "cnsMed": "中",
+    "cnsHigh": "高",
+    "confirmAutoFill": "自动填充将向本周添加练习。继续吗？",
+    "confirmPublish": "发布本周训练？发布后将锁定编辑。",
+    "peakingWarnings": "峰期警告",
+    "deleteSeasonTitle": "删除赛季？",
+    "deleteSeasonConfirm": "删除赛季「{name}」？所有阶段和计划将被删除，此操作不可撤销。",
+    "seasonDeleted": "赛季已删除",
+    "noPublishedPlan": "此阶段没有已发布的计划",
+    "peaking": {
+      "noPreComp": "此比赛前无PRE_COMP训练阶段",
+      "gapTooLong": "减量后间隔过长：{days}天(最多{required}天)",
+      "phaseTooShort": "PRE_COMP阶段过短：{days}天(最少{required}天)"
     },
-    "nav": {
-        "home": "首页",
-        "exercises": "练习",
-        "training": "训练",
-        "analytics": "分析",
-        "settings": "设置",
-        "profile": "个人资料",
-        "logout": "退出"
+    "adaptationBadge": "自动调整已激活",
+    "preCompReduction": "赛前减量: {competition} 还有 {days} 天",
+    "createFailed": "创建赛季失败: {message}",
+    "phaseGuideline_GPP": "建议：大训练量 • 低强度",
+    "phaseGuideline_SPP": "建议：中等训练量 • 中等强度",
+    "phaseGuideline_PRE_COMP": "建议：降低训练量 • 混合强度",
+    "phaseGuideline_COMP": "建议：最小训练量 • 最大强度",
+    "phaseGuideline_TRANSITION": "建议：积极恢复 • 低训练量",
+    "autoFillNoExercises": "未找到适合此阶段的练习。",
+    "readiness": "准备状态",
+    "log": {
+      "title": "训练记录",
+      "record": "记录结果",
+      "edit": "编辑结果",
+      "save": "保存",
+      "planned": "计划",
+      "noExercises": "当天没有训练",
+      "reps": "次数",
+      "weightKg": "重量 (kg)",
+      "duration": "时间 (秒)",
+      "distance": "距离 (m)",
+      "addSet": "添加组数",
+      "bodyweightNote": "自重训练",
+      "rpe": "感知负荷",
+      "rpeEasy": "轻松",
+      "rpeMax": "最大",
+      "saved": "已保存"
     },
-    "auth": {
-        "login": "登录",
-        "register": "注册",
-        "email": "邮箱",
-        "password": "密码",
-        "confirmPassword": "确认密码",
-        "name": "姓名",
-        "forgotPassword": "忘记密码？",
-        "resetPassword": "重置密码",
-        "sendResetLink": "发送重置链接",
-        "loginWithGoogle": "使用 Google 登录",
-        "registerWithGoogle": "使用 Google 注册",
-        "noAccount": "没有账号？",
-        "hasAccount": "已有账号？",
-        "signUp": "注册",
-        "signIn": "登录",
-        "emailVerification": "验证邮箱",
-        "emailVerificationSent": "验证邮件已发送至 {email}",
-        "orContinueWith": "或通过以下方式继续",
-        "termsAgree": "注册即表示您同意服务条款"
+    "athleteNotePlaceholder": "训练笔记...",
+    "adaptationBanner": "状态较差 — 建议减少负荷或替换动作",
+    "saving": "保存中...",
+    "skipReason": "跳过原因",
+    "skipReasons": {
+      "Equipment": "器材",
+      "Pain": "疼痛",
+      "Time": "时间",
+      "CoachDecision": "教练",
+      "Other": "其他"
+    }
+  },
+  "loading": "加载中...",
+  "back": "返回",
+  "close": "关闭",
+  "readiness": {
+    "title": "每日签到",
+    "sleep": "睡眠",
+    "sleepDuration": "时长 (小时)",
+    "sleepQuality": "质量",
+    "soreness": "肌肉酸痛",
+    "mood": "心情 / 压力",
+    "submit": "提交",
+    "score": "准备状态",
+    "status_optimal": "状态极佳!",
+    "status_good": "状态良好",
+    "status_average": "注意调整",
+    "status_poor": "建议减量",
+    "status_recovery_needed": "需要休息"
+  },
+  "settings": {
+    "appLanguage": "应用语言",
+    "appLanguageDesc": "更改整个应用的语言",
+    "appearance": "外观",
+    "theme": "主题",
+    "themeAuto": "自动",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "training": "训练",
+    "units": "单位",
+    "unitsDesc": "用于重量和距离",
+    "metric": "公制 (kg, m)",
+    "imperial": "英制 (lb, ft)",
+    "autoAdaptation": "自动调整",
+    "autoAdaptationDesc": "准备状态低时自动减少训练量",
+    "save": "保存更改",
+    "saved": "设置已保存",
+    "security": "安全",
+    "changePassword": "更改密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认密码",
+    "profile": "个人资料",
+    "name": "姓名",
+    "email": "电子邮件",
+    "role": "角色",
+    "passwordChanged": "密码修改成功",
+    "passwordChangeFailed": "密码修改失败，请检查当前密码。",
+    "profileUpdated": "资料更新成功",
+    "profileUpdateFailed": "资料更新失败",
+    "version": "版本",
+    "account": "账户",
+    "height": "身高",
+    "cm": "厘米",
+    "birthDate": "出生日期"
+  },
+  "groups": {
+    "title": "小组与邀请",
+    "myGroups": "我的小组",
+    "create": "创建",
+    "save": "创建小组",
+    "cancel": "取消",
+    "groupNamePlaceholder": "小组名称...",
+    "noGroups": "暂无小组。创建一个来邀请运动员！",
+    "generateCode": "生成邀请码",
+    "copy": "复制",
+    "regenerate": "重新生成",
+    "joinGroup": "加入小组",
+    "joinDescription": "输入教练发送的6位邀请码。",
+    "join": "加入",
+    "joinSuccess": "您已加入小组「{name}」！",
+    "invalidCode": "无效或已过期的邀请码，请重试。",
+    "manageGroups": "小组与邀请",
+    "createError": "创建小组失败，请重试。",
+    "deleteGroupTitle": "删除小组？",
+    "deleteGroupConfirm": "删除小组「{name}」？所有成员将被移除。",
+    "confirmDelete": "删除",
+    "confirmCancel": "取消"
+  },
+  "onboarding": {
+    "next": "下一步",
+    "skip": "跳过",
+    "finish": "开始使用",
+    "step": "第 {current} 步，共 {total} 步",
+    "welcome": {
+      "title": "欢迎使用 Jumpedia",
+      "subtitle": "跳高运动员训练平台",
+      "chooseLanguage": "选择语言"
+    },
+    "profile": {
+      "title": "请介绍一下您自己",
+      "subtitle": "我们将为您配置应用程序",
+      "yourName": "您的姓名",
+      "namePlaceholder": "张三",
+      "role": "您的角色",
+      "roleCoach": "教练",
+      "roleCoachDesc": "为运动员制定训练计划",
+      "roleAthlete": "运动员",
+      "roleAthleteDesc": "执行训练计划"
+    },
+    "prefs": {
+      "title": "偏好设置",
+      "subtitle": "您随时可以在设置中更改",
+      "units": "计量单位",
+      "metric": "公制 (kg, cm)",
+      "imperial": "英制 (lb, in)",
+      "autoAdapt": "自动调整训练负荷",
+      "autoAdaptDesc": "准备状态低时自动减少训练量"
+    },
+    "done": {
+      "title": "一切就绪！",
+      "subtitle": "Jumpedia 为您提供",
+      "feature1": "赛季规划",
+      "feature1Desc": "创建包含阶段和比赛的赛季",
+      "feature2": "周计划构建器",
+      "feature2Desc": "按天制定训练计划",
+      "feature3": "状态追踪",
+      "feature3Desc": "10秒签到评估每日状态",
+      "feature4": "自动调整",
+      "feature4Desc": "根据准备状态智能调整训练强度",
+      "athleteFeature1": "每日状态签到",
+      "athleteFeature1Desc": "10秒评估状态，帮助教练了解你",
+      "athleteFeature2": "我的训练计划",
+      "athleteFeature2Desc": "查看教练为每天安排的训练任务",
+      "athleteFeature3": "进展与成就",
+      "athleteFeature3Desc": "跳跃图表、签到连续记录和勋章",
+      "athleteFeature4": "运动员参考资料",
+      "athleteFeature4Desc": "技术、热身和心理准备指南"
+    }
+  },
+  "dashboard": {
+    "title": "教练仪表盘",
+    "athletes": "运动员",
+    "noAthletes": "暂无运动员。添加第一位运动员！",
+    "addAthlete": "添加运动员",
+    "editAthlete": "编辑运动员",
+    "readiness": "准备度",
+    "lastLog": "最近训练",
+    "noCheckin": "暂无数据",
+    "noLog": "没有日志",
+    "today": "今天",
+    "yesterday": "昨天",
+    "daysAgo": "{n}天前",
+    "deleteConfirm": "删除“{name}”及所有数据？此操作不可逆。",
+    "yearsOld": "{age}岁",
+    "stats": {
+      "totalAthletes": "总运动员",
+      "activeToday": "今日活跃",
+      "avgReadiness": "平均准备度"
+    },
+    "newAthlete": {
+      "title": "新运动员",
+      "name": "姓名",
+      "namePlaceholder": "张三",
+      "birthDate": "出生日期",
+      "gender": "性别",
+      "genderMale": "男",
+      "genderFemale": "女",
+      "heightCm": "身高(cm)",
+      "save": "添加",
+      "cancel": "取消",
+      "createFailed": "添加运动员失败，请重试。"
+    },
+    "updateFailed": "更新失败，请重试。",
+    "loading": "加载中...",
+    "loadError": "无法加载运动员列表。",
+    "allGroups": "全部",
+    "filterByGroup": "按组筛选",
+    "noAthletesInGroup": "该组暂无运动员",
+    "group": "组",
+    "quickPlan": "快速计划",
+    "compliance": "执行率"
+  },
+  "analytics": {
+    "title": "分析",
+    "selectAthlete": "选择运动员",
+    "noData": "暂无数据",
+    "noAthletes": "暂无运动员。请先在仪表盘创建运动员。",
+    "testResults": "测试成绩",
+    "addTest": "添加测试",
+    "personalBest": "个人最佳",
+    "progress": "进展",
+    "readinessTrend": "准备度趋势",
+    "noTestsYet": "暂无成绩。添加第一条！",
+    "trainingLoad": "训练负荷分布",
+    "cnsHeatmap": "准备度热力图",
+    "selectSeason": "选择赛季",
+    "loadError": "加载数据失败",
+    "loadResultsError": "加载结果失败",
+    "goToDashboard": "进入仪表盘",
+    "cnsLow": "低",
+    "cnsHigh": "高",
+    "sleep": "睡眠",
+    "sleepQuality": "睡眠质量",
+    "mood": "心情",
+    "soreness": "肌肉疲劳",
+    "readiness": "准备状态",
+    "close": "关闭",
+    "noCheckinData": "当天没有營馀记录",
+    "category_streak": "连续签到",
+    "category_training": "训练",
+    "category_testing": "测试",
+    "category_compete": "比赛",
+    "tests": {
+      "standing_jump": "立定跳",
+      "approach_jump": "助跑跳",
+      "sprint_30m": "30米冲刺",
+      "sprint_60m": "60米冲刺",
+      "squat_max": "深蹲最大",
+      "clean_max": "挤举最大",
+      "snatch_max": "抛举最大"
+    },
+    "addTestForm": {
+      "title": "新测试",
+      "testType": "测试类型",
+      "value": "成绩",
+      "date": "日期",
+      "notes": "备注",
+      "save": "保存",
+      "cancel": "取消",
+      "invalidValue": "请输入有效值 > 0",
+      "futureDateError": "日期不能是未来",
+      "saveFailed": "保存失败，请重试。",
+      "notesPlaceholder": "状况、感觉...",
+      "existingResult": "该日期已有结果：{value} {unit}。替换吗？",
+      "confirmReplace": "替换"
+    },
+    "minResults": "至少需要2个结果才能显示图表",
+    "chartLoading": "加载图表中",
+    "achievements": "成就",
+    "notifications": {
+      "title": "通知",
+      "markAll": "全部标为已读",
+      "empty": "没有新通知"
+    }
+  },
+  "reference": {
+    "title": "参考资料",
+    "subtitle": "技术、错误、周期化、伤病与科学",
+    "categories": {
+      "technique": {
+        "title": "跳跃技术",
+        "desc": "跨越式跳高各阶段：助跑、起跳、腾空"
+      },
+      "errors": {
+        "title": "常见错误",
+        "desc": "常见错误分析与纠正方法"
+      },
+      "periodization": {
+        "title": "训练周期化",
+        "desc": "GPP → SPP → PRE_COMP → COMP → TRANSITION"
+      },
+      "injuries": {
+        "title": "伤病与预防",
+        "desc": "常见伤病、康复与预防措施"
+      },
+      "warmup": {
+        "title": "热身",
+        "desc": "热身方案与箱式呼吸计时器"
+      },
+      "mental": {
+        "title": "心理准备",
+        "desc": "可视化卡片与赛前例行程序"
+      }
+    },
+    "scientific": {
+      "title": "科学依据",
+      "subtitle": "训练方法对比与竞技高峰规则",
+      "tra_dup": {
+        "heading": "TRA vs DUP — 训练周期化对比",
+        "tra_label": "传统周期化(TRA)",
+        "dup_label": "波浪式周期化(DUP)",
+        "rows": [
+          {
+            "aspect": "负荷",
+            "tra": "线性递增",
+            "dup": "每周变化"
+          },
+          {
+            "aspect": "强度",
+            "tra": "逐渐提升",
+            "dup": "高低交替"
+          },
+          {
+            "aspect": "训练量",
+            "tra": "赛前减量",
+            "dup": "波浪式"
+          },
+          {
+            "aspect": "适用场景",
+            "tra": "经典赛季",
+            "dup": "短中观期"
+          },
+          {
+            "aspect": "力量增长",
+            "tra": "+",
+            "dup": "++"
+          },
+          {
+            "aspect": "单调性",
+            "tra": "高",
+            "dup": "低"
+          }
+        ]
+      },
+      "peaking": {
+        "heading": "竞技高峰规则",
+        "rules": [
+          "赛前10-14天——减少训练量40-60%",
+          "强度保持或略有提升",
+          "赛前3周内不引入新练习",
+          "PRE_COMP阶段每周至少2次专项训练",
+          "最后两周睡眠优先≥8小时",
+          "比赛热身——赛前2-3周开始演练"
+        ]
+      }
+    },
+    "technique": {
+      "title": "跳高技术",
+      "phases": [
+        {
+          "name": "助跑",
+          "desc": "8-10步弧线助跑，最后3步加速，弧线角度30-45°。"
+        },
+        {
+          "name": "倒二步",
+          "desc": "最后一步较长，重心降低，脚跟先着地滚动。"
+        },
+        {
+          "name": "起跳",
+          "desc": "踝、膝、髋爆发性伸展，摆动腿和双臂向上摆动。"
+        },
+        {
+          "name": "腾空（背越式）",
+          "desc": "腰部弓形弯曲，依次越杆：背→髋→腿。"
+        },
+        {
+          "name": "落地",
+          "desc": "背部落垫，髋部越杆后再展腿。"
+        }
+      ]
     },
     "errors": {
-        "required": "此字段为必填项",
-        "invalidEmail": "邮箱格式无效",
-        "passwordMin": "最少8个字符",
-        "passwordMismatch": "两次密码不一致",
-        "loginFailed": "邮箱或密码错误",
-        "registerFailed": "注册失败",
-        "networkError": "网络错误，请检查连接",
-        "unknown": "发生未知错误",
-        "sessionExpired": "会话已过期，请重新登录"
+      "title": "常见错误",
+      "items": [
+        {
+          "error": "直线助跑",
+          "fix": "从第4-5步开始走弧线，逐渐加大弯度"
+        },
+        {
+          "error": "起跳点离横杆太远",
+          "fix": "起跳点距横杆投影60-80厘米"
+        },
+        {
+          "error": "摆臂力量不足",
+          "fix": "起跳时双臂同步爆发性上摆"
+        },
+        {
+          "error": "过早弓腰",
+          "fix": "肩部越杆后再弓腰"
+        },
+        {
+          "error": "背越式腿部弯曲",
+          "fix": "髋部越杆后腿部向上伸直"
+        }
+      ]
     },
-    "language": {
-        "label": "语言",
-        "ru": "Русский",
-        "en": "English",
-        "cn": "中文"
+    "periodization": {
+      "title": "赛季周期化",
+      "phases": [
+        {
+          "name": "GPP",
+          "duration": "6-10周",
+          "focus": "基础力量，高训练量，低强度"
+        },
+        {
+          "name": "SPP",
+          "duration": "4-6周",
+          "focus": "专项体能，跳跃练习，强度提升"
+        },
+        {
+          "name": "PRE_COMP",
+          "duration": "2-3周",
+          "focus": "速度磨砺，减量，高强度"
+        },
+        {
+          "name": "COMP",
+          "duration": "1-3周",
+          "focus": "竞技高峰，极低训练量，最大强度"
+        },
+        {
+          "name": "TRANSITION",
+          "duration": "2-4周",
+          "focus": "恢复，轻度活动"
+        }
+      ]
+    },
+    "injuries": {
+      "title": "伤病与预防",
+      "items": [
+        {
+          "injury": "跟腱炎",
+          "cause": "跳跃量过大，鞋底过硬",
+          "prevention": "离心训练，循序渐进增加负荷"
+        },
+        {
+          "injury": "髌骨股骨综合征",
+          "cause": "股四头肌薄弱，落地技术差",
+          "prevention": "臀肌强化，正确脚步滚动"
+        },
+        {
+          "injury": "踝关节扭伤",
+          "cause": "地面不平，疲劳",
+          "prevention": "本体感觉训练，踝关节热身"
+        },
+        {
+          "injury": "腰痛",
+          "cause": "背越式过度前弓，核心薄弱",
+          "prevention": "核心强化，弓腰技术"
+        }
+      ]
+    },
+    "back": "返回参考资料"
+  },
+  "exercises": {
+    "title": "动作库",
+    "subtitle": "跳高运动员专项练习",
+    "search": "搜索练习...",
+    "filterAll": "全部",
+    "filterCategory": "类别",
+    "filterLevel": "级别",
+    "filterEquipment": "器材",
+    "filterPhase": "训练阶段",
+    "noResults": "未找到练习",
+    "noResultsHint": "请尝试修改筛选条件或搜索词",
+    "found": "已找到",
+    "favorites": "收藏",
+    "allExercises": "所有练习",
+    "loading": "加载练习中...",
+    "loadError": "无法加载练习",
+    "retry": "重试",
+    "close": "关闭",
+    "dosage": "剂量",
+    "coachTips": "教练提示",
+    "ttsSpeak": "朗读提示",
+    "ttsStop": "停止",
+    "noTips": "暂无教练提示",
+    "showAthlete": "展示给运动员",
+    "addFavorite": "加入收藏",
+    "inFavorites": "已收藏",
+    "removeFavorite": "取消收藏",
+    "communityBadge": "社区",
+    "equipment": "器材",
+    "muscles": "肌肉群",
+    "cns": "中枢神经负荷",
+    "category": {
+      "plyometric": "增强式训练",
+      "highjump": "跳高",
+      "strength": "力量",
+      "gpp": "一般体能",
+      "speed": "速度",
+      "flexibility": "柔韧",
+      "jump": "跳跃"
+    },
+    "level": {
+      "beginner": "初级",
+      "intermediate": "中级",
+      "advanced": "高级"
+    },
+    "referenceCard": {
+      "title": "动作库",
+      "desc": "包含筛选、教练提示和语音播报的完整练习库"
     }
+  },
+  "constructor": {
+    "title": "新建动作",
+    "step1Title": "基本信息",
+    "step2Title": "详细信息",
+    "step3Title": "教练提示",
+    "step3Hint": "这些提示将通过语音播报",
+    "step4Title": "预览",
+    "nameEn": "名称 (EN)",
+    "nameRu": "名称 (RU)",
+    "category": "类别",
+    "level": "级别",
+    "cns": "中枢神经负荷",
+    "dosage": "剂量",
+    "equipment": "器材",
+    "equipmentHint": "逗号分隔：杠铃，跳箱",
+    "muscles": "肌肉群",
+    "phases": "训练阶段",
+    "commaSeparated": "逗号分隔...",
+    "cuesEn": "教练提示 (EN)",
+    "cuesRu": "教练提示 (RU)",
+    "next": "继续",
+    "back": "返回",
+    "cancel": "取消",
+    "savePersonal": "保存为私人",
+    "submitReview": "提交审核",
+    "reviewNote": "审核通过后，动作将出现在全局目录中",
+    "saveError": "保存失败，请重试",
+    "myExercises": "我的动作",
+    "noCustomExercises": "暂无自定义动作，创建第一个吧！",
+    "nameRuPlaceholder": "例如：跳箱",
+    "cuesRuPlaceholder": "例如：抬高膝盖..."
+  },
+  "quickPlan": {
+    "title": "快速训练",
+    "subtitle": "不依赖训练计划，快速安排今日训练",
+    "date": "日期",
+    "today": "今天",
+    "addExercise": "添加动作",
+    "exercises": "动作列表",
+    "noExercises": "未添加动作，点击「+」",
+    "sets": "组",
+    "reps": "次",
+    "notes": "训练备注",
+    "notesPlaceholder": "目标、感受、条件...",
+    "save": "保存训练",
+    "saved": "训练已保存！",
+    "saveError": "保存失败",
+    "clear": "清空",
+    "confirmClear": "清空整个训练计划？",
+    "history": "历史",
+    "noHistory": "暂无保存的训练",
+    "duration": "时长（分钟）",
+    "cnsTotal": "中枢神经负荷",
+    "remove": "删除",
+    "saveToLibrary": "存入库",
+    "savedToLibrary": "已保存 ✓"
+  },
+  "athleteDashboard": {
+    "welcome": "你好，{name}！",
+    "todayDate": "今天是 {date}",
+    "todayPlan": "我今日的训练",
+    "noPublishedPlan": "今天没有分配的训练计划",
+    "todayExercises": "个训练项目",
+    "checkinTitle": "每日状态检测",
+    "checkinSubtitle": "帮助教练了解你的状态",
+    "checkinDone": "状态已提交 ✓",
+    "checkinDoneSubtitle": "谢谢！教练已能看到你的状态",
+    "checkinBtn": "填写状态",
+    "sleep": "睡眠时长",
+    "sleepQuality": "睡眠质量",
+    "mood": "心情",
+    "soreness": "肌肉疲劳",
+    "submit": "保存",
+    "submitting": "保存中...",
+    "submitError": "出错了，请重试",
+    "lastScore": "上次得分",
+    "streak": "连续天数",
+    "statsTitle": "我的统计",
+    "noStats": "暂无数据",
+    "progressTitle": "我的进展",
+    "jumpChartTitle": "立定跳远",
+    "achievementsTitle": "成就",
+    "reCheckin": "更新",
+    "competition": "比赛",
+    "daysUntil": "天后"
+  },
+  "warmupPage": {
+    "back": "返回",
+    "title": "热身",
+    "subtitle": "训练、比赛与恢复热身方案",
+    "protocolsTitle": "热身方案",
+    "protocol": {
+      "training": "训练",
+      "competition": "比赛",
+      "recovery": "恢复"
+    },
+    "phase": {
+      "walk": "步行",
+      "jog": "慢跑",
+      "dynamic": "动态拉伸",
+      "runs": "冲刺",
+      "accelerations": "加速跑",
+      "specific": "专项热身",
+      "static": "静态拉伸",
+      "breathe": "呼吸练习"
+    },
+    "breathingTitle": "箱式呼吸 4-4-4-4",
+    "breathingSub": "吸气—屏气—呼气—屏气，各4秒",
+    "breath": {
+      "inhale": "吸气",
+      "hold1": "屏气",
+      "exhale": "呼气",
+      "hold2": "屏气"
+    },
+    "start": "开始",
+    "pause": "暂停",
+    "reset": "重置",
+    "min": "分钟",
+    "loading": "加载中...",
+    "loadError": "加载协议失败",
+    "noTemplates": "暂无协议。请通过参考→模板添加",
+    "retry": "重试"
+  },
+  "mentalPage": {
+    "back": "返回",
+    "title": "心理准备",
+    "subtitle": "可视化训练与赛前例行程序",
+    "cardsTitle": "卡片",
+    "tipLabel": "练习",
+    "card": {
+      "success_visualization": {
+        "title": "成功可视化",
+        "body": "在脑海中回放完美的跳跃：助跑、起跳、腾空。尽量细致。",
+        "tip": "睡前3分钟：想象5次完美跳跃"
+      },
+      "pre_comp_routine": {
+        "title": "赛前例行程序",
+        "body": "固定的行动顺序可以减少焦虑、提高专注度。",
+        "tip": "制定属于自己的5-7步清单"
+      },
+      "breathing_focus": {
+        "title": "呼吸专注",
+        "body": "控制呼吸可以降低心率，让身体进入最佳状态。",
+        "tip": "起跑前做3组4-4-4-4箱式呼吸"
+      },
+      "positive_self_talk": {
+        "title": "积极自我对话",
+        "body": "将「别搞砸」换成「我准备好了」——语言塑造心理状态。",
+        "tip": "设计2-3条个人口号，热身时重复念"
+      },
+      "pressure_release": {
+        "title": "释放压力",
+        "body": "压力是一种特权，它意味着你已经足够优秀。",
+        "tip": "问自己：「最坏的情况是什么？」——然后接受它"
+      },
+      "performance_mindset": {
+        "title": "竞技心态",
+        "body": "只评估自己能控制的：技术、助跑、专注度。",
+        "tip": "比赛中忘掉结果——专注于过程"
+      }
+    },
+    "routineTitle": "赛前例行程序",
+    "routine": {
+      "step1": {
+        "title": "提前60分钟：身体热身",
+        "desc": "执行标准热身方案，不要临时尝试新方法"
+      },
+      "step2": {
+        "title": "提前30分钟：可视化",
+        "desc": "找安静的地方，在脑海中完成5次完美跳跃"
+      },
+      "step3": {
+        "title": "提前15分钟：箱式呼吸",
+        "desc": "做3组4-4-4-4呼吸，释放紧张感"
+      },
+      "step4": {
+        "title": "提前5分钟：自我对话",
+        "desc": "重复个人口号，保持积极心态"
+      },
+      "step5": {
+        "title": "出发",
+        "desc": "相信自己的训练。你已准备好。"
+      }
+    }
+  },
+  "streakHero": {
+    "title": "签到连续天数",
+    "days": "天",
+    "best": "最佳记录",
+    "nextMilestone": "距离{target}天",
+    "eveningWarning": "今天别忘了！保持你的连续记录"
+  },
+  "athleteDetail": {
+    "back": "返回",
+    "overview": "概览",
+    "training": "训练",
+    "tests": "测试",
+    "readiness": "准备状态",
+    "noData": "暂无数据",
+    "loadError": "加载运动员数据失败",
+    "currentSeason": "当前赛季",
+    "pastSeasons": "历史赛季",
+    "noSeason": "暂无训练赛季",
+    "avgReadiness": "平均准备状态（12周）",
+    "testType": {
+      "standing_jump": "立定跳远",
+      "approach_jump": "助跑跳",
+      "sprint_30m": "30米冲刺",
+      "sprint_60m": "60米冲刺",
+      "squat_max": "深蹲1RM",
+      "clean_max": "抓举1RM",
+      "snatch_max": "上挺1RM"
+    },
+    "yearsOld": "岁",
+    "cm": "厘米",
+    "male": "男",
+    "female": "女"
+  },
+  "celebration": {
+    "awesome": "太棒了！",
+    "newAchievement": "新成就！",
+    "dismiss": "关闭"
+  },
+  "templates": {
+    "title": "训练模板",
+    "subtitle": "创建热身和训练日模板",
+    "warmupTab": "热身",
+    "dayTab": "训练日",
+    "systemSection": "系统模板",
+    "mySection": "我的模板",
+    "noMy": "暂无自定义模板，创建第一个！",
+    "create": "+ 创建",
+    "copy": "复制",
+    "edit": "编辑",
+    "delete": "删除",
+    "deleteConfirm": "删除模板「{name}」？",
+    "min": "分钟",
+    "items": "步骤",
+    "editorTitle": "模板编辑器",
+    "editorTitleNew": "新模板",
+    "nameRu": "名称 (RU)",
+    "nameEn": "名称 (EN)",
+    "nameCn": "名称 (CN)",
+    "type": "类型",
+    "typeWarmup": "热身",
+    "typeDay": "训练日",
+    "totalMinutes": "总时间（分钟）",
+    "warmupSection": "🔥 热身",
+    "mainSection": "🏋 主训练部分",
+    "addFromCatalog": "+ 从目录",
+    "addCustomStep": "+ 自定义步骤",
+    "customTextPlaceholder": "步骤描述...",
+    "durationSec": "时长（秒）",
+    "sets": "组数",
+    "reps": "次数",
+    "removeItem": "删除",
+    "save": "保存",
+    "cancel": "取消",
+    "saving": "保存中...",
+    "loadError": "加载模板失败",
+    "saveError": "保存失败，请重试。",
+    "deleteError": "删除模板失败。",
+    "copySuccess": "模板已复制到我的模板",
+    "back": "返回参考",
+    "referenceCard": {
+      "title": "训练模板",
+      "desc": "创建热身和训练日模板，应用于周计划构建器"
+    }
+  },
+  "coachLog": {
+    "title": "计划 vs 实际",
+    "exercise": "训练项目",
+    "planned": "计划",
+    "actual": "实际",
+    "status": "状态",
+    "sets": "组",
+    "status_matched": "完成",
+    "status_partial": "部分",
+    "status_missed": "错过",
+    "status_added": "额外",
+    "noData": "没有可比较的数据",
+    "skipLabel": "跳过原因"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAll": "全部标为已读",
+    "markAllRead": "全部标为已读",
+    "empty": "没有新通知",
+    "showAll": "查看全部",
+    "preferences": "通知设置",
+    "allow": "允许",
+    "dismiss": "暂不",
+    "pushTitle": "开启通知",
+    "pushText": "接收训练计划、打卡提醒和成就的通知。",
+    "iosTitle": "安装应用以接收通知",
+    "iosStep1": "点击分享",
+    "iosStep2": "\"添加到主屏幕\"",
+    "iosStep3": "从主屏幕打开",
+    "types": {
+      "all": "全部",
+      "plan_published": "训练计划",
+      "checkin_reminder": "打卡",
+      "achievement": "成就",
+      "low_readiness": "准备度",
+      "coach_note": "教练笔记",
+      "system": "系统",
+      "invite_accepted": "邀请",
+      "competition_upcoming": "比赛"
+    },
+    "quietHours": {
+      "title": "勿扰时段",
+      "from": "从",
+      "to": "到",
+      "timezone": "时区",
+      "disabled": "已禁用"
+    },
+    "pushEnabled": "推送通知",
+    "emailEnabled": "邮件通知"
+  },
+  "notificationSettings": {
+    "title": "通知设置",
+    "back": "返回设置",
+    "channels": "通知渠道",
+    "pushDesc": "接收设备推送通知",
+    "emailDesc": "通过邮件接收重要更新",
+    "notifTypes": "通知类型",
+    "typesDesc": "已静音的类型不会生成通知",
+    "save": "保存",
+    "saved": "设置已保存",
+    "saveFailed": "保存设置失败，请重试。",
+    "loadFailed": "无法加载偏好设置",
+    "pushActive": "Push 已启用",
+    "pushSubscribe": "开启推送",
+    "pushUnsubscribe": "取消订阅",
+    "pushDenied": "已在浏览器设置中屏蔽",
+    "pushUnsupported": "不支持推送"
+  }
 }

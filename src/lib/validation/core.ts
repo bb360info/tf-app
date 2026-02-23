@@ -60,6 +60,8 @@ export const GroupsSchema = z.object({
     coach_id: pbId,
     name: z.string().min(1).max(255),
     timezone: z.string().optional(),
+    invite_code: z.string().length(6).optional(),
+    invite_expires: z.iso.datetime().optional(),
 });
 
 /** UNIQUE: group_id + athlete_id */
@@ -74,4 +76,6 @@ export const GroupMembersSchema = z.object({
 export const CoachPreferencesSchema = z.object({
     coach_id: pbId,
     default_plan_languages: z.array(LanguageSchema),
+    auto_adaptation_enabled: z.boolean().optional(),
+    onboarding_complete: z.boolean().optional(),
 });

@@ -1,26 +1,58 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/pocketbase/AuthProvider';
 import { Link } from '@/i18n/navigation';
 import { LoginSchema } from '@/lib/validation/core';
+import { getMyPreferences } from '@/lib/pocketbase/services/preferences';
 import styles from './AuthForms.module.css';
+
+/** BUG-8 fix: check onboarding status from localStorage with PB fallback */
+async function isOnboardingDone(): Promise<boolean> {
+    if (typeof window !== 'undefined' && localStorage.getItem('onboarding_done') === '1') {
+        return true;
+    }
+    // Fallback: check PocketBase (handles new device / incognito)
+    try {
+        const prefs = await getMyPreferences();
+        if (prefs?.onboarding_complete) {
+            localStorage.setItem('onboarding_done', '1'); // sync for next time
+            return true;
+        }
+    } catch { /* ignore */ }
+    return false;
+}
 
 export default function LoginForm() {
     const t = useTranslations();
+    const router = useRouter();
     const { login, loginGoogle } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Refs as fallback for iOS autofill / password managers that bypass onChange
+    const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+
+    // Get returnTo from query parameters (set by AuthGuard redirect)
+    const returnTo = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('returnTo')
+        : null;
+
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
         setError('');
 
+        // Use ref values as fallback for autofill that doesn't trigger onChange
+        const finalEmail = email || emailRef.current?.value || '';
+        const finalPassword = password || passwordRef.current?.value || '';
+
         // Validate with Zod
-        const result = LoginSchema.safeParse({ email, password });
+        const result = LoginSchema.safeParse({ email: finalEmail, password: finalPassword });
         if (!result.success) {
             const firstIssue = result.error.issues[0];
             if (firstIssue?.path[0] === 'email') {
@@ -33,9 +65,17 @@ export default function LoginForm() {
 
         setIsLoading(true);
         try {
-            await login(email, password);
-            // On success, AuthProvider will update state → redirect happens in page
-        } catch {
+            await login(finalEmail, finalPassword);
+            if (returnTo) {
+                // Redirect back to the page user was trying to access
+                window.location.href = decodeURIComponent(returnTo);
+            } else {
+                const done = await isOnboardingDone();
+                router.push(done ? '/dashboard' : '/onboarding');
+            }
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'LoginForm', action: 'login' });
             setError(t('errors.loginFailed'));
         } finally {
             setIsLoading(false);
@@ -47,7 +87,16 @@ export default function LoginForm() {
         setIsLoading(true);
         try {
             await loginGoogle();
-        } catch {
+            // Redirect after successful Google OAuth
+            if (returnTo) {
+                window.location.href = decodeURIComponent(returnTo);
+            } else {
+                const done = await isOnboardingDone();
+                router.push(done ? '/dashboard' : '/onboarding');
+            }
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'LoginForm', action: 'googleLogin' });
             setError(t('errors.loginFailed'));
         } finally {
             setIsLoading(false);
@@ -71,6 +120,7 @@ export default function LoginForm() {
                     </label>
                     <input
                         id="login-email"
+                        ref={emailRef}
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -87,6 +137,7 @@ export default function LoginForm() {
                     </label>
                     <input
                         id="login-password"
+                        ref={passwordRef}
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}

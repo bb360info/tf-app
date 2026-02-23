@@ -1,0 +1,250 @@
+/* =========================================================
+   analytics.module.css
+   Coach Analytics Page — Mobile-first, Athletic Minimal + Glass
+   ========================================================= */
+
+/* ── Page ────────────────────────────────────────────────── */
+
+.page {
+    min-height: 100dvh;
+    background: var(--color-bg-primary);
+    padding-bottom: calc(var(--space-20) + var(--space-4));
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+.stickyHeader {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-6);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .stickyHeader {
+        background: var(--color-bg-primary);
+    }
+}
+
+/* ── Athlete Selector ────────────────────────────────────── */
+
+.selectorWrap {
+    padding: var(--space-4) 0 0;
+}
+
+.athleteSelect {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    cursor: pointer;
+    transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.athleteSelect:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+/* ── Test Type Tabs ──────────────────────────────────────── */
+
+.tabsWrap {
+    padding: var(--space-4) 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabsWrap::-webkit-scrollbar {
+    display: none;
+}
+
+.tabs {
+    display: flex;
+    gap: var(--space-2);
+    min-width: max-content;
+}
+
+.tab {
+    height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        border-color var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.tabActive {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+.tab:hover:not(.tabActive) {
+    background: var(--color-bg-tertiary);
+}
+
+/* ── Content section ─────────────────────────────────────── */
+
+.content {
+    padding: var(--space-4) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* ── Add button ──────────────────────────────────────────── */
+
+.addBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 48px;
+    border: 1.5px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.addBtn:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+    background: var(--color-accent-light);
+}
+
+/* ── Header actions row ─────────────────────────────────── */
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.addTestBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    width: auto;
+    padding: 0 var(--space-3);
+    border: none;
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-full);
+    height: 36px;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.addTestBtn:hover {
+    background: var(--color-accent-hover);
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.emptyState {
+    text-align: center;
+    padding: var(--space-16) var(--space-4);
+    color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+}
+
+.emptyTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.emptyDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+}
+
+/* ── Error state ─────────────────────────────────────────── */
+
+.errorState {
+    padding: var(--space-4);
+    background: var(--color-accent-light);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-lg);
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin: var(--space-4);
+}
+
+/* ── Recent results list ─────────────────────────────────── */
+
+.resultsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+    .resultsGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .resultsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ── Section title ───────────────────────────────────────── */
+
+.sectionTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 var(--space-3) 0;
+}
+
+/* ── Chart Section (Pie + Heatmap wrappers) ──────────────── */
+
+.chartSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}

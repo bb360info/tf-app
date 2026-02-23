@@ -1,0 +1,720 @@
+/* AthleteTrainingView.module.css */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-bottom: var(--space-8);
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+}
+
+.subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-1);
+}
+
+.planBadge {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: 4px var(--space-3);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Exercise List */
+.exerciseList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* Exercise Item */
+.exerciseItem {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+    transition: border-color var(--duration-fast);
+}
+
+.exerciseItem.exerciseDone {
+    border-color: var(--color-success);
+}
+
+.exerciseHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 64px;
+    transition: background var(--duration-fast);
+}
+
+.exerciseHeader:hover {
+    background: var(--color-bg-secondary);
+}
+
+.exerciseDot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.exerciseInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.exerciseName {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.exerciseDosage {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.doneIcon {
+    color: var(--color-success);
+    flex-shrink: 0;
+}
+
+/* Exercise Log Panel */
+.exerciseLog {
+    padding: 0 var(--space-4) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Sets Stepper */
+.setsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-4);
+}
+
+.logFieldLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.setsStepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.stepBtn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: var(--text-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--duration-fast);
+}
+
+.stepBtn:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.setsValue {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    font-family: var(--font-mono);
+    color: var(--color-text-primary);
+    min-width: 2ch;
+    text-align: center;
+}
+
+/* RPE Slider */
+.rpeRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.rpeLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.rpeTrack {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.rpeInput {
+    flex: 1;
+    height: 4px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: var(--radius-full);
+    background: var(--color-border);
+}
+
+.rpeInput::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    cursor: pointer;
+}
+
+.rpeInput::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    cursor: pointer;
+    border: none;
+}
+
+.rpeValue {
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    font-family: var(--font-mono);
+    min-width: 2ch;
+    text-align: right;
+    transition: color var(--duration-fast);
+}
+
+/* Save Button */
+.saveBtn {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: opacity var(--duration-fast);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.saveBtn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+/* States */
+.loadingState {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-16) 0;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--color-border);
+    border-top-color: var(--color-accent-primary);
+    border-radius: var(--radius-full);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.errorState {
+    text-align: center;
+    padding: var(--space-8) 0;
+    color: var(--color-error);
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-16) var(--space-4);
+    text-align: center;
+}
+
+.emptyIcon {
+    color: var(--color-text-tertiary);
+    opacity: 0.4;
+}
+
+.emptyTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+}
+
+.emptyHint {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation: none;
+    }
+
+    .exerciseItem,
+    .exerciseHeader,
+    .stepBtn,
+    .saveBtn {
+        transition: none;
+    }
+}
+
+/* ─── Week Navigation ───────────────────────── */
+
+.weekNav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-content: center;
+    padding: var(--space-2) 0;
+}
+
+.weekNavBtn {
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background var(--duration-fast);
+}
+
+.weekNavBtn:hover:not(:disabled) {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.weekNavBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.weekLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* ─── Week Scroll ───────────────────────────── */
+
+.weekScroll {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow-y: auto;
+    padding-bottom: var(--space-4);
+}
+
+/* ─── Day Card ──────────────────────────────── */
+
+.dayCard {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--glass-blur);
+    overflow: hidden;
+    transition: border-color var(--duration-fast);
+}
+
+.dayCardToday {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+}
+
+.dayCardHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dayCardName {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+}
+
+.dayCardDate {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.todayBadge {
+    margin-left: auto;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    padding: 2px var(--space-2);
+    background: color-mix(in srgb, var(--color-accent-primary) 15%, transparent);
+    color: var(--color-accent-primary);
+    border-radius: var(--radius-full);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+}
+
+/* ─── Session Block inside DayCard ─────────────── */
+
+.sessionBlock {
+    padding: var(--space-3) var(--space-4);
+}
+
+.sessionBlock+.sessionBlock {
+    border-top: 1px solid var(--color-border);
+}
+
+.sessionHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sessionHeaderPM {
+    color: var(--color-warning, #f59e0b);
+}
+
+/* ─── Start Log Button ──────────────────────── */
+
+.startLogBtn {
+    width: 100%;
+    margin-top: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--color-accent-primary) 40%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    transition: background var(--duration-fast);
+}
+
+.startLogBtn:hover {
+    background: color-mix(in srgb, var(--color-accent-primary) 18%, transparent);
+}
+
+/* ─── Warmup Badge (Collapsible) ───────────────── */
+
+.warmupBadge {
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid color-mix(in srgb, var(--color-speed, #f2994a) 30%, var(--color-border));
+    background: color-mix(in srgb, var(--color-speed, #f2994a) 5%, var(--glass-bg));
+    overflow: hidden;
+}
+
+.warmupBadgeHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 44px;
+    transition: background var(--duration-fast);
+}
+
+.warmupBadgeHeader:hover {
+    background: color-mix(in srgb, var(--color-speed, #f2994a) 8%, transparent);
+}
+
+.warmupBadgeIcon {
+    color: var(--color-speed, #f2994a);
+    flex-shrink: 0;
+}
+
+.warmupBadgeTitle {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: color-mix(in srgb, var(--color-speed, #f2994a) 85%, var(--color-text-primary));
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.warmupBadgeCount {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-mono);
+}
+
+.warmupBadgeChevron {
+    margin-left: auto;
+    color: var(--color-text-tertiary);
+    display: flex;
+    align-items: center;
+}
+
+/* ─── Warmup Item ───────────────────────────────── */
+
+.warmupList {
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--space-3) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.warmupItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-speed, #f2994a) 6%, var(--color-bg-primary));
+    border: 1px solid color-mix(in srgb, var(--color-speed, #f2994a) 20%, transparent);
+    border-radius: var(--radius-sm);
+}
+
+.warmupItemIcon {
+    color: color-mix(in srgb, var(--color-speed, #f2994a) 70%, var(--color-text-tertiary));
+    flex-shrink: 0;
+}
+
+.warmupItemName {
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.warmupItemDur {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .warmupBadgeHeader {
+        transition: none;
+    }
+}
+
+/* ─── Coach Day Note Banner ──────────────────────────────── */
+
+.coachNote {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 20%, transparent);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+}
+
+.coachNoteIcon {
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.coachNoteText {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* ─── Phase 5: Adaptation Banner ─────────────────────────────── */
+
+.adaptationBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    color: var(--color-warning);
+    font-size: var(--text-sm);
+}
+
+.adaptationBanner p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+/* ─── Phase 5: Athlete Notes Textarea ────────────────────────── */
+
+.notesWrap {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.notesLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.notesTextarea {
+    width: 100%;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    resize: none;
+    min-height: 60px;
+    transition: border-color var(--duration-fast);
+}
+
+.notesTextarea::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.notesTextarea:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+}
+
+.notesTextarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ─── Phase 5: Skip Reason Chips ─────────────────────────────── */
+
+.skipReasonRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+}
+
+.skipLabel {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.skipChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.skipChip {
+    min-height: 36px;
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.skipChip:hover {
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+.skipChipActive {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    border-color: var(--color-warning);
+    color: var(--color-warning);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .notesTextarea,
+    .skipChip {
+        transition: none;
+    }
+}

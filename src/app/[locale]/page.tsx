@@ -1,11 +1,22 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
+import { useAuth } from '@/lib/pocketbase/AuthProvider';
 import styles from './page.module.css';
 
 export default function HomePage() {
     const t = useTranslations();
+    const { isAuthenticated, isLoading } = useAuth();
+    const router = useRouter();
+
+    // Redirect authenticated users to dashboard
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.replace('/dashboard');
+        }
+    }, [isLoading, isAuthenticated, router]);
 
     return (
         <div className={styles.page}>

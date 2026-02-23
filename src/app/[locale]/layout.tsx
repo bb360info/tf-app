@@ -4,6 +4,8 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/lib/pocketbase/AuthProvider';
+import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { ErrorBoundaryWrapper } from '@/components/shared/ErrorBoundaryWrapper';
 import '../globals.css';
 
 type Props = {
@@ -56,11 +58,23 @@ export default async function LocaleLayout({ children, params }: Props) {
 
     return (
         <html lang={locale === 'cn' ? 'zh-CN' : locale}>
+            {/* Anti-FOUC: reads localStorage before React hydrates to set correct theme */}
+            <head>
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(){try{var t=localStorage.getItem('jp-theme');var r=t==='dark'?'dark':t==='light'?'light':(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',r);}catch(e){}})();`,
+                    }}
+                />
+            </head>
             <body>
                 <NextIntlClientProvider messages={messages}>
-                    <AuthProvider>
-                        {children}
-                    </AuthProvider>
+                    <ThemeProvider>
+                        <AuthProvider>
+                            <ErrorBoundaryWrapper>
+                                {children}
+                            </ErrorBoundaryWrapper>
+                        </AuthProvider>
+                    </ThemeProvider>
                 </NextIntlClientProvider>
             </body>
         </html>

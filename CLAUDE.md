@@ -10,6 +10,11 @@
 - **Validation**: Zod for all PocketBase collections
 - **Video**: FFmpeg WASM (client-side compression) + MediaPipe Pose
 
+## Language Policy
+- **Communication**: All agents MUST communicate with the USER in **Russian**.
+- **Artifacts**: All `implementation_plan.md` and `walkthrough.md` artifacts MUST be written in **Russian**.
+- **Documentation**: Technical documentation, code comments, and architecture docs REMAIN in **English**.
+
 ## Key Constraints
 - 🇨🇳 **China access required**: NO external CDN, NO Google Fonts via CDN, NO analytics scripts. Self-host everything.
 - Google OAuth2 works only with VPN in China — Email auth is primary for CN users
@@ -17,12 +22,18 @@
 - PocketBase has 21 collections — see `docs/ARCHITECTURE.md` for full schema
 - Static Export means NO server-side rendering, NO API routes in Next.js
 
-## Design System
-- **Style**: Athletic Minimal + Glassmorphism
-- **Approach**: Mobile-first, touch-first
+## Design System (MANDATORY — violation = defect)
+- **Iron Law**: EVERY visual decision comes from `docs/DESIGN_SYSTEM.md` → `src/styles/tokens.css`
+- **Auto-loaded**: `jumpedia-design-system` + `verification-before-completion` discipline skills (via `always` group)
+- **Source of truth**: `src/styles/tokens.css` for CSS var names, `docs/DESIGN_SYSTEM.md` for guidelines
+- **CSS**: Vanilla CSS with CSS Modules (`.module.css`) — **NO Tailwind, NEVER**
+- **Style**: Athletic Minimal + Glassmorphism — `var(--glass-bg)`, `var(--glass-blur)` etc.
+- **Icons**: Lucide React only — **NO emojis as UI icons**
+- **Approach**: Mobile-first (375px base) + touch-first (44×44px min touch targets)
 - **Fonts**: Inter (body) + Plus Jakarta Sans (display) + JetBrains Mono (data) — ALL self-hosted
-- **Icons**: Lucide React only — NO emojis as UI icons
-- **Read**: `docs/DESIGN_SYSTEM.md` before ANY UI work
+- **Before UI work**: Run `/ui-work` workflow — reads DESIGN_SYSTEM.md + tokens.css + 3 skills
+- **NEVER load skills**: `frontend-design` (breaks Inter), `tailwind-design-system` (wrong stack), `web-artifacts-builder`
+- **Pre-delivery**: Pass all checklist items from `jumpedia-design-system` SKILL.md
 
 ## Project Structure
 ```
@@ -47,6 +58,8 @@ conductor/             ← Track-based task management
 3. **New feature ideas** → add to `conductor/backlog.md`, do NOT implement mid-track
 4. **1 commit = 1 task** — don't mix unrelated changes
 5. **Update `CHANGELOG.md`** after completing a task — use Added/Changed/Fixed/Removed format
+6. **Verification Iron Law**: NEVER claim "done", "fixed", "works" without running `pnpm test` / `pnpm build` / `pnpm type-check` and showing output
+7. **Model self-identification**: When running `/switch-agent`, the FIRST line of the report MUST start with your model code in brackets: `[G1H]`, `[G1L]`, `[G3H]`, `[G3L]`, `[GF]`, `[CS]`, `[CO]`, or `[??]`. See model code table in `.agent/workflows/switch-agent.md` step 0.
 
 ## Commands
 ```bash
@@ -64,3 +77,8 @@ pnpm lint         # ESLint
 - `docs/PERIODIZATION.md` — Training system: seasons, phases, plans, readiness
 - `conductor/tracks.md` — Current track status and gates
 - `conductor/backlog.md` — Feature ideas waiting for future tracks
+
+## Available Workflows
+- `/switch-agent` — **Run when starting new chat / switching agents** — reads current track gate, reports status and next task
+- `/auto-skills` — Select skills for any task from project_skills.json
+- `/ui-work` — Mandatory before any UI/CSS/component work

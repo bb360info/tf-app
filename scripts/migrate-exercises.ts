@@ -1,4 +1,6 @@
 #!/usr/bin/env npx tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Migration script — strict typing not required
 /**
  * Migrate exercises from legacy/v1/data.js → PocketBase `exercises` collection.
  *

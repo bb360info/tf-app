@@ -1,0 +1,92 @@
+/* ErrorBoundary — Glassmorphism error fallback UI
+   DS: tokens from src/styles/tokens.css, @supports fallback, dark mode */
+
+.overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: var(--space-6);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-8) var(--space-6);
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+
+    background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+    backdrop-filter: blur(var(--glass-blur, 16px));
+    -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.5));
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--glass-shadow, 0 4px 24px rgba(0, 0, 0, 0.08));
+
+    /* China / old browser fallback — no blur */
+    @supports not (backdrop-filter: blur(1px)) {
+        background: var(--color-bg-elevated, #ffffff);
+        border: 1px solid var(--color-border);
+    }
+}
+
+.iconWrap {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: rgba(235, 87, 87, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon {
+    color: var(--color-error, #eb5757);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: var(--leading-tight);
+}
+
+.message {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+    margin: 0;
+    max-width: 280px;
+}
+
+.retryBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    min-height: 44px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default),
+        transform var(--duration-fast) var(--ease-spring);
+}
+
+.retryBtn:hover {
+    background: var(--color-accent-hover, #1a6bc4);
+}
+
+.retryBtn:active {
+    transform: scale(0.97);
+}

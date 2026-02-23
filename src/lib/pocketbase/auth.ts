@@ -15,14 +15,15 @@ export async function loginWithEmail(email: string, password: string) {
 export async function registerWithEmail(
     email: string,
     password: string,
-    name: string
+    name: string,
+    role: 'coach' | 'athlete' = 'athlete'
 ) {
     const user = await pb.collection('users').create({
         email,
         password,
         passwordConfirm: password,
         name,
-        role: 'coach', // default role on registration
+        role,
         language: 'en',
         units: 'metric',
         emailVisibility: false,
@@ -45,6 +46,13 @@ export async function loginWithGoogle() {
 /** Logout — clear auth store */
 export function logout() {
     pb.authStore.clear();
+}
+
+/** Update role of the currently authenticated user */
+export async function updateUserRole(role: 'coach' | 'athlete') {
+    const userId = pb.authStore.record?.id;
+    if (!userId) throw new Error('Not authenticated');
+    return pb.collection('users').update(userId, { role });
 }
 
 /** Request password reset email */
@@ -82,4 +90,18 @@ export function onAuthChange(
     return pb.authStore.onChange((token, record) => {
         callback(token, record as unknown as UsersRecord | null);
     });
+}
+
+/** Change password */
+export async function changePassword(id: string, old: string, newPass: string, confirm: string) {
+    return pb.collection('users').update(id, {
+        oldPassword: old,
+        password: newPass,
+        passwordConfirm: confirm,
+    });
+}
+
+/** Update user name */
+export async function updateUserName(id: string, name: string) {
+    return pb.collection('users').update(id, { name });
 }

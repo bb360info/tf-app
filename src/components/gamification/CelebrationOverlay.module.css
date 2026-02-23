@@ -1,0 +1,155 @@
+/* ===========================================
+   CelebrationOverlay.module.css
+   Full-screen celebration with confetti
+   =========================================== */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    animation: fadeIn var(--duration-fast) var(--ease-default);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ── Confetti ────────────────────────── */
+.confettiContainer {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.confetti {
+    position: absolute;
+    top: -10px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ── Card ────────────────────────────── */
+.card {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: var(--space-8) var(--space-6);
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    animation: badgeReveal var(--duration-slow) var(--ease-spring) forwards;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .card {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+@keyframes badgeReveal {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.15);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ── Close button ────────────────────── */
+.closeBtn {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.closeBtn:hover {
+    background: var(--color-bg-tertiary);
+}
+
+/* ── Text ────────────────────────────── */
+.awesome {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--space-2) 0;
+}
+
+.achievementName {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1) 0;
+}
+
+.achievementDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* ── Reduced motion ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .confetti {
+        display: none;
+    }
+
+    .card {
+        animation: none;
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .overlay {
+        animation: none;
+    }
+}

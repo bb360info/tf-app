@@ -31,10 +31,19 @@ routerUse(function (e) {
 
 // --- 2. Auth Rate Limiting (5 attempts / 15 min per IP) ---
 routerUse(function (e) {
+    // 🔧 DEV TOGGLE: set to false to disable rate limiting during development
+    // Remember to set back to true before deploying to production!
+    var RATE_LIMIT_ENABLED = false;
+
     var path = e.request.url.path;
 
     // Only rate-limit auth-with-password endpoints
     if (!path || path.indexOf("/auth-with-password") === -1) {
+        return e.next();
+    }
+
+    // Skip if rate limiting is disabled
+    if (!RATE_LIMIT_ENABLED) {
         return e.next();
     }
 

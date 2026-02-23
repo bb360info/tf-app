@@ -17,7 +17,8 @@ export const TrainingCategorySchema = z.enum([
     'flexibility',
     'jump',
 ]);
-export const PhaseTypeSchema = z.enum(['GPP', 'SPP', 'COMP', 'TRANSITION']);
+export const PhaseTypeSchema = z.enum(['GPP', 'SPP', 'PRE_COMP', 'COMP', 'TRANSITION']);
+export const TrainingQualitySchema = z.enum(['speed', 'power', 'elasticity', 'max_strength', 'technical']);
 
 export const ExercisesSchema = z.object({
     name_ru: z.string().min(1).max(500),
@@ -30,6 +31,7 @@ export const ExercisesSchema = z.object({
     unit_type: UnitTypeSchema,
     cns_cost: z.number().int().min(1).max(5),
     training_category: TrainingCategorySchema,
+    training_quality: TrainingQualitySchema.optional(),
     phase_suitability: z.array(PhaseTypeSchema),
     tags: z.array(z.string()).optional(),
     illustration: z.string().optional(),

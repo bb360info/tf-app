@@ -1,0 +1,47 @@
+/* =======================================================
+   ThemeToggle.module.css
+   3-way theme selector: Light / Auto / Dark
+   ======================================================= */
+
+.wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-default);
+    flex-shrink: 0;
+}
+
+.btn:hover {
+    color: var(--color-text-primary);
+}
+
+.btn.active {
+    background: var(--color-bg-primary);
+    color: var(--color-accent-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Ensure touch target even when smaller visually */
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+}

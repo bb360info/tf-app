@@ -1,0 +1,144 @@
+/* ==========================================================================
+   ToastProvider — Glass toast notifications
+   Tokens: src/styles/tokens.css
+   ========================================================================== */
+
+/* ── Container ──────────────────────────────────────────────────── */
+
+.container {
+    position: fixed;
+    bottom: calc(72px + var(--space-4));
+    /* Above BottomTabBar (64px + safe area) */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: calc(100% - var(--space-8));
+    max-width: 400px;
+    pointer-events: none;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    animation: slideUp var(--duration-slow, 350ms) var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .toast {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+/* ── Variants ───────────────────────────────────────────────────── */
+
+.icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success .icon {
+    color: var(--color-success);
+}
+
+.error .icon {
+    color: var(--color-error);
+}
+
+.warning .icon {
+    color: var(--color-warning);
+}
+
+.info .icon {
+    color: var(--color-info);
+}
+
+/* ── Content ────────────────────────────────────────────────────── */
+
+.message {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    line-height: var(--leading-normal);
+    min-width: 0;
+}
+
+/* ── Close Button ───────────────────────────────────────────────── */
+
+.closeBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast) var(--ease-default);
+}
+
+.closeBtn:hover {
+    color: var(--color-text-primary);
+}
+
+/* ── Animations ─────────────────────────────────────────────────── */
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.exiting {
+    animation: slideDown var(--duration-normal, 250ms) var(--ease-in, cubic-bezier(0.4, 0, 1, 1)) forwards;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+}
+
+/* ── Reduced Motion ─────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .toast,
+    .exiting {
+        animation: none;
+    }
+}

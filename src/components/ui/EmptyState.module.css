@@ -1,0 +1,78 @@
+/* ==========================================================================
+   EmptyState — Universal empty state component
+   Tokens: src/styles/tokens.css
+   ========================================================================== */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-8) var(--space-6);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .container {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+/* ── Icon ────────────────────────────────────────────────────────── */
+
+.icon {
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-4);
+    opacity: 0.6;
+}
+
+/* ── Text ────────────────────────────────────────────────────────── */
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-2);
+    line-height: var(--leading-tight);
+}
+
+.description {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-5);
+    line-height: var(--leading-normal);
+    max-width: 300px;
+}
+
+/* ── CTA Button ─────────────────────────────────────────────────── */
+
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-3) var(--space-5);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.actionBtn:hover {
+    background: var(--color-accent-hover);
+}

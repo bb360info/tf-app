@@ -16,7 +16,24 @@ const eslintConfig = defineConfig([
     "legacy/**",
     // PocketBase hooks (Goja JS runtime, not compiled by Next.js)
     "pb_hooks/**",
+    // Conductor utility scripts (CJS Node.js, not TS/ESM)
+    "conductor/scripts/**",
+    // Generated service worker bundle (Serwist/Webpack output)
+    "public/sw.js",
   ]),
+  {
+    rules: {
+      // Allow unused variables/params prefixed with _
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

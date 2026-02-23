@@ -31,6 +31,7 @@ export const LogExercisesSchema = z.object({
     log_id: pbId,
     exercise_id: pbId,
     sets_data: z.array(SetDataSchema),
+    rpe: z.number().int().min(1).max(10).optional(),
 });
 
 // ─── Daily Check-ins ───────────────────────────────────────────────

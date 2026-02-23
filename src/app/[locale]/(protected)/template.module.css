@@ -1,0 +1,27 @@
+/* ==========================================================================
+   Page Transition — Fade-in / Slide-up
+   Tokens: src/styles/tokens.css
+   ========================================================================== */
+
+.wrapper {
+    animation: fadeSlideIn var(--duration-slow, 350ms) var(--ease-out, cubic-bezier(0, 0, 0.2, 1)) both;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wrapper {
+        animation: none;
+    }
+}

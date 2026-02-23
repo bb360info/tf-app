@@ -277,14 +277,17 @@ The app uses frosted glass surfaces to create depth and a modern feel.
 @media (min-width: 1440px) { ... }
 ```
 
-### Layout Widths
+### Layout Widths (PageWrapper)
 
-| Breakpoint | Content max-width | Side padding |
-|-----------|------------------|-------------|
-| Mobile (<768px) | `100%` | `16px` |
-| Tablet (768-1023px) | `720px` | `24px` |
-| Desktop (1024-1439px) | `960px` | `32px` |
-| Wide (1440px+) | `1120px` | `40px` |
+Все страницы ОБЯЗАНЫ использовать компонент `<PageWrapper>` для обеспечения согласованной ширины.
+
+| Variant | CSS Token | Size | Use Case |
+|---------|-----------|------|----------|
+| **narrow** | `--page-max-narrow` | `640px` | Settings, Auth, Формы |
+| **standard** | `--page-max-standard` | `960px` | Dashboard, Analytics |
+| **wide** | `--page-max-wide` | `1120px` | Training, Video analysis (широкие таблицы) |
+
+> На мобильных (<768px) все варианты занимают 100% с боковым padding в 16px. Ограничение max-width включается только на планшетах и десктопах.
 
 ### Rules
 
@@ -296,6 +299,12 @@ The app uses frosted glass surfaces to create depth and a modern feel.
 ---
 
 ## 4. Component Patterns
+
+### PageHeader (Заголовок раздела)
+
+Используется в самом верху секции или страницы, содержит Title, опциональный Subtitle, кнопки действий (actions) справа и кнопку "Назад".
+- Заголовок: `--font-display`, bold, `--text-2xl`
+- Отступ снизу (до контента): `--space-6` или `--space-8`
 
 ### Card (Primary Surface)
 
@@ -359,6 +368,13 @@ All buttons:
 - Overlay: `rgba(0, 0, 0, 0.4)`
 - Surface: glass-card (strong variant)
 - Corner radius: `--radius-xl` (top only on mobile)
+
+### Skeleton UI (Загрузка)
+
+Вместо пустых экранов со спиннером необходимо использовать `<Skeleton>` блоки, повторяющие контур загружаемого контента.
+- Цвет фона: `var(--color-skeleton-bg)`
+- Анимация: бесконечный shimmer-эффект (блик) цвета `var(--color-skeleton-shimmer)`
+- Использование: `SkeletonCard`, `SkeletonText`, `SkeletonAvatar`.
 
 ---
 

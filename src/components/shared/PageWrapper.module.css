@@ -1,0 +1,57 @@
+.wrapper {
+    margin: 0 auto;
+    padding-inline: var(--space-4);
+    width: 100%;
+    position: relative;
+}
+
+/* iOS header gradient — blends status bar into app background */
+.wrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: linear-gradient(to bottom,
+            var(--color-bg-primary) 0%,
+            transparent 100%);
+    pointer-events: none;
+    z-index: var(--z-sticky);
+}
+
+@media (min-width: 768px) {
+    .wrapper::before {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .wrapper {
+        padding-inline: var(--space-6);
+    }
+}
+
+@media (min-width: 1024px) {
+    .wrapper {
+        padding-inline: var(--space-8);
+    }
+}
+
+@media (min-width: 1440px) {
+    .wrapper {
+        padding-inline: var(--space-10);
+    }
+}
+
+.narrow {
+    max-width: var(--page-max-narrow);
+}
+
+.standard {
+    max-width: var(--page-max-standard);
+}
+
+.wide {
+    max-width: var(--page-max-wide);
+}

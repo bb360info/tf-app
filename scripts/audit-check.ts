@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Audit script — strict typing not required
 import PocketBase from 'pocketbase';
 const pb = new PocketBase('https://jumpedia.app');
 

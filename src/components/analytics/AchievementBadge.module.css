@@ -1,0 +1,151 @@
+/* ===========================================
+   AchievementBadge.module.css
+   Athletic Minimal + Glassmorphism badge card
+   =========================================== */
+
+.badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1.5px solid var(--color-border);
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+    transition:
+        transform var(--duration-fast) var(--ease-spring),
+        box-shadow var(--duration-fast) var(--ease-default);
+    cursor: default;
+    user-select: none;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .badge {
+        background: var(--color-bg-secondary);
+    }
+}
+
+/* ── Unlocked (earned) ─────────────────── */
+.unlocked {
+    border-color: var(--color-favorite);
+    box-shadow: 0 0 0 1px var(--color-favorite), var(--glass-shadow);
+}
+
+.unlocked:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px var(--color-favorite), var(--shadow-lg);
+}
+
+/* ── Locked (not earned yet) ───────────── */
+.locked {
+    opacity: 0.45;
+    filter: grayscale(0.6);
+}
+
+/* ── Icon wrapper ──────────────────────── */
+.iconWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    flex-shrink: 0;
+}
+
+.unlocked .iconWrap {
+    background: color-mix(in srgb, var(--color-favorite) 15%, transparent);
+    color: var(--color-favorite);
+}
+
+.locked .iconWrap {
+    color: var(--color-text-tertiary);
+}
+
+/* ── Text content ──────────────────────── */
+.label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+    margin: 0;
+}
+
+.desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-normal);
+    margin: 0;
+}
+
+.earnedAt {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-favorite);
+    margin: 0;
+}
+
+/* ── New badge animation ──────────────── */
+.newBadge {
+    animation: popIn var(--duration-slow) var(--ease-spring) forwards;
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ── Progress bar (locked achievements) ── */
+.progressSection {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+}
+
+.progressBar {
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: var(--color-accent-primary);
+    transition: width var(--duration-slow) var(--ease-default);
+}
+
+.progressText {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-mono);
+    text-align: center;
+    margin: 0;
+}
+
+/* ── Reduced motion ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .newBadge {
+        animation: none;
+    }
+
+    .progressFill {
+        transition: none;
+    }
+}

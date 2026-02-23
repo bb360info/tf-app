@@ -1,0 +1,122 @@
+.container {
+    padding: var(--space-6) var(--space-8);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-6);
+    gap: var(--space-4);
+}
+
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.loading {
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--color-text-tertiary);
+}
+
+/* ─── Grid ────────────────────────────────────────────────────── */
+
+.gridContainer {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    /* Grid bg */
+    display: flex;
+    flex-direction: column;
+}
+
+.headerRow {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: var(--z-raised);
+}
+
+.weekLabelCorner {
+    padding: var(--space-3);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-tertiary);
+    text-align: center;
+    border-right: 1px solid var(--color-border-light);
+}
+
+.dayHeader {
+    padding: var(--space-3);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-align: center;
+    text-transform: capitalize;
+    border-right: 1px solid var(--color-border-light);
+}
+
+.dayHeader:last-child {
+    border-right: none;
+}
+
+.weekRow {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    border-bottom: 1px solid var(--color-border-light);
+    min-height: 100px;
+    /* Min height for rows */
+}
+
+.weekLabel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-tertiary);
+    border-right: 1px solid var(--color-border-light);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.weekLabel:hover {
+    background: var(--color-primary-ghost);
+    color: var(--color-primary);
+}
+
+.weekNum {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+}
+
+.dayCell {
+    padding: var(--space-1);
+    border-right: 1px solid var(--color-border-light);
+    background: var(--color-bg);
+}
+
+.dayCell:last-child {
+    border-right: none;
+}

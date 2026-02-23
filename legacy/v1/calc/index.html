@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Calculator TF">
+    <title>Stratos | Elite Unit Converter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-highlight: rgba(255, 255, 255, 0.2);
+            --neon-accent: #00f2ff;
+            --neon-glow: 0 0 10px rgba(0, 242, 255, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --danger: #ff4b4b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(20, 0, 40) 0%, rgb(10, 10, 30) 90%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background blobs */
+        .ambient-light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .light-1 {
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: #4f00bc;
+        }
+
+        .light-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: #00f2ff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Glass Card */
+        .converter-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 400px) {
+            .converter-card {
+                padding: 30px 20px;
+            }
+        }
+
+        .converter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: skewX(-25deg);
+            animation: shine 8s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+
+            20% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--neon-accent);
+            text-shadow: var(--neon-glow);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 50px 15px 20px;
+            /* Right padding for unit */
+            color: #fff;
+            font-size: 1.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 300;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--neon-accent);
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+        }
+
+        /* Remove arrows/spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            position: absolute;
+            right: 20px;
+            pointer-events: none;
+        }
+
+        .imperial-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .imperial-input {
+            position: relative;
+            flex: 1;
+        }
+
+        /* Decimal Feet Display */
+        .decimal-feet-container {
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .decimal-feet-input {
+            /* Inherits standard input styles, specific tweaks if needed */
+            padding-right: 40px;
+            /* Visual differentiation to show it's secondary but editable */
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+            font-size: 1.2rem;
+        }
+
+        .decimal-feet-input:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: var(--neon-accent);
+        }
+
+        .decimal-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+            display: block;
+            margin-left: 5px;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            opacity: 0.5;
+            font-size: 1.2rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
+            margin: 0 15px;
+        }
+
+        /* Action Buttons */
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0.6;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-btn.copied {
+            color: var(--neon-accent);
+            opacity: 1;
+        }
+
+        /* Buttons Container */
+        .actions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+            align-items: center;
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        footer a {
+            color: var(--neon-accent);
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(0, 242, 255, 0.5);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        footer a:hover {
+            border-bottom-style: solid;
+            text-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <div class="container">
+        <header>
+            <h1>🚀 STRATOS</h1>
+            <p class="subtitle">Precision Converter for Elite Athletes</p>
+        </header>
+
+        <main class="converter-card" id="card">
+
+            <!-- Metric Input -->
+            <div class="input-group">
+                <div class="label-row">
+                    <label for="meters">Metric</label>
+                    <button class="copy-btn" onclick="copyValue('meters-val')" title="Copy Meters">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+                <div class="input-wrapper">
+                    <input type="number" id="meters" placeholder="0.00" step="0.01">
+                    <span class="unit">m</span>
+                </div>
+            </div>
+
+            <div class="divider">
+                <span>⇄</span>
+            </div>
+
+            <!-- Imperial Input -->
+            <div class="input-group">
+                <div class="label-row">
+                    <label>Imperial</label>
+                    <button class="copy-btn" onclick="copyImperial()" title="Copy Imperial">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+                <div class="imperial-row">
+                    <div class="imperial-input">
+                        <input type="number" id="feet" placeholder="0" step="1">
+                        <span class="unit">ft</span>
+                    </div>
+                    <!-- Inches as TEXT input for fractions -->
+                    <div class="imperial-input">
+                        <input type="text" id="inches" placeholder="0.00" inputmode="decimal">
+                        <span class="unit">in</span>
+                    </div>
+                </div>
+
+                <!-- Decimal Feet Input (Editable) -->
+                <div class="decimal-feet-container">
+                    <label class="decimal-label" for="decimal-feet">Decimal Feet</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="decimal-feet" class="decimal-feet-input" placeholder="0.00"
+                            step="0.01">
+                        <span class="unit">ft</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions-container">
+                <button class="clear-btn" onclick="clearAll()">Reset Form</button>
+            </div>
+
+        </main>
+
+        <footer>
+            Created by <a id="creator-link" href="#">@imgajumps</a>
+        </footer>
+    </div>
+
+    <script>
+        const metersInput = document.getElementById('meters');
+        const feetInput = document.getElementById('feet');
+        const inchesInput = document.getElementById('inches');
+        const decimalFeetInput = document.getElementById('decimal-feet');
+        const creatorLink = document.getElementById('creator-link');
+
+        // Conversion Factors
+        const M_TO_IN = 39.3700787;
+        const IN_TO_M = 0.0254;
+
+        // --- Helper Functions ---
+
+        // Parse inches input (supports decimals "5.5" and fractions "1/2", "1 1/2")
+        function parseInches(val) {
+            if (!val) return 0;
+            val = val.trim();
+
+            if (val.includes('/')) {
+                const parts = val.split(' ');
+                let total = 0;
+                for (let part of parts) {
+                    if (part.includes('/')) {
+                        const [num, den] = part.split('/');
+                        if (den && parseFloat(den) !== 0) {
+                            total += parseFloat(num) / parseFloat(den);
+                        }
+                    } else {
+                        total += parseFloat(part) || 0;
+                    }
+                }
+                return total;
+            }
+            return parseFloat(val) || 0;
+        }
+
+        // --- Deep Linking Logic ---
+        creatorLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            const username = 'imgajumps';
+            const appUrl = `instagram://user?username=${username}`;
+            const webUrl = `https://www.instagram.com/${username}`;
+
+            // Try to open app
+            window.location.href = appUrl;
+
+            // Fallback to web after a short delay
+            setTimeout(() => {
+                window.location.href = webUrl;
+            }, 500);
+        });
+
+        // --- Main Logic ---
+
+        function updateFromMeters() {
+            const val = metersInput.value;
+            if (val === '') {
+                feetInput.value = '';
+                inchesInput.value = '';
+                decimalFeetInput.value = '';
+                return;
+            }
+            const meters = parseFloat(val);
+            if (isNaN(meters)) return;
+
+            const totalInches = meters * M_TO_IN;
+            const feet = Math.floor(totalInches / 12);
+            let inches = (totalInches % 12);
+
+            // Round inches to 2 decimals for feet/inches display
+            // But we need high precision for decimal feet calculation? 
+            // Actually decimal feet is just mirrors meters * 3.28084
+            const decimalFeet = meters * 3.2808399;
+
+            // Update Decimal Feet Input
+            decimalFeetInput.value = decimalFeet.toFixed(2);
+
+            // Update Traditional Feet/Inches
+            inches = Math.round(inches * 100) / 100;
+
+            if (inches === 12) {
+                feetInput.value = feet + 1;
+                inchesInput.value = 0;
+            } else {
+                feetInput.value = feet;
+                inchesInput.value = inches;
+            }
+        }
+
+        function updateFromImperial() {
+            const feetVal = feetInput.value;
+            const inchesVal = inchesInput.value;
+
+            if (feetVal === '' && inchesVal === '') {
+                metersInput.value = '';
+                decimalFeetInput.value = '';
+                return;
+            }
+
+            const feet = parseFloat(feetVal) || 0;
+            const inches = parseInches(inchesVal);
+
+            const totalInches = (feet * 12) + inches;
+            const meters = totalInches * IN_TO_M;
+
+            // Update Meters
+            metersInput.value = Math.round(meters * 1000) / 1000;
+
+            // Update Decimal Feet (Derived from meters or direct calc?)
+            // Direct calc: feet + (inches/12)
+            const decFeet = feet + (inches / 12);
+            decimalFeetInput.value = decFeet.toFixed(2);
+        }
+
+        function updateFromDecimalFeet() {
+            const val = decimalFeetInput.value;
+            if (val === '') {
+                metersInput.value = '';
+                feetInput.value = '';
+                inchesInput.value = '';
+                return;
+            }
+
+            const decFeet = parseFloat(val);
+            if (isNaN(decFeet)) return;
+
+            // Convert to Meters
+            // 1 ft = 0.3048 m
+            const meters = decFeet * 0.3048;
+            metersInput.value = Math.round(meters * 1000) / 1000;
+
+            // Convert to Feet/Inches
+            const totalInches = decFeet * 12;
+            const feet = Math.floor(totalInches / 12); // Careful, this might be slightly off due to float, e.g. 5.99999
+            // A safer sway is Math.floor(decFeet) usually works, but what if 5.999ft?
+            // Actually Math.floor(decFeet) is correct for the feet part.
+            // Let's stick strictly to totalInches logic as it's robust.
+
+            const standardFeet = Math.floor(decFeet + 0.00001); // Epsilon for safety?
+            // Actually, let's use the same logic as FromMeters
+
+            const finalFeet = Math.floor(decFeet);
+            let finalInches = (decFeet - finalFeet) * 12;
+
+            // Round inches to 2 decimals
+            finalInches = Math.round(finalInches * 100) / 100;
+
+            if (finalInches === 12) {
+                feetInput.value = finalFeet + 1;
+                inchesInput.value = 0;
+            } else {
+                feetInput.value = finalFeet;
+                inchesInput.value = finalInches;
+            }
+        }
+
+        function clearAll() {
+            metersInput.value = '';
+            feetInput.value = '';
+            inchesInput.value = '';
+            decimalFeetInput.value = '';
+            metersInput.focus();
+        }
+
+        async function copyValue(type) {
+            if (!metersInput.value) return;
+            const text = `${metersInput.value}m`;
+
+            if (text) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    const btn = document.querySelector('.label-row .copy-btn');
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                    }, 1000);
+                } catch (err) {
+                    console.error('Failed to copy', err);
+                }
+            }
+        }
+
+        async function copyImperial() {
+            const feet = feetInput.value || 0;
+            const inches = inchesInput.value || 0;
+            if (feetInput.value === '' && inchesInput.value === '') return;
+
+            const text = `${feet}' ${inches}"`;
+            try {
+                await navigator.clipboard.writeText(text);
+                const btns = document.querySelectorAll('.copy-btn');
+                const btn = btns[1];
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                }, 1000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        }
+
+        // Attach listeners
+        metersInput.addEventListener('input', updateFromMeters);
+        feetInput.addEventListener('input', updateFromImperial);
+        inchesInput.addEventListener('input', updateFromImperial);
+        decimalFeetInput.addEventListener('input', updateFromDecimalFeet);
+
+    </script>
+</body>
+
+</html>

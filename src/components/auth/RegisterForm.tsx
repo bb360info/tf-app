@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/pocketbase/AuthProvider';
 import { Link } from '@/i18n/navigation';
 import { RegisterSchema } from '@/lib/validation/core';
@@ -9,6 +10,7 @@ import styles from './AuthForms.module.css';
 
 export default function RegisterForm() {
     const t = useTranslations();
+    const router = useRouter();
     const { register, loginGoogle } = useAuth();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -46,8 +48,11 @@ export default function RegisterForm() {
 
         setIsLoading(true);
         try {
-            await register(email, password, name);
-        } catch {
+            await register(email, password, name, 'athlete');
+            router.push('/onboarding');
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'RegisterForm', action: 'register' });
             setError(t('errors.registerFailed'));
         } finally {
             setIsLoading(false);
@@ -59,7 +64,11 @@ export default function RegisterForm() {
         setIsLoading(true);
         try {
             await loginGoogle();
-        } catch {
+            // New Google user → onboarding to set role, name, preferences
+            router.push('/onboarding');
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'RegisterForm', action: 'googleRegister' });
             setError(t('errors.registerFailed'));
         } finally {
             setIsLoading(false);
