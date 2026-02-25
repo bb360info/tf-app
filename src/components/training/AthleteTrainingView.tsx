@@ -22,16 +22,18 @@ import {
     AlertTriangle,
 } from 'lucide-react';
 import {
-    getPublishedPlanForToday,
     createTrainingLog,
     listTodayLogs,
     listWeekLogs,
 } from '@/lib/pocketbase/services/logs';
+import { getPublishedPlanForToday } from '@/lib/pocketbase/services/planResolution';
 import type { TrainingLogWithRelations } from '@/lib/pocketbase/services/logs';
 import type { PlanWithExercises, PlanExerciseWithExpand } from '@/lib/pocketbase/services/plans';
 import type { Language } from '@/lib/pocketbase/types';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { groupByDayAndSession } from '@/lib/pocketbase/services/plans';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
+import { ExerciseItem } from './cards/ExerciseItem';
 import styles from './AthleteTrainingView.module.css';
 
 
@@ -98,158 +100,6 @@ function AdaptationBanner({ t }: { t: ReturnType<typeof useTranslations> }) {
 }
 
 // ─── Exercise Item ────────────────────────────────────────────────
-
-interface ExerciseLogState {
-    rpe: number;
-    sets: number;
-    saved: boolean;
-}
-
-
-function ExerciseItem({
-    planEx,
-    locale,
-    logId,
-    t,
-}: {
-    planEx: PlanExerciseWithExpand;
-    locale: Language;
-    logId: string;
-    t: ReturnType<typeof useTranslations>;
-}) {
-    const [open, setOpen] = useState(false);
-    const [state, setState] = useState<ExerciseLogState>({ rpe: 5, sets: planEx.sets ?? 1, saved: false });
-    const [saving, setSaving] = useState(false);
-    const [skipReason, setSkipReason] = useState<SkipReason | null>(null);
-
-    const name = getExerciseName(planEx, locale);
-    const exercise = planEx.expand?.exercise_id;
-    const catColor = exercise?.training_category
-        ? `var(--color-${exercise.training_category})`
-        : 'var(--color-accent-primary)';
-
-    const handleSave = useCallback(async () => {
-        if (!logId) return;
-        // Skip saving warmup items without exercise_id
-        if (!planEx.exercise_id) return;
-        setSaving(true);
-        try {
-            const { saveLogExercise } = await import('@/lib/pocketbase/services/logs');
-            await saveLogExercise(logId, planEx.exercise_id, [
-                { set: 1, reps: state.sets },
-            ], state.rpe, skipReason ?? undefined);
-            setState((s) => ({ ...s, saved: true }));
-        } catch (e) {
-            console.error('[AthleteTrainingView] save exercise:', e);
-        } finally {
-            setSaving(false);
-        }
-    }, [logId, planEx.exercise_id, state.rpe, state.sets, skipReason]);
-
-
-    const dosageLabel = (() => {
-        const unitType = exercise?.unit_type ?? 'reps';
-        const s = planEx.sets;
-        if (!s) return t('log.reps');
-        switch (unitType) {
-            case 'weight':
-                return `${s}×${planEx.reps || '?'}${planEx.weight ? ` @${planEx.weight}kg` : ''}`;
-            case 'distance':
-                return `${s}×${planEx.distance ? `${planEx.distance}m` : '?m'}`;
-            case 'time':
-                return `${s}×${planEx.duration ? `${planEx.duration}s` : '?s'}`;
-            default:
-                return planEx.reps ? `${s}×${planEx.reps}${planEx.intensity ? ` @${planEx.intensity}` : ''}` : `${s} sets`;
-        }
-    })();
-
-    return (
-        <li className={`${styles.exerciseItem} ${state.saved ? styles.exerciseDone : ''}`}>
-            <button
-                type="button"
-                className={styles.exerciseHeader}
-                onClick={() => setOpen((o) => !o)}
-                aria-expanded={open}
-            >
-                <span className={styles.exerciseDot} style={{ background: catColor }} aria-hidden="true" />
-                <div className={styles.exerciseInfo}>
-                    <span className={styles.exerciseName}>{name}</span>
-                    <span className={styles.exerciseDosage}>{dosageLabel}</span>
-                </div>
-                {state.saved && <CheckCircle size={16} className={styles.doneIcon} />}
-                {open ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
-            </button>
-
-            {open && (
-                <div className={styles.exerciseLog}>
-                    {/* Sets done */}
-                    <div className={styles.setsRow}>
-                        <span className={styles.logFieldLabel}>{t('log.reps')}</span>
-                        <div className={styles.setsStepper}>
-                            <button
-                                type="button"
-                                className={styles.stepBtn}
-                                onClick={() => setState((s) => ({ ...s, sets: Math.max(0, s.sets - 1), saved: false }))}
-                                aria-label="Decrease sets"
-                            >−</button>
-                            <span className={styles.setsValue}>{state.sets}</span>
-                            <button
-                                type="button"
-                                className={styles.stepBtn}
-                                onClick={() => setState((s) => ({ ...s, sets: s.sets + 1, saved: false }))}
-                                aria-label="Increase sets"
-                            >+</button>
-                        </div>
-                    </div>
-
-                    {/* RPE */}
-                    <div className={styles.rpeRow}>
-                        <span className={styles.rpeLabel}>{t('log.rpe')}</span>
-                        <div className={styles.rpeTrack}>
-                            <input
-                                type="range"
-                                min={1} max={10} step={1}
-                                value={state.rpe}
-                                onChange={(e) => setState((s) => ({ ...s, rpe: Number(e.target.value), saved: false }))}
-                                className={styles.rpeInput}
-                                style={{ accentColor: RPE_COLORS[state.rpe] ?? '#888' }}
-                            />
-                            <span className={styles.rpeValue} style={{ color: RPE_COLORS[state.rpe] ?? '#888' }}>
-                                {state.rpe}
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        type="button"
-                        className={styles.saveBtn}
-                        onClick={handleSave}
-                        disabled={saving || !logId}
-                    >
-                        {saving ? t('saving') : state.saved ? `\u2713 ${t('log.save')}` : t('log.save')}
-                    </button>
-
-                    {/* Skip Reason chips */}
-                    <div className={styles.skipReasonRow}>
-                        <span className={styles.skipLabel}>{t('skipReason')}</span>
-                        <div className={styles.skipChips}>
-                            {SKIP_REASONS.map((r) => (
-                                <button
-                                    key={r}
-                                    type="button"
-                                    className={`${styles.skipChip} ${skipReason === r ? styles.skipChipActive : ''}`}
-                                    onClick={() => setSkipReason((prev) => (prev === r ? null : r))}
-                                >
-                                    {t(`skipReasons.${r}`)}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </li>
-    );
-}
 
 
 // ─── Warmup Item (no RPE/Sets UI) ────────────────────────────────
@@ -348,7 +198,7 @@ function DayCard({
     const sessions = Object.keys(exercisesBySession).map(Number).filter((s) => (exercisesBySession[s]?.length ?? 0) > 0);
     if (sessions.length === 0) return null;
 
-    const dateStr = date.toISOString().slice(0, 10);
+    const dateStr = toLocalISODate(date);
     const formattedDate = date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', {
         day: 'numeric', month: 'short',
     });
@@ -399,6 +249,7 @@ function DayCard({
                             locale={locale}
                             t={t}
                             readinessScore={isToday ? readinessScore : undefined}
+                            athleteId={athleteId}
                         />
                     </div>
                 );
@@ -417,6 +268,7 @@ function LoggableSession({
     locale,
     t,
     readinessScore,
+    athleteId,
 }: {
     exercises: PlanExerciseWithExpand[];
     log: TrainingLogWithRelations | null;
@@ -424,6 +276,7 @@ function LoggableSession({
     locale: Language;
     t: ReturnType<typeof useTranslations>;
     readinessScore?: number;
+    athleteId: string;
 }) {
     const [currentLog, setCurrentLog] = useState<TrainingLogWithRelations | null>(log);
     const [initializing, setInitializing] = useState(false);
@@ -489,6 +342,7 @@ function LoggableSession({
                         planEx={ex}
                         locale={locale}
                         logId={currentLog?.id ?? ''}
+                        athleteId={athleteId}
                         t={t}
                     />
                 ))}
@@ -596,7 +450,7 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
     useEffect(() => {
         if (!athleteId || !plan) return;
         let cancelled = false;
-        const weekStartISO = weekStart.toISOString().slice(0, 10);
+        const weekStartISO = toLocalISODate(weekStart);
         listWeekLogs(athleteId, weekStartISO).then((logs) => {
             if (!cancelled) setWeekLogs(logs);
         }).catch(() => {/* ignore */ });
@@ -658,13 +512,13 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
 
     // Week-level log map: date+session → log
     const logKey = (date: Date, session: number) =>
-        `${date.toISOString().slice(0, 10)}_${session}`;
+        `${toLocalISODate(date)}_${session}`;
 
     const weekLogMap = new Map<string, TrainingLogWithRelations>();
     for (const log of weekLogs) {
         const dateStr = typeof log.date === 'string'
             ? log.date.slice(0, 10)
-            : new Date(log.date).toISOString().slice(0, 10);
+            : toLocalISODate(new Date(log.date));
         weekLogMap.set(`${dateStr}_${log.session ?? 0}`, log);
     }
     // Also include today's logs

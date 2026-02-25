@@ -18,7 +18,26 @@
     "reference": "Reference",
     "settings": "Settings",
     "profile": "Profile",
-    "logout": "Log out"
+    "logout": "Log out",
+    "more": "More",
+    "team": "Team",
+    "review": "Review",
+    "notifications": "Notifications",
+    "activity": "Activity",
+    "stats": "Stats"
+  },
+  "feature": {
+    "upcoming": "Upcoming Features",
+    "comingSoon": "Coming soon",
+    "video": {
+      "title": "Video Analysis",
+      "description": "Upload jumps for slow-motion breakdown and drawing tools"
+    },
+    "offline": {
+      "title": "Offline Mode",
+      "description": "Access training plans and reference materials without internet"
+    },
+    "inDevelopment": "This feature is currently in development"
   },
   "auth": {
     "login": "Log in",
@@ -27,6 +46,11 @@
     "password": "Password",
     "confirmPassword": "Confirm password",
     "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "firstNamePlaceholder": "John",
+    "lastNamePlaceholder": "Smith",
+    "roleLabel": "I am a...",
     "forgotPassword": "Forgot password?",
     "resetPassword": "Reset password",
     "sendResetLink": "Send reset link",
@@ -46,7 +70,8 @@
     "role": "I am a...",
     "roleAthlete": "Athlete",
     "roleCoach": "Coach",
-    "close": "Close"
+    "close": "Close",
+    "inviteBanner": "You are registering via a coach invitation"
   },
   "errors": {
     "required": "This field is required",
@@ -151,6 +176,7 @@
     "trainingTemplatePicker": "Templates",
     "templatePickerEmpty": "No day templates",
     "saveAsTemplate": "Save day as template",
+    "savePhaseAsTemplate": "Save phase as template",
     "enterTemplateName": "Template name...",
     "manageGroups": "Manage members",
     "searchExercises": "Search exercises...",
@@ -166,6 +192,8 @@
     "planStatus_draft": "Draft",
     "planStatus_published": "Published",
     "planStatus_archived": "Archived",
+    "publishAction": "Publish Plan",
+    "revertAction": "Revert to Draft",
     "managePlans": "Manage Plans",
     "autoFill": "Auto-Fill",
     "cnsLabel": "Weekly CNS",
@@ -232,7 +260,18 @@
       "Time": "Time",
       "CoachDecision": "Coach",
       "Other": "Other"
-    }
+    },
+    "assignedToGroup": "Assigned to: {name}",
+    "assignedToAthlete": "Assigned to: {name}",
+    "assigningPreview": "Assigning: {plan}",
+    "unassign": "Unassign",
+    "readinessScore": "Readiness Score",
+    "moreActions": "More Actions",
+    "reviewTitle": "Training Review",
+    "reviewSubtitle": "Workouts pending coach review will appear here"
+  },
+  "shared": {
+    "back": "Back"
   },
   "loading": "Loading...",
   "back": "Back",
@@ -260,6 +299,8 @@
     "themeAuto": "System",
     "themeLight": "Light",
     "themeDark": "Dark",
+    "fontScale": "Text Size",
+    "fontScaleDesc": "Adjust global typography scale",
     "training": "Training",
     "units": "Units",
     "unitsDesc": "For weight and distance",
@@ -309,7 +350,25 @@
     "deleteGroupTitle": "Delete Group?",
     "deleteGroupConfirm": "Delete group \"{name}\"? All members will be removed.",
     "confirmDelete": "Delete",
-    "confirmCancel": "Cancel"
+    "confirmCancel": "Cancel",
+    "shareLink": "Share link",
+    "linkCopied": "Link copied",
+    "inviteTitle": "Join a training group on Jumpedia",
+    "inviteText": "Join group \"{group}\"",
+    "linkExpiry": "Link valid for 7 days",
+    "linkExpiringSoon": "Code expires in less than 24h. Generate a new one?",
+    "moveTo": "Move",
+    "addTo": "Add to group",
+    "moveWarning": "Group «{from}» has an active plan. Athlete will lose access to it.",
+    "moveWarningBoth": "Athlete will switch from «{from}» plan to «{to}» plan.",
+    "moveWarningGain": "Athlete will gain access to «{to}» plan.",
+    "moveSuccess": "Athlete moved to group «{name}»",
+    "addSuccess": "Athlete added to group «{name}»",
+    "showQR": "QR Code",
+    "downloadQR": "Download QR",
+    "inviteHint": "Or ask your coach to send an invite link",
+    "moveConfirm": "Move",
+    "addConfirm": "Add"
   },
   "onboarding": {
     "next": "Next",
@@ -331,6 +390,25 @@
       "roleCoachDesc": "I plan training for athletes",
       "roleAthlete": "Athlete",
       "roleAthleteDesc": "I follow training plans"
+    },
+    "specialization": {
+      "title": "Your Discipline",
+      "subtitle": "Select your primary jumping discipline",
+      "primary": "Primary Discipline",
+      "secondary": "Also train (optional)",
+      "personalBest": "Personal Best (optional)",
+      "pbPlaceholder": "e.g. 2.10",
+      "pbHint": "Meters, e.g. 2.10 for high jump",
+      "meters": "m",
+      "outdoor": "Outdoor",
+      "indoor": "Indoor",
+      "competition": "Competition",
+      "training": "Training",
+      "disciplines": {
+        "triple_jump": "Triple Jump",
+        "long_jump": "Long Jump",
+        "high_jump": "High Jump"
+      }
     },
     "prefs": {
       "title": "Preferences",
@@ -359,7 +437,8 @@
       "athleteFeature3": "Progress & Achievements",
       "athleteFeature3Desc": "Jump charts, check-in streaks and medals",
       "athleteFeature4": "Athlete Reference",
-      "athleteFeature4Desc": "Technique, warm-up and mental prep guides"
+      "athleteFeature4Desc": "Technique, warm-up and mental prep guides",
+      "joinedGroup": "You joined group \"{name}\""
     }
   },
   "dashboard": {
@@ -384,6 +463,8 @@
     },
     "newAthlete": {
       "title": "New Athlete",
+      "tabBasic": "Basic Info",
+      "tabSport": "Sport Profile",
       "name": "Name",
       "namePlaceholder": "John Doe",
       "birthDate": "Birth Date",
@@ -391,6 +472,18 @@
       "genderMale": "Male",
       "genderFemale": "Female",
       "heightCm": "Height (cm)",
+      "discipline": "Primary Discipline",
+      "secondaryDiscipline": "Secondary Discipline",
+      "disciplineHighJump": "High Jump",
+      "disciplineLongJump": "Long Jump",
+      "disciplineTripleJump": "Triple Jump",
+      "initialPrDiscipline": "Initial PR Discipline",
+      "initialPrResult": "Initial PR (m)",
+      "seasonType": "Season Type",
+      "seasonOutdoor": "Outdoor",
+      "seasonIndoor": "Indoor",
+      "next": "Next",
+      "back": "Back",
       "save": "Add",
       "cancel": "Cancel",
       "createFailed": "Failed to add athlete. Please try again."
@@ -403,7 +496,13 @@
     "noAthletesInGroup": "No athletes in this group",
     "group": "Group",
     "quickPlan": "Quick Plan",
-    "compliance": "Compliance"
+    "compliance": "Compliance",
+    "attentionNeeded": "Attention Needed",
+    "pendingReviewsTitle": "Pending items",
+    "pendingReviewsAllDone": "All items reviewed",
+    "pendingReviewsCount": "{count} items pending",
+    "trainingTodayTitle": "Training Today",
+    "trainingTodayDesc": "Overview of active plans"
   },
   "analytics": {
     "title": "Analytics",
@@ -765,7 +864,21 @@
     "cnsTotal": "CNS Load",
     "remove": "Remove",
     "saveToLibrary": "Save to Library",
-    "savedToLibrary": "Saved ✓"
+    "savedToLibrary": "Saved ✓",
+    "assignAthlete": "Assign to Athlete",
+    "assignGroup": "Assign to Group",
+    "assigning": "Assigning...",
+    "conflictTitle": "A plan already exists for this day",
+    "conflictText": "Choose how to resolve conflict: replace existing exercises or append to them.",
+    "addToExisting": "Add to Existing",
+    "replaceExisting": "Replace Existing",
+    "invalidDate": "Invalid assignment date",
+    "noSeasonForDate": "No season found for selected date",
+    "noPhaseForDate": "No phase found for selected date",
+    "dateBeforePhase": "Date is before phase start",
+    "loadTargetsError": "Failed to load athletes/groups lists",
+    "assignedSuccess": "Workout assigned",
+    "cancel": "Cancel"
   },
   "athleteDashboard": {
     "welcome": "Hey, {name}!",
@@ -794,7 +907,21 @@
     "achievementsTitle": "Achievements",
     "reCheckin": "Update",
     "competition": "Competition",
-    "daysUntil": "days until"
+    "daysUntil": "days until",
+    "recent": "Recent",
+    "viewAll": "All notifications",
+    "restDay": "Rest Day",
+    "noWorkout": "No workout scheduled for today.",
+    "todaysWorkout": "Workout",
+    "weekLabel": "Week",
+    "blocksPlanned": "blocks today",
+    "startWorkout": "Start Workout",
+    "setsThisWeek": "Sets this week",
+    "vsLastWeek": "vs last week",
+    "myPR": "My PR",
+    "weeklyVolume": "Weekly Activity",
+    "pullToRefresh": "Pull down to refresh...",
+    "refreshing": "Refreshing..."
   },
   "warmupPage": {
     "back": "Back",
@@ -934,6 +1061,17 @@
     "dismiss": "Dismiss"
   },
   "templates": {
+    "panelTitle": "Templates",
+    "systemTemplates": "System",
+    "myTemplates": "My Templates",
+    "refresh": "Refresh",
+    "filter_all": "All",
+    "filter_warmup": "Warm-up",
+    "filter_training_day": "Training Day",
+    "noSystemTemplates": "No system templates",
+    "noMyTemplates": "No personal templates",
+    "createFirstTemplate": "Create first",
+    "retry": "Retry",
     "title": "Training Templates",
     "subtitle": "Create warm-up and training day templates",
     "warmupTab": "Warm-Ups",
@@ -945,6 +1083,7 @@
     "copy": "Copy",
     "edit": "Edit",
     "delete": "Delete",
+    "apply": "Apply",
     "deleteConfirm": "Delete template \"{name}\"?",
     "min": "min",
     "items": "steps",
@@ -1008,6 +1147,12 @@
     "iosStep1": "Tap Share",
     "iosStep2": "\"Add to Home Screen\"",
     "iosStep3": "Open from Home Screen",
+    "coachNoteDefault": "📋 Note from your coach",
+    "coachNoteSent": "{text}",
+    "planPublished": "📅 New plan for week {week}",
+    "achievementEarned": "🏅 Achievement unlocked: {title}",
+    "inviteAccepted": "👋 {athleteName} joined group «{groupName}»",
+    "movedToGroup": "↗️ You were moved to group «{groupName}»",
     "types": {
       "all": "All",
       "plan_published": "Plans",
@@ -1046,5 +1191,24 @@
     "pushUnsubscribe": "Unsubscribe",
     "pushDenied": "Blocked in browser settings",
     "pushUnsupported": "Push not supported"
+  },
+  "join": {
+    "title": "Join a Training Group",
+    "joining": "Joining...",
+    "success": "You joined group \"{name}\"",
+    "successHint": "Your coach can assign a training plan to you",
+    "successProfile": "Complete your specialization profile in Settings",
+    "goToDashboard": "Go to Dashboard",
+    "invalidLink": "Invalid Link",
+    "invalidLinkDesc": "The link is broken. Ask your coach to send a new one.",
+    "codeExpired": "The invite link has expired. Ask your coach for a new one.",
+    "coachCannotJoin": "Coaches manage groups, not join them",
+    "coachCannotJoinDesc": "Go to group settings to manage athletes",
+    "alreadyMember": "You are already in this group",
+    "alreadyMemberDesc": "Head to the main page",
+    "registerFirst": "Register to continue",
+    "haveAccount": "Already have an account? Sign in",
+    "register": "Create Account",
+    "loginExisting": "Log in instead"
   }
 }

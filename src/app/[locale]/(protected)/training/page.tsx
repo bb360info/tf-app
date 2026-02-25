@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     listSeasons,
     deleteSeason,
@@ -29,16 +29,25 @@ export default function TrainingPage() {
     const t = useTranslations();
     const locale = useLocale() as 'ru' | 'en' | 'cn';
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { isAthlete } = useAuth();
     const [seasons, setSeasons] = useState<SeasonWithRelations[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showWizard, setShowWizard] = useState(false);
+    const [initialGroupId, setInitialGroupId] = useState<string | null>(null);
     const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
     const [confirmDeleteSeasonId, setConfirmDeleteSeasonId] = useState<string | null>(null);
     const [deletingSeason, setDeletingSeason] = useState(false);
     // Athlete-only: store resolved athleteId from AthleteTrainingView
     const [resolvedAthleteId, setResolvedAthleteId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const shouldOpenWizard = searchParams.get('openWizard') === '1';
+        if (!shouldOpenWizard) return;
+        setInitialGroupId(searchParams.get('groupId'));
+        setShowWizard(true);
+    }, [searchParams]);
 
 
     // Coach specific state
@@ -174,7 +183,6 @@ export default function TrainingPage() {
                                         onChange={e => setFilterAthleteId(e.target.value)}
                                     >
                                         <option value="">{t('training.allAthletes')}</option>
-                                        <option value="self">{t('training.myself')}</option>
                                         {myAthletes.map(a => (
                                             <option key={a.id} value={a.id}>{a.name}</option>
                                         ))}
@@ -303,6 +311,7 @@ export default function TrainingPage() {
                 {
                     showWizard && (
                         <SeasonWizardLazy
+                            initialGroupId={initialGroupId ?? undefined}
                             onClose={() => setShowWizard(false)}
                             onCreated={() => {
                                 setShowWizard(false);
@@ -367,4 +376,3 @@ const SeasonDetailLazy = dynamic(
         ),
     }
 );
-

@@ -7,6 +7,7 @@ import { getOrCreateLog, batchSaveLogExercises } from '@/lib/pocketbase/services
 import { listPlanExercises } from '@/lib/pocketbase/services/plans';
 import { getExerciseName } from '@/lib/pocketbase/services/exercises';
 import type { SetData, UnitType } from '@/lib/pocketbase/types';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
 import styles from './TrainingLog.module.css';
 
 // ─── Types ────────────────────────────────────────────
@@ -161,9 +162,7 @@ export default function TrainingLog({
         setSaving(true);
         setError(null);
         try {
-            const dateStr = dayDate
-                ? dayDate.toISOString().slice(0, 10)
-                : new Date().toISOString().slice(0, 10);
+            const dateStr = dayDate ? toLocalISODate(dayDate) : toLocalISODate();
 
             const log = await getOrCreateLog(athleteId, planId, dateStr, session);
 
@@ -183,7 +182,7 @@ export default function TrainingLog({
         } finally {
             setSaving(false);
         }
-    }, [athleteId, planId, dayDate, exercises, onSaved]);
+    }, [athleteId, planId, dayDate, session, exercises, onSaved]);
 
     // ── Update helpers ─────────────────────────────────
 

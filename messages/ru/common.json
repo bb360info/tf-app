@@ -18,7 +18,26 @@
     "reference": "Справочник",
     "settings": "Настройки",
     "profile": "Профиль",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "more": "Ещё",
+    "team": "Команда",
+    "review": "Проверка",
+    "notifications": "Уведомления",
+    "activity": "Активность",
+    "stats": "Статистика"
+  },
+  "feature": {
+    "upcoming": "В разработке",
+    "comingSoon": "Скоро",
+    "video": {
+      "title": "Видео-анализ",
+      "description": "Загрузка прыжков для замедленного разбора и рисования"
+    },
+    "offline": {
+      "title": "Офлайн режим",
+      "description": "Доступ к планам и справочнику без интернета"
+    },
+    "inDevelopment": "Эта функция находится в разработке"
   },
   "auth": {
     "login": "Войти",
@@ -27,6 +46,11 @@
     "password": "Пароль",
     "confirmPassword": "Подтвердите пароль",
     "name": "Имя",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "firstNamePlaceholder": "Иван",
+    "lastNamePlaceholder": "Иванов",
+    "roleLabel": "Я —",
     "forgotPassword": "Забыли пароль?",
     "resetPassword": "Сбросить пароль",
     "sendResetLink": "Отправить ссылку",
@@ -46,7 +70,8 @@
     "role": "Я —",
     "roleAthlete": "Атлет",
     "roleCoach": "Тренер",
-    "close": "Закрыть"
+    "close": "Закрыть",
+    "inviteBanner": "Вы регистрируетесь по приглашению тренера"
   },
   "errors": {
     "required": "Обязательное поле",
@@ -151,6 +176,7 @@
     "trainingTemplatePicker": "Шаблоны",
     "templatePickerEmpty": "Нет шаблонов дня",
     "saveAsTemplate": "Сохранить день как шаблон",
+    "savePhaseAsTemplate": "Сохранить фазу как шаблон",
     "enterTemplateName": "Название шаблона...",
     "manageGroups": "Участники",
     "searchExercises": "Поиск упражнений...",
@@ -166,6 +192,8 @@
     "planStatus_draft": "Черновик",
     "planStatus_published": "Опубликован",
     "planStatus_archived": "Архив",
+    "publishAction": "Опубликовать план",
+    "revertAction": "Вернуть в черновики",
     "managePlans": "Управлять планами",
     "autoFill": "Авто-заполнение",
     "cnsLabel": "ЦНС за неделю",
@@ -230,7 +258,18 @@
       "Time": "Время",
       "CoachDecision": "Тренер",
       "Other": "Другое"
-    }
+    },
+    "assignedToGroup": "Назначено группе: {name}",
+    "assignedToAthlete": "Назначено атлету: {name}",
+    "assigningPreview": "Назначение: {plan}",
+    "unassign": "Отменить",
+    "readinessScore": "Оценка готовности",
+    "moreActions": "Больше действий",
+    "reviewTitle": "Проверка тренировок",
+    "reviewSubtitle": "Здесь появятся тренировки, ожидающие проверки тренером"
+  },
+  "shared": {
+    "back": "Назад"
   },
   "loading": "Загрузка...",
   "back": "Назад",
@@ -258,6 +297,8 @@
     "themeAuto": "Авто",
     "themeLight": "Светлая",
     "themeDark": "Тёмная",
+    "fontScale": "Размер текста",
+    "fontScaleDesc": "Масштабирование шрифтов интерфейса",
     "training": "Тренировки",
     "units": "Единицы измерения",
     "unitsDesc": "Для веса и дистанции",
@@ -307,7 +348,25 @@
     "deleteGroupTitle": "Удалить группу?",
     "deleteGroupConfirm": "Удалить группу «{name}»? Все участники будут отвязаны.",
     "confirmDelete": "Удалить",
-    "confirmCancel": "Отмена"
+    "confirmCancel": "Отмена",
+    "shareLink": "Поделиться ссылкой",
+    "linkCopied": "Ссылка скопирована",
+    "inviteTitle": "Присоединяйтесь к группе на Jumpedia",
+    "inviteText": "Вступите в группу «{group}»",
+    "linkExpiry": "Ссылка действует 7 дней",
+    "linkExpiringSoon": "Код истекает менее чем через сутки. Сгенерировать новый?",
+    "moveTo": "Переместить",
+    "addTo": "Добавить в группу",
+    "moveWarning": "В группе «{from}» есть активный план. Атлет потеряет доступ к нему.",
+    "moveWarningBoth": "Атлет перейдёт с плана группы «{from}» на план группы «{to}».",
+    "moveWarningGain": "Атлет получит план группы «{to}».",
+    "moveSuccess": "Атлет перемещён в группу «{name}»",
+    "addSuccess": "Атлет добавлен в группу «{name}»",
+    "showQR": "QR-код",
+    "downloadQR": "Скачать QR",
+    "inviteHint": "Или попросите тренера отправить ссылку-приглашение",
+    "moveConfirm": "Переместить",
+    "addConfirm": "Добавить"
   },
   "onboarding": {
     "next": "Далее",
@@ -329,6 +388,25 @@
       "roleCoachDesc": "Планирую тренировки для спортсменов",
       "roleAthlete": "Спортсмен",
       "roleAthleteDesc": "Выполняю тренировочные планы"
+    },
+    "specialization": {
+      "title": "Ваша дисциплина",
+      "subtitle": "Выберите основную дисциплину для прыжков",
+      "primary": "Основная дисциплина",
+      "secondary": "Также тренирую (необязательно)",
+      "personalBest": "Личный рекорд (необязательно)",
+      "pbPlaceholder": "напр. 2.10",
+      "pbHint": "В метрах, напр. 2.10 для прыжка в высоту",
+      "meters": "м",
+      "outdoor": "Улица",
+      "indoor": "Зал",
+      "competition": "Соревнования",
+      "training": "Тренировка",
+      "disciplines": {
+        "triple_jump": "Тройной прыжок",
+        "long_jump": "Прыжок в длину",
+        "high_jump": "Прыжок в высоту"
+      }
     },
     "prefs": {
       "title": "Настройки",
@@ -357,7 +435,8 @@
       "athleteFeature3": "Прогресс и достижения",
       "athleteFeature3Desc": "Графики прыжков, серии чекинов и медали",
       "athleteFeature4": "Справочник прыгуна",
-      "athleteFeature4Desc": "Техника, разминка, ментальная подготовка"
+      "athleteFeature4Desc": "Техника, разминка, ментальная подготовка",
+      "joinedGroup": "Вы добавлены в группу «{name}»"
     }
   },
   "dashboard": {
@@ -382,6 +461,8 @@
     },
     "newAthlete": {
       "title": "Новый атлет",
+      "tabBasic": "Базовая инфо",
+      "tabSport": "Спортивный профиль",
       "name": "Имя",
       "namePlaceholder": "Иван Иванов",
       "birthDate": "Дата рождения",
@@ -389,6 +470,18 @@
       "genderMale": "Мужской",
       "genderFemale": "Женский",
       "heightCm": "Рост (см)",
+      "discipline": "Основная дисциплина",
+      "secondaryDiscipline": "Вторая дисциплина",
+      "disciplineHighJump": "Прыжок в высоту",
+      "disciplineLongJump": "Прыжок в длину",
+      "disciplineTripleJump": "Тройной прыжок",
+      "initialPrDiscipline": "Дисциплина для стартового PR",
+      "initialPrResult": "Начальный PR (м)",
+      "seasonType": "Сезон",
+      "seasonOutdoor": "Открытый",
+      "seasonIndoor": "Закрытый",
+      "next": "Далее",
+      "back": "Назад",
       "save": "Добавить",
       "cancel": "Отмена",
       "createFailed": "Не удалось добавить атлета. Попробуйте ещё раз."
@@ -401,7 +494,13 @@
     "noAthletesInGroup": "В этой группе нет атлетов",
     "group": "Группа",
     "quickPlan": "Быстрый план",
-    "compliance": "Выполнение"
+    "compliance": "Выполнение",
+    "attentionNeeded": "Требует внимания",
+    "pendingReviewsTitle": "На ревью",
+    "pendingReviewsAllDone": "Все логи проверены",
+    "pendingReviewsCount": "{count} логов ожидают",
+    "trainingTodayTitle": "Тренировки сегодня",
+    "trainingTodayDesc": "Обзор активных планов"
   },
   "analytics": {
     "title": "Аналитика",
@@ -759,7 +858,21 @@
     "cnsTotal": "Нагрузка ЦНС",
     "remove": "Удалить",
     "saveToLibrary": "В библиотеку",
-    "savedToLibrary": "Сохранено ✓"
+    "savedToLibrary": "Сохранено ✓",
+    "assignAthlete": "Назначить атлету",
+    "assignGroup": "Назначить группе",
+    "assigning": "Назначение...",
+    "conflictTitle": "План на этот день уже есть",
+    "conflictText": "Выберите действие: заменить упражнения или добавить к существующим.",
+    "addToExisting": "Добавить к существующим",
+    "replaceExisting": "Заменить существующие",
+    "invalidDate": "Некорректная дата назначения",
+    "noSeasonForDate": "Не найден сезон на выбранную дату",
+    "noPhaseForDate": "Не найдена фаза сезона на выбранную дату",
+    "dateBeforePhase": "Дата раньше начала фазы",
+    "loadTargetsError": "Не удалось загрузить списки атлетов/групп",
+    "assignedSuccess": "Тренировка назначена",
+    "cancel": "Отмена"
   },
   "athleteDashboard": {
     "welcome": "Привет, {name}!",
@@ -788,7 +901,21 @@
     "achievementsTitle": "Достижения",
     "reCheckin": "Обновить",
     "competition": "Соревнование",
-    "daysUntil": "дн. до"
+    "daysUntil": "дн. до",
+    "recent": "Недавние",
+    "viewAll": "Все уведомления",
+    "restDay": "День отдыха",
+    "noWorkout": "Сегодня нет запланированных тренировок.",
+    "todaysWorkout": "Тренировка",
+    "weekLabel": "Неделя",
+    "blocksPlanned": "блоков на сегодня",
+    "startWorkout": "Начать тренировку",
+    "setsThisWeek": "Подходов на неделе",
+    "vsLastWeek": "к прошлой неделе",
+    "myPR": "Мой ЛР",
+    "weeklyVolume": "Активность за неделю",
+    "pullToRefresh": "Потяните вниз для обновления...",
+    "refreshing": "Обновление..."
   },
   "warmupPage": {
     "back": "Назад",
@@ -928,6 +1055,17 @@
     "dismiss": "Закрыть"
   },
   "templates": {
+    "panelTitle": "Шаблоны",
+    "systemTemplates": "Системные шаблоны",
+    "myTemplates": "Мои шаблоны",
+    "refresh": "Обновить",
+    "filter_all": "Все",
+    "filter_warmup": "Разминка",
+    "filter_training_day": "День",
+    "noSystemTemplates": "Нет системных",
+    "noMyTemplates": "Нет личных",
+    "createFirstTemplate": "Создать первый",
+    "retry": "Повторить",
     "title": "Шаблоны тренировок",
     "subtitle": "Создавайте шаблоны разминок и тренировочных дней",
     "warmupTab": "Разминки",
@@ -939,6 +1077,7 @@
     "copy": "Копировать",
     "edit": "Редактировать",
     "delete": "Удалить",
+    "apply": "Применить",
     "deleteConfirm": "Удалить шаблон «{name}»?",
     "min": "мин",
     "items": "шагов",
@@ -1002,6 +1141,12 @@
     "iosStep1": "Нажмите Поделиться",
     "iosStep2": "\"На экран Домой\"",
     "iosStep3": "Откройте с экрана Домой",
+    "coachNoteDefault": "📋 Заметка от тренера",
+    "coachNoteSent": "{text}",
+    "planPublished": "📅 Новый план на неделю {week}",
+    "achievementEarned": "🏅 Достижение разблокировано: {title}",
+    "inviteAccepted": "👋 {athleteName} вступил в группу «{groupName}»",
+    "movedToGroup": "↗️ Вы переведены в группу «{groupName}»",
     "types": {
       "all": "Все",
       "plan_published": "Планы",
@@ -1040,5 +1185,24 @@
     "pushUnsubscribe": "Отписаться",
     "pushDenied": "Заблокировано в настройках браузера",
     "pushUnsupported": "Push не поддерживается"
+  },
+  "join": {
+    "title": "Присоединиться к группе",
+    "joining": "Присоединяемся...",
+    "success": "Вы добавлены в группу «{name}»",
+    "successHint": "Тренер может назначить вам план тренировок",
+    "successProfile": "Заполните профиль специализации в Настройках",
+    "goToDashboard": "Перейти на главную",
+    "invalidLink": "Неверная ссылка",
+    "invalidLinkDesc": "Ссылка повреждена. Попросите тренера отправить новую.",
+    "codeExpired": "Срок действия ссылки истёк. Попросите тренера прислать новую.",
+    "coachCannotJoin": "Тренеры управляют группами",
+    "coachCannotJoinDesc": "Перейдите в настройки групп для управления атлетами",
+    "alreadyMember": "Вы уже в этой группе",
+    "alreadyMemberDesc": "Перейдите на главную страницу",
+    "registerFirst": "Зарегистрируйтесь, чтобы продолжить",
+    "haveAccount": "Уже есть аккаунт? Войти",
+    "register": "Создать аккаунт",
+    "loginExisting": "Войти в существующий"
   }
 }

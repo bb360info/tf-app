@@ -30,14 +30,14 @@ export type CompetitionRecord = CompetitionsRecord & RecordModel;
 
 /** List all seasons for the current coach, filtered by athlete if provided */
 export async function listSeasons(athleteId?: string): Promise<SeasonWithRelations[]> {
-    const user = pb.authStore.model;
+    const user = pb.authStore.record;
     if (!user?.id) throw new Error('Not authenticated');
 
-    let filter = `coach_id = "${user.id}" && deleted_at = ""`;
+    let filter = pb.filter('coach_id = {:coachId} && deleted_at = ""', { coachId: user.id });
     // Pass the real athleteId (from athletes collection) to filter by specific athlete.
     // The 'self' special case has been removed — callers must pass the actual athlete record ID.
     if (athleteId) {
-        filter += ` && athlete_id = "${athleteId}"`;
+        filter += ' && ' + pb.filter('athlete_id = {:athleteId}', { athleteId });
     }
 
     const records = await pb.collection(Collections.SEASONS).getFullList<SeasonWithRelations>({
@@ -75,6 +75,7 @@ export async function createSeason(data: {
     end_date: string;
     coach_id: string;
     athlete_id?: string;
+    group_id?: string;
 }): Promise<SeasonWithRelations> {
     return pb.collection(Collections.SEASONS).create<SeasonWithRelations>(data);
 }
@@ -99,7 +100,7 @@ export async function deleteSeason(id: string): Promise<void> {
 /** List phases for a season, ordered by `order` */
 export async function listPhases(seasonId: string): Promise<PhaseRecord[]> {
     return pb.collection(Collections.TRAINING_PHASES).getFullList<PhaseRecord>({
-        filter: `season_id = "${seasonId}" && deleted_at = ""`,
+        filter: pb.filter('season_id = {:seasonId} && deleted_at = ""', { seasonId }),
         sort: 'order',
     });
 }
@@ -161,7 +162,7 @@ export async function createPhasesForSeason(
 /** List competitions for a season, ordered by date */
 export async function listCompetitions(seasonId: string): Promise<CompetitionRecord[]> {
     return pb.collection(Collections.COMPETITIONS).getFullList<CompetitionRecord>({
-        filter: `season_id = "${seasonId}" && deleted_at = ""`,
+        filter: pb.filter('season_id = {:seasonId} && deleted_at = ""', { seasonId }),
         sort: 'date',
     });
 }

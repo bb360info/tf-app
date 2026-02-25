@@ -28,9 +28,17 @@ export type UserRole = 'coach' | 'athlete' | 'admin';
 export type Language = 'ru' | 'en' | 'cn';
 export type UnitSystem = 'metric' | 'imperial';
 
+// ─── Disciplines & Personal Records ────────────────────────────────
+
+export type Discipline = 'triple_jump' | 'long_jump' | 'high_jump';
+export type SeasonType = 'indoor' | 'outdoor';
+export type PRSource = 'competition' | 'training';
+
 export interface UsersRecord extends BaseRecord {
     email: string;
     name: string;
+    first_name?: string;
+    last_name?: string;
     role: UserRole;
     language: Language;
     units: UnitSystem;
@@ -48,6 +56,8 @@ export interface AthletesRecord extends BaseRecord, SoftDeletable {
     birth_date?: string;
     gender?: Gender;
     height_cm?: number;
+    primary_discipline?: Discipline;
+    secondary_disciplines?: Discipline[];
 }
 
 export interface GroupsRecord extends BaseRecord, SoftDeletable {
@@ -75,6 +85,7 @@ export interface CoachPreferencesRecord extends BaseRecord {
 export interface SeasonsRecord extends BaseRecord, SoftDeletable {
     coach_id: string; // FK → users
     athlete_id?: string; // FK → athletes (individual season assignment)
+    group_id?: string; // FK → groups (group season assignment)
     name: string;
     start_date: string;
     end_date: string;
@@ -306,6 +317,8 @@ export interface NotificationsRecord extends BaseRecord {
     user_id: string; // FK → users
     type: NotificationType;
     message: string;
+    message_key?: string;                                    // i18n key: 'planPublished', 'achievementEarned', ...
+    message_params?: Record<string, string | number>;        // interpolation params: { week: 3, title: 'Streak 7d' }
     read: boolean;
     link?: string;
     priority?: NotificationPriority; // default: normal
@@ -388,4 +401,18 @@ export interface PlanAssignmentsRecord extends BaseRecord {
     athlete_id?: string; // FK → athletes (set for individual assignment)
     group_id?: string;  // FK → groups (set for group assignment)
     status?: PlanAssignmentStatus;
+}
+
+// ─── Personal Records ───────────────────────────────────────────────
+
+export interface PersonalRecordsRecord extends BaseRecord {
+    athlete_id: string;          // FK → athletes
+    discipline: Discipline;
+    season_type: SeasonType;
+    result: number;              // meters (float), max 30
+    date?: string;               // ISO date
+    competition_name?: string;   // max 255
+    source: PRSource;
+    is_current: boolean;
+    notes?: string;              // max 500
 }

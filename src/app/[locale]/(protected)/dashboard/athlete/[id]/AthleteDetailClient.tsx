@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/pocketbase/AuthProvider';
 import {
     ArrowLeft,
     Calendar,
@@ -13,6 +14,9 @@ import {
     TrendingUp,
     TrendingDown,
     Minus,
+    Trophy,
+    Plus,
+    Trash2,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { getAthlete, getLatestCheckin, readinessLevel, type AthleteRecord } from '@/lib/pocketbase/services/athletes';
@@ -26,9 +30,12 @@ import {
     type TestResultRecord,
     type TestResultWithDelta,
 } from '@/lib/pocketbase/services/testResults';
+import { getCurrentPRs, addPersonalRecord, type PersonalRecord } from '@/lib/pocketbase/services/personalRecords';
 import { listSeasons, type SeasonWithRelations } from '@/lib/pocketbase/services/seasons';
 import { logError } from '@/lib/utils/errors';
-import type { TestType } from '@/lib/pocketbase/types';
+import { getInitials, getDisplayName } from '@/lib/utils/nameHelpers';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
+import type { TestType, Discipline } from '@/lib/pocketbase/types';
 import { PageWrapper } from '@/components/shared/PageWrapper';
 import { Skeleton } from '@/components/shared/Skeleton';
 import styles from './athleteDetail.module.css';
@@ -73,6 +80,8 @@ export default function AthleteDetailPage() {
     const t = useTranslations('athleteDetail');
     const locale = useLocale() as 'ru' | 'en' | 'cn';
     const router = useRouter();
+    const { user } = useAuth();
+    const isCoach = user?.role === 'coach';
     const athleteId = useMemo(() => getAthleteIdFromUrl(), []);
 
     const [athlete, setAthlete] = useState<AthleteRecord | null>(null);
@@ -160,10 +169,15 @@ export default function AthleteDetailPage() {
                 {/* ── Hero ─────────────────────────────────────────── */}
                 <div className={styles.hero}>
                     <div className={styles.heroAvatar} aria-hidden="true">
-                        {initials(athlete.name)}
+                        {getInitials(athlete)}
                     </div>
                     <div className={styles.heroInfo}>
-                        <h1 className={styles.heroName}>{athlete.name}</h1>
+                        <h1 className={styles.heroName}>{getDisplayName(athlete)}</h1>
+                        {athlete.primary_discipline && (
+                            <span className={styles.disciplineChip}>
+                                {t(`disciplines.${athlete.primary_discipline}` as 'disciplines.high_jump' | 'disciplines.long_jump' | 'disciplines.triple_jump') ?? athlete.primary_discipline.replace('_', ' ')}
+                            </span>
+                        )}
                         <div className={styles.heroMeta}>
                             {age != null && (
                                 <span>{age} {t('yearsOld')}</span>
@@ -203,7 +217,7 @@ export default function AthleteDetailPage() {
                 {/* ── Tab Content ──────────────────────────────────── */}
                 <div className={styles.tabContent}>
                     {activeTab === 'overview' && (
-                        <OverviewTab athleteId={athleteId} readiness={readiness} locale={locale} t={t} />
+                        <OverviewTab athleteId={athleteId} readiness={readiness} locale={locale} t={t} isCoach={isCoach} />
                     )}
                     {activeTab === 'training' && (
                         <TrainingTab athleteId={athleteId} locale={locale} t={t} />
@@ -230,25 +244,30 @@ function TabIcon({ tab, size }: { tab: Tab; size: number }) {
     }
 }
 
-// ─── Avatar helper ────────────────────────────────────────────────
-function initials(name: string): string {
-    return name.split(' ').slice(0, 2).map(n => n[0] ?? '').join('').toUpperCase();
-}
+// ─── Avatar helper — REMOVED (use getInitials from nameHelpers) ──
 
 // ═══════════════════════════════════════════════════════════════════
 // ── Overview Tab ──────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function OverviewTab({ athleteId, readiness: _readiness, locale, t }: { athleteId: string; readiness: number | null; locale: string; t: any }) {
+function OverviewTab({ athleteId, readiness: _readiness, locale, t, isCoach }: { athleteId: string; readiness: number | null; locale: string; t: any; isCoach: boolean }) {
     const [latestResults, setLatestResults] = useState<Partial<Record<TestType, TestResultRecord>>>({});
     const [loadingResults, setLoadingResults] = useState(true);
+    const [currentPRs, setCurrentPRs] = useState<PersonalRecord[]>([]);
+    const [showPRForm, setShowPRForm] = useState(false);
+    const [prForm, setPrForm] = useState({ discipline: '' as Discipline | '', season_type: 'outdoor' as 'outdoor' | 'indoor', result: '', source: 'competition' as 'competition' | 'training', date: '' });
+    const [savingPR, setSavingPR] = useState(false);
 
     useEffect(() => {
         listLatestResults(athleteId).then(r => {
             setLatestResults(r);
             setLoadingResults(false);
         }).catch(() => setLoadingResults(false));
+
+        getCurrentPRs(athleteId).then(prs => {
+            setCurrentPRs(prs);
+        }).catch(() => { /* non-critical */ });
     }, [athleteId]);
 
     const DISPLAY_TYPES: TestType[] = ['standing_jump', 'approach_jump', 'sprint_30m', 'squat_max'];
@@ -288,6 +307,124 @@ function OverviewTab({ athleteId, readiness: _readiness, locale, t }: { athleteI
             <div className={styles.fullWidth}>
                 <StreakHeroCardLazy athleteId={athleteId} />
             </div>
+
+            {/* PR Section */}
+            <div className={styles.prSection}>
+                <div className={styles.prSectionHeader}>
+                    <span className={styles.prSectionTitle}>
+                        <Trophy size={14} aria-hidden="true" /> {t('personalRecords') ?? 'Personal Records'}
+                    </span>
+                    {isCoach && (
+                        <button
+                            className={styles.prAddBtn}
+                            onClick={() => setShowPRForm(v => !v)}
+                            aria-label="Add personal record"
+                        >
+                            <Plus size={14} />
+                        </button>
+                    )}
+                </div>
+
+                {showPRForm && (
+                    <div className={styles.prForm}>
+                        <div className={styles.prFormRow}>
+                            <select
+                                className={styles.prSelect}
+                                value={prForm.discipline}
+                                onChange={e => setPrForm(f => ({ ...f, discipline: e.target.value as Discipline }))}
+                            >
+                                <option value="">Discipline…</option>
+                                <option value="high_jump">High Jump</option>
+                                <option value="long_jump">Long Jump</option>
+                                <option value="triple_jump">Triple Jump</option>
+                            </select>
+                            <select
+                                className={styles.prSelect}
+                                value={prForm.season_type}
+                                onChange={e => setPrForm(f => ({ ...f, season_type: e.target.value as 'outdoor' | 'indoor' }))}
+                            >
+                                <option value="outdoor">Outdoor</option>
+                                <option value="indoor">Indoor</option>
+                            </select>
+                        </div>
+                        <div className={styles.prFormRow}>
+                            <input
+                                className={styles.prInput}
+                                type="number"
+                                step="0.01"
+                                placeholder="Result (m)"
+                                value={prForm.result}
+                                onChange={e => setPrForm(f => ({ ...f, result: e.target.value }))}
+                            />
+                            <input
+                                className={styles.prInput}
+                                type="date"
+                                value={prForm.date}
+                                onChange={e => setPrForm(f => ({ ...f, date: e.target.value }))}
+                            />
+                        </div>
+                        <button
+                            className={styles.prSaveBtn}
+                            disabled={!prForm.discipline || !prForm.result || savingPR}
+                            onClick={async () => {
+                                const result = parseFloat(prForm.result);
+                                if (isNaN(result) || result <= 0 || !prForm.discipline) return;
+                                setSavingPR(true);
+                                try {
+                                    const newPR = await addPersonalRecord({
+                                        athleteId,
+                                        discipline: prForm.discipline as Discipline,
+                                        season_type: prForm.season_type,
+                                        result,
+                                        source: prForm.source,
+                                        date: prForm.date || undefined,
+                                    });
+                                    setCurrentPRs(prev => [newPR, ...prev.filter(p => !(p.discipline === newPR.discipline && p.season_type === newPR.season_type))]);
+                                    setShowPRForm(false);
+                                    setPrForm({ discipline: '', season_type: 'outdoor', result: '', source: 'competition', date: '' });
+                                } catch { /* non-critical */ } finally { setSavingPR(false); }
+                            }}
+                        >
+                            {savingPR ? '…' : 'Save PR'}
+                        </button>
+                    </div>
+                )}
+
+                {currentPRs.length === 0 && !showPRForm ? (
+                    <div className={styles.prEmpty}>
+                        <Trophy size={24} />
+                        <span>No PRs recorded yet</span>
+                    </div>
+                ) : (
+                    <div className={styles.prList}>
+                        {currentPRs.map(pr => (
+                            <div key={pr.id} className={styles.prRow}>
+                                <div className={styles.prRowInfo}>
+                                    <span className={styles.prDiscipline}>{pr.discipline.replace('_', ' ')}</span>
+                                    <span className={styles.prMeta}>{pr.season_type} · {pr.source}</span>
+                                </div>
+                                <span className={styles.prResult}>{pr.result.toFixed(2)}m</span>
+                                {isCoach && (
+                                    <button
+                                        className={styles.prDeleteBtn}
+                                        onClick={async () => {
+                                            if (!window.confirm('Delete this PR?')) return;
+                                            try {
+                                                const { deletePersonalRecord } = await import('@/lib/pocketbase/services/personalRecords');
+                                                await deletePersonalRecord(pr.id);
+                                                setCurrentPRs(prev => prev.filter(p => p.id !== pr.id));
+                                            } catch { /* non-critical */ }
+                                        }}
+                                        aria-label="Delete PR"
+                                    >
+                                        <Trash2 size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -323,11 +460,11 @@ function TrainingTab({ athleteId, locale, t }: { athleteId: string; locale: stri
         setLoadingPlan(true);
         (async () => {
             try {
-                const { getPublishedPlanForToday, getLogsForPlan, listLogExercises, calculateWeeklyCompliance } = await import('@/lib/pocketbase/services/logs').then(async (logsM) => {
+                const { getPublishedPlanForToday } = await import('@/lib/pocketbase/services/planResolution');
+                const { getLogsForPlan, listLogExercises, calculateWeeklyCompliance } = await import('@/lib/pocketbase/services/logs').then(async (logsM) => {
                     const plansM = await import('@/lib/pocketbase/services/plans');
                     const complianceM = await import('@/lib/pocketbase/services/compliance');
                     return {
-                        getPublishedPlanForToday: logsM.getPublishedPlanForToday,
                         getLogsForPlan: logsM.getLogsForPlan,
                         listLogExercises: logsM.listLogExercises,
                         calculateWeeklyCompliance: complianceM.calculateWeeklyCompliance,
@@ -349,10 +486,10 @@ function TrainingTab({ athleteId, locale, t }: { athleteId: string; locale: stri
                 }));
 
                 // Load today's log exercises for comparison
-                const today = new Date().toISOString().slice(0, 10);
+                const today = toLocalISODate();
                 const logs = await getLogsForPlan(plan.id);
                 const todayLog = logs.find((l) => {
-                    const d = typeof l.date === 'string' ? l.date.slice(0, 10) : new Date(l.date).toISOString().slice(0, 10);
+                    const d = typeof l.date === 'string' ? l.date.slice(0, 10) : toLocalISODate(new Date(l.date));
                     return d === today;
                 });
 
@@ -377,7 +514,7 @@ function TrainingTab({ athleteId, locale, t }: { athleteId: string; locale: stri
                 const daysFromMon = dayOfWeekJS === 0 ? 6 : dayOfWeekJS - 1;
                 const weekStart = new Date(now);
                 weekStart.setDate(now.getDate() - daysFromMon);
-                const weekStartISO = weekStart.toISOString().slice(0, 10);
+                const weekStartISO = toLocalISODate(weekStart);
 
                 const complianceResult = calculateWeeklyCompliance({
                     planExercises: planExercises.map((e) => ({

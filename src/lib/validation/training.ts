@@ -9,6 +9,8 @@ const optionalDatetime = z.iso.datetime().optional();
 
 export const SeasonsSchema = z.object({
     coach_id: pbId,
+    athlete_id: pbId.optional(),
+    group_id: pbId.optional(),
     name: z.string().min(1).max(255),
     start_date: z.iso.datetime(),
     end_date: z.iso.datetime(),

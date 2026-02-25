@@ -13,8 +13,10 @@ import {
     validatePhasesCoverage,
 } from '@/lib/pocketbase/services/seasons';
 import { listMyAthletes, type AthleteRecord } from '@/lib/pocketbase/services/athletes';
+import { listMyGroups, type GroupWithRelations } from '@/lib/pocketbase/services/groups';
 import type { PhaseType } from '@/lib/pocketbase/types';
-import { X } from 'lucide-react';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
+import { X, ChevronUp, Diamond, Minus } from 'lucide-react';
 import styles from './SeasonWizard.module.css';
 
 type WizardStep = 'basics' | 'phases' | 'competitions' | 'review';
@@ -36,11 +38,12 @@ interface CompetitionData {
 interface Props {
     onClose: () => void;
     onCreated: () => void;
+    initialGroupId?: string;
 }
 
 const STEPS: WizardStep[] = ['basics', 'phases', 'competitions', 'review'];
 
-export default function SeasonWizard({ onClose, onCreated }: Props) {
+export default function SeasonWizard({ onClose, onCreated, initialGroupId }: Props) {
     const t = useTranslations();
     const locale = useLocale() as 'ru' | 'en' | 'cn';
     const { user, isLoading: authLoading } = useAuth();
@@ -54,12 +57,16 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [athletes, setAthletes] = useState<AthleteRecord[]>([]);
+    const [groups, setGroups] = useState<GroupWithRelations[]>([]);
     const [selectedAthleteId, setSelectedAthleteId] = useState<string>('');
+    const [targetType, setTargetType] = useState<'athlete' | 'group'>(initialGroupId ? 'group' : 'athlete');
+    const [selectedGroupId, setSelectedGroupId] = useState<string>(initialGroupId ?? '');
 
     // Load athletes for coaches
     useEffect(() => {
         if (user?.role === 'coach') {
             listMyAthletes().then(setAthletes).catch(console.error);
+            listMyGroups().then(setGroups).catch(console.error);
         }
     }, [user?.role]);
 
@@ -113,8 +120,8 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
 
             generated.push({
                 phase_type: PHASE_SEQUENCE[i],
-                start_date: phaseStart.toISOString().split('T')[0],
-                end_date: phaseEnd.toISOString().split('T')[0],
+                start_date: toLocalISODate(phaseStart),
+                end_date: toLocalISODate(phaseEnd),
                 focus: '',
             });
 
@@ -130,7 +137,11 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
     const addPhase = () => {
         const lastPhase = phases[phases.length - 1];
         const newStart = lastPhase
-            ? (() => { const d = new Date(lastPhase.end_date); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })()
+            ? (() => {
+                const d = new Date(lastPhase.end_date);
+                d.setDate(d.getDate() + 1);
+                return toLocalISODate(d);
+            })()
             : startDate;
 
         setPhases([...phases, {
@@ -186,7 +197,8 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
                 start_date: new Date(startDate).toISOString(),
                 end_date: new Date(endDate).toISOString(),
                 coach_id: user.id,
-                athlete_id: selectedAthleteId || undefined,
+                athlete_id: targetType === 'athlete' ? (selectedAthleteId || undefined) : undefined,
+                group_id: targetType === 'group' ? (selectedGroupId || undefined) : undefined,
             });
 
             // 2. Create phases
@@ -228,9 +240,11 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
 
     // Validation
     // Coach must select an athlete (self-athlete removed in Track 4.12)
-    const athleteRequired = user?.role === 'coach' && athletes.length > 0;
+    const athleteRequired = user?.role === 'coach' && targetType === 'athlete' && athletes.length > 0;
+    const groupRequired = user?.role === 'coach' && targetType === 'group' && groups.length > 0;
     const isBasicsValid = name.trim().length > 0 && startDate && endDate && new Date(startDate) < new Date(endDate)
-        && (!athleteRequired || selectedAthleteId !== '');
+        && (!athleteRequired || selectedAthleteId !== '')
+        && (!groupRequired || selectedGroupId !== '');
     const phaseValidation = phases.length > 0
         ? validatePhasesCoverage(startDate, endDate, phases)
         : { valid: phases.length === 0, errors: [] };
@@ -264,23 +278,62 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
                     {step === 'basics' && (
                         <div className={styles.stepContent}>
                             {user?.role === 'coach' && (
-                                <div className={styles.field}>
-                                    <label className={styles.label}>{t('training.assignToAthlete')}</label>
-                                    {athletes.length > 0 ? (
-                                        <select
-                                            className={styles.select}
-                                            value={selectedAthleteId}
-                                            onChange={e => setSelectedAthleteId(e.target.value)}
+                                <>
+                                    <div className={styles.fieldRow}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.targetBtn} ${targetType === 'athlete' ? styles.targetBtnActive : ''}`}
+                                            onClick={() => setTargetType('athlete')}
                                         >
-                                            <option value="" disabled>{t('training.selectAthlete')}</option>
-                                            {athletes.map(a => (
-                                                <option key={a.id} value={a.id}>{a.name}</option>
-                                            ))}
-                                        </select>
+                                            {t('training.assignToAthlete')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={`${styles.targetBtn} ${targetType === 'group' ? styles.targetBtnActive : ''}`}
+                                            onClick={() => setTargetType('group')}
+                                        >
+                                            {t('training.assignToGroup')}
+                                        </button>
+                                    </div>
+
+                                    {targetType === 'athlete' ? (
+                                        <div className={styles.field}>
+                                            <label className={styles.label}>{t('training.assignToAthlete')}</label>
+                                            {athletes.length > 0 ? (
+                                                <select
+                                                    className={styles.select}
+                                                    value={selectedAthleteId}
+                                                    onChange={e => setSelectedAthleteId(e.target.value)}
+                                                >
+                                                    <option value="" disabled>{t('training.selectAthlete')}</option>
+                                                    {athletes.map(a => (
+                                                        <option key={a.id} value={a.id}>{a.name}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <p className={styles.hint}>{t('training.noAthletesHint')}</p>
+                                            )}
+                                        </div>
                                     ) : (
-                                        <p className={styles.hint}>{t('training.noAthletesHint')}</p>
+                                        <div className={styles.field}>
+                                            <label className={styles.label}>{t('training.assignToGroup')}</label>
+                                            {groups.length > 0 ? (
+                                                <select
+                                                    className={styles.select}
+                                                    value={selectedGroupId}
+                                                    onChange={e => setSelectedGroupId(e.target.value)}
+                                                >
+                                                    <option value="" disabled>{t('training.selectGroup')}</option>
+                                                    {groups.map(group => (
+                                                        <option key={group.id} value={group.id}>{group.name}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <p className={styles.hint}>{t('groups.noGroups')}</p>
+                                            )}
+                                        </div>
                                     )}
-                                </div>
+                                </>
                             )}
 
                             <div className={styles.field}>
@@ -427,9 +480,9 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
                                             value={comp.priority}
                                             onChange={e => updateCompetition(i, { priority: e.target.value as 'A' | 'B' | 'C' })}
                                         >
-                                            <option value="A">● A — {t('training.priorityA')}</option>
-                                            <option value="B">● B — {t('training.priorityB')}</option>
-                                            <option value="C">● C — {t('training.priorityC')}</option>
+                                            <option value="A">^ A — {t('training.priorityA')}</option>
+                                            <option value="B">♦ B — {t('training.priorityB')}</option>
+                                            <option value="C">— C — {t('training.priorityC')}</option>
                                         </select>
                                     </div>
                                     <input
@@ -475,7 +528,9 @@ export default function SeasonWizard({ onClose, onCreated }: Props) {
                                     <h3 className={styles.reviewLabel}>{t('training.competitions')} ({competitions.length})</h3>
                                     {competitions.map((c, i) => (
                                         <div key={i} className={styles.reviewComp}>
-                                            <span className={styles.priorityDot} data-priority={c.priority} />
+                                            <span className={styles.competitionChip} data-priority={c.priority}>
+                                                {c.priority === 'A' ? <ChevronUp size={12} /> : c.priority === 'B' ? <Diamond size={11} /> : <Minus size={12} />}
+                                            </span>
                                             {c.name} — {c.date}
                                         </div>
                                     ))}
@@ -592,7 +647,9 @@ function GanttPreview({
                         style={{ left: `${pos}%` }}
                         title={`${c.name} (${c.priority})`}
                     >
-                        <span className={styles.priorityDot} data-priority={c.priority} />
+                        <span className={styles.competitionChip} data-priority={c.priority}>
+                            {c.priority === 'A' ? <ChevronUp size={12} /> : c.priority === 'B' ? <Diamond size={11} /> : <Minus size={12} />}
+                        </span>
                     </div>
                 );
             })}

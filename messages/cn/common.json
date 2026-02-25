@@ -18,7 +18,26 @@
     "reference": "参考",
     "settings": "设置",
     "profile": "个人资料",
-    "logout": "退出"
+    "logout": "退出",
+    "more": "更多",
+    "team": "团队",
+    "review": "审查",
+    "notifications": "通知",
+    "activity": "活动",
+    "stats": "统计"
+  },
+  "feature": {
+    "upcoming": "即将推出",
+    "comingSoon": "敬请期待",
+    "video": {
+      "title": "视频分析",
+      "description": "上传跳跃视频，进行慢动作回放和画图分析"
+    },
+    "offline": {
+      "title": "离线模式",
+      "description": "无需网络即可访问训练计划和参考资料"
+    },
+    "inDevelopment": "此功能目前正在开发中"
   },
   "auth": {
     "login": "登录",
@@ -27,6 +46,11 @@
     "password": "密码",
     "confirmPassword": "确认密码",
     "name": "姓名",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "firstNamePlaceholder": "张",
+    "lastNamePlaceholder": "三",
+    "roleLabel": "我是...",
     "forgotPassword": "忘记密码？",
     "resetPassword": "重置密码",
     "sendResetLink": "发送重置链接",
@@ -46,7 +70,8 @@
     "role": "我是...",
     "roleAthlete": "运动员",
     "roleCoach": "教练",
-    "close": "关闭"
+    "close": "关闭",
+    "inviteBanner": "您正在通过教练邀请注册"
   },
   "errors": {
     "required": "此字段为必填项",
@@ -151,6 +176,7 @@
     "trainingTemplatePicker": "模板",
     "templatePickerEmpty": "无日模板",
     "saveAsTemplate": "将当琎保存为模板",
+    "savePhaseAsTemplate": "将阶段保存为模板",
     "enterTemplateName": "模板名称...",
     "manageGroups": "管理成员",
     "searchExercises": "搜索训练...",
@@ -166,6 +192,8 @@
     "planStatus_draft": "草稿",
     "planStatus_published": "已发布",
     "planStatus_archived": "已归档",
+    "publishAction": "发布计划",
+    "revertAction": "恢复为草稿",
     "managePlans": "管理计划",
     "autoFill": "自动填充",
     "cnsLabel": "每周神经系统负荷",
@@ -222,7 +250,18 @@
       "Time": "时间",
       "CoachDecision": "教练",
       "Other": "其他"
-    }
+    },
+    "assignedToGroup": "已分配到群组: {name}",
+    "assignedToAthlete": "已分配到运动员: {name}",
+    "assigningPreview": "分配中: {plan}",
+    "unassign": "取消分配",
+    "readinessScore": "准备状态得分",
+    "moreActions": "更多操作",
+    "reviewTitle": "训练审核",
+    "reviewSubtitle": "等待教练审核的训练将显示在此处"
+  },
+  "shared": {
+    "back": "返回"
   },
   "loading": "加载中...",
   "back": "返回",
@@ -250,6 +289,8 @@
     "themeAuto": "自动",
     "themeLight": "浅色",
     "themeDark": "深色",
+    "fontScale": "字体大小",
+    "fontScaleDesc": "调整应用全局字体比例",
     "training": "训练",
     "units": "单位",
     "unitsDesc": "用于重量和距离",
@@ -299,7 +340,25 @@
     "deleteGroupTitle": "删除小组？",
     "deleteGroupConfirm": "删除小组「{name}」？所有成员将被移除。",
     "confirmDelete": "删除",
-    "confirmCancel": "取消"
+    "confirmCancel": "取消",
+    "shareLink": "分享链接",
+    "linkCopied": "链接已复制",
+    "inviteTitle": "在Jumpedia加入训练组",
+    "inviteText": "加入小组「{group}」",
+    "linkExpiry": "链接有效期7天",
+    "linkExpiringSoon": "邀请码不足24小时到期，是否生成新的？",
+    "moveTo": "移动",
+    "addTo": "添加到组",
+    "moveWarning": "「{from}」组有活跃计划，运动员将失去访问权限。",
+    "moveWarningBoth": "运动员将从「{from}」计划切换到「{to}」计划。",
+    "moveWarningGain": "运动员将获得「{to}」组计划。",
+    "moveSuccess": "运动员已移动到「{name}」组",
+    "addSuccess": "运动员已添加到「{name}」组",
+    "showQR": "QR码",
+    "downloadQR": "下载QR",
+    "inviteHint": "或请教练发送邀请链接",
+    "moveConfirm": "移动",
+    "addConfirm": "添加"
   },
   "onboarding": {
     "next": "下一步",
@@ -321,6 +380,25 @@
       "roleCoachDesc": "为运动员制定训练计划",
       "roleAthlete": "运动员",
       "roleAthleteDesc": "执行训练计划"
+    },
+    "specialization": {
+      "title": "您的项目",
+      "subtitle": "请选择您的主要跳跃项目",
+      "primary": "主项目",
+      "secondary": "其他项目（可选）",
+      "personalBest": "个人最佳（可选）",
+      "pbPlaceholder": "例如 2.10",
+      "pbHint": "单位为米，例如跳高 2.10",
+      "meters": "米",
+      "outdoor": "室外",
+      "indoor": "室内",
+      "competition": "比赛",
+      "training": "训练",
+      "disciplines": {
+        "triple_jump": "三级跳",
+        "long_jump": "跳远",
+        "high_jump": "跳高"
+      }
     },
     "prefs": {
       "title": "偏好设置",
@@ -349,7 +427,8 @@
       "athleteFeature3": "进展与成就",
       "athleteFeature3Desc": "跳跃图表、签到连续记录和勋章",
       "athleteFeature4": "运动员参考资料",
-      "athleteFeature4Desc": "技术、热身和心理准备指南"
+      "athleteFeature4Desc": "技术、热身和心理准备指南",
+      "joinedGroup": "您已加入小组「{name}」"
     }
   },
   "dashboard": {
@@ -374,6 +453,8 @@
     },
     "newAthlete": {
       "title": "新运动员",
+      "tabBasic": "基础信息",
+      "tabSport": "运动档案",
       "name": "姓名",
       "namePlaceholder": "张三",
       "birthDate": "出生日期",
@@ -381,6 +462,18 @@
       "genderMale": "男",
       "genderFemale": "女",
       "heightCm": "身高(cm)",
+      "discipline": "主项",
+      "secondaryDiscipline": "副项",
+      "disciplineHighJump": "跳高",
+      "disciplineLongJump": "跳远",
+      "disciplineTripleJump": "三级跳",
+      "initialPrDiscipline": "初始PR项目",
+      "initialPrResult": "初始PR（米）",
+      "seasonType": "赛季类型",
+      "seasonOutdoor": "室外",
+      "seasonIndoor": "室内",
+      "next": "下一步",
+      "back": "返回",
       "save": "添加",
       "cancel": "取消",
       "createFailed": "添加运动员失败，请重试。"
@@ -393,7 +486,13 @@
     "noAthletesInGroup": "该组暂无运动员",
     "group": "组",
     "quickPlan": "快速计划",
-    "compliance": "执行率"
+    "compliance": "执行率",
+    "attentionNeeded": "需要关注",
+    "pendingReviewsTitle": "待审核",
+    "pendingReviewsAllDone": "所有记录已审核",
+    "pendingReviewsCount": "{count} 个待审核",
+    "trainingTodayTitle": "今日训练",
+    "trainingTodayDesc": "活动计划概览"
   },
   "analytics": {
     "title": "分析",
@@ -751,7 +850,21 @@
     "cnsTotal": "中枢神经负荷",
     "remove": "删除",
     "saveToLibrary": "存入库",
-    "savedToLibrary": "已保存 ✓"
+    "savedToLibrary": "已保存 ✓",
+    "assignAthlete": "分配给运动员",
+    "assignGroup": "分配给小组",
+    "assigning": "分配中...",
+    "conflictTitle": "当天已存在训练计划",
+    "conflictText": "请选择处理方式：替换现有动作或追加到现有计划。",
+    "addToExisting": "追加到现有计划",
+    "replaceExisting": "替换现有计划",
+    "invalidDate": "分配日期无效",
+    "noSeasonForDate": "所选日期未找到赛季",
+    "noPhaseForDate": "所选日期未找到赛季阶段",
+    "dateBeforePhase": "日期早于阶段开始时间",
+    "loadTargetsError": "无法加载运动员/小组列表",
+    "assignedSuccess": "训练已分配",
+    "cancel": "取消"
   },
   "athleteDashboard": {
     "welcome": "你好，{name}！",
@@ -780,7 +893,21 @@
     "achievementsTitle": "成就",
     "reCheckin": "更新",
     "competition": "比赛",
-    "daysUntil": "天后"
+    "daysUntil": "天后",
+    "recent": "最近",
+    "viewAll": "全部通知",
+    "restDay": "休息日",
+    "noWorkout": "今天没有安排训练。",
+    "todaysWorkout": "训练",
+    "weekLabel": "周",
+    "blocksPlanned": "个训练块",
+    "startWorkout": "开始训练",
+    "setsThisWeek": "本周组数",
+    "vsLastWeek": "对比上周",
+    "myPR": "我的PB",
+    "weeklyVolume": "本周活动",
+    "pullToRefresh": "下拉刷新...",
+    "refreshing": "刷新中..."
   },
   "warmupPage": {
     "back": "返回",
@@ -920,6 +1047,17 @@
     "dismiss": "关闭"
   },
   "templates": {
+    "panelTitle": "模板",
+    "systemTemplates": "系统模板",
+    "myTemplates": "我的模板",
+    "refresh": "刷新",
+    "filter_all": "全部",
+    "filter_warmup": "热身",
+    "filter_training_day": "训练日",
+    "noSystemTemplates": "无系统模板",
+    "noMyTemplates": "无个人模板",
+    "createFirstTemplate": "创建第一个",
+    "retry": "重试",
     "title": "训练模板",
     "subtitle": "创建热身和训练日模板",
     "warmupTab": "热身",
@@ -931,6 +1069,7 @@
     "copy": "复制",
     "edit": "编辑",
     "delete": "删除",
+    "apply": "应用",
     "deleteConfirm": "删除模板「{name}」？",
     "min": "分钟",
     "items": "步骤",
@@ -994,6 +1133,12 @@
     "iosStep1": "点击分享",
     "iosStep2": "\"添加到主屏幕\"",
     "iosStep3": "从主屏幕打开",
+    "coachNoteDefault": "📋 教练留言",
+    "coachNoteSent": "{text}",
+    "planPublished": "📅 第{week}周新计划已发布",
+    "achievementEarned": "🏅 成就解锁：{title}",
+    "inviteAccepted": "👋 {athleteName} 加入了组「{groupName}」",
+    "movedToGroup": "↗️ 您已被转移到「{groupName}」组",
     "types": {
       "all": "全部",
       "plan_published": "训练计划",
@@ -1032,5 +1177,24 @@
     "pushUnsubscribe": "取消订阅",
     "pushDenied": "已在浏览器设置中屏蔽",
     "pushUnsupported": "不支持推送"
+  },
+  "join": {
+    "title": "加入训练组",
+    "joining": "正在加入...",
+    "success": "您已加入小组「{name}」",
+    "successHint": "您的教练可以为您分配训练计划",
+    "successProfile": "在设置中完善您的专项信息",
+    "goToDashboard": "前往主页",
+    "invalidLink": "无效链接",
+    "invalidLinkDesc": "链接已损坏，请让教练重新发送。",
+    "codeExpired": "邀请链接已过期，请向教练索取新链接。",
+    "coachCannotJoin": "教练管理运动员组，不加入",
+    "coachCannotJoinDesc": "请到分组设置中管理运动员",
+    "alreadyMember": "您已经是该组成员",
+    "alreadyMemberDesc": "前往主页",
+    "registerFirst": "注册后即可加入",
+    "haveAccount": "已有账号？登录",
+    "register": "创建账号",
+    "loginExisting": "已有账号？登录"
   }
 }
