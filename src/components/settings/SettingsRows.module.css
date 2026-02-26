@@ -1,0 +1,161 @@
+.row,
+.rowLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    min-height: 64px;
+    gap: var(--space-4);
+}
+
+.rowLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+.row:first-of-type,
+.rowLink:first-of-type {
+    border-top: none;
+}
+
+.rowLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+}
+
+.rowIconWrap {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+}
+
+.rowInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.rowName {
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+}
+
+.rowDesc {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+    line-height: var(--leading-normal);
+}
+
+.rowNavRight {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.rowValue {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.chevronIcon {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.controlWrap {
+    flex-shrink: 0;
+}
+
+.selectWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.select {
+    min-width: 132px;
+    height: 44px;
+    padding: 0 var(--space-8) 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.selectIcon {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.toggle {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggleTrack {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-border);
+    cursor: pointer;
+    transition: background var(--duration-normal) var(--ease-default);
+}
+
+.toggle input:checked + .toggleTrack {
+    background: var(--color-accent-primary);
+}
+
+.toggleTrack::before {
+    content: '';
+    position: absolute;
+    left: var(--space-1);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-primary);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--duration-normal) var(--ease-spring);
+}
+
+.toggle input:checked + .toggleTrack::before {
+    transform: translateY(-50%) translateX(22px);
+}

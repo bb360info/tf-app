@@ -1,0 +1,67 @@
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    position: relative;
+    overflow: hidden;
+}
+
+.high {
+    border-left: 4px solid var(--color-success);
+}
+
+.med {
+    border-left: 4px solid var(--color-warning);
+}
+
+.low {
+    border-left: 4px solid var(--color-danger);
+}
+
+.title {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    font-weight: var(--weight-medium);
+}
+
+.body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.score {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+}
+
+.recommendation {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin-top: var(--space-1);
+}
+
+.iconHigh {
+    color: var(--color-success);
+}
+
+.iconMed {
+    color: var(--color-warning);
+}
+
+.iconLow {
+    color: var(--color-danger);
+}
+
+.iconNone {
+    color: var(--color-text-tertiary);
+}

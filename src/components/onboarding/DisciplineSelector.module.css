@@ -1,0 +1,184 @@
+/* ==========================================================================
+   DisciplineSelector — DisciplineSelector.module.css
+   Athletic Minimal + Glassmorphism. All tokens from src/styles/tokens.css
+   ========================================================================== */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* ── Section label ─────────────────────────────────────────────────────── */
+
+.sectionLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ── Discipline card grid ──────────────────────────────────────────────── */
+
+.cardGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--duration-normal) var(--ease-default);
+    min-height: 64px;
+    width: 100%;
+}
+
+.card:hover {
+    border-color: var(--color-accent-primary);
+    background: var(--color-accent-light);
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+.cardActive {
+    border-color: var(--color-accent-primary);
+    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+}
+
+.cardSecondaryActive {
+    border-color: var(--color-accent-primary);
+    background: color-mix(in srgb, var(--color-accent-primary) 6%, transparent);
+}
+
+.cardDisabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ── Card icon ─────────────────────────────────────────────────────────── */
+
+.cardIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--color-accent-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.cardActive .cardIcon,
+.cardSecondaryActive .cardIcon {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+/* ── Card text ─────────────────────────────────────────────────────────── */
+
+.cardName {
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+}
+
+.cardMeta {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+/* ── Checkmark for secondary selection ─────────────────────────────────── */
+
+.checkmark {
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    border: 1.5px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.checkmarkActive {
+    background: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+/* ── Personal best input ───────────────────────────────────────────────── */
+
+.pbSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+}
+
+.pbLabel {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.pbInputRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.pbInput {
+    flex: 1;
+    height: 44px;
+    padding: 0 var(--space-3);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+    background: var(--color-bg-primary);
+    transition: border-color var(--duration-normal) var(--ease-default),
+        box-shadow var(--duration-normal) var(--ease-default);
+    outline: none;
+}
+
+.pbInput:focus {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.pbUnit {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+.pbHint {
+    font-size: var(--text-xs);
+    color: var(--color-text-tertiary);
+}

@@ -1,0 +1,173 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-bg-primary);
+    overflow: hidden;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    animation: slideInUp var(--motion-flow) var(--ease-out);
+    will-change: transform, opacity;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sessionBlock {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.sessionHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.sessionHeaderPM {
+    color: var(--color-accent-primary);
+}
+
+.sectionDivider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+}
+
+.mainDivider {
+    margin-top: var(--space-4);
+    color: var(--color-accent-primary);
+}
+
+.exerciseList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.ejectBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    padding: var(--space-1);
+    margin-left: auto;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ejectBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-danger);
+}
+
+.warmupAddRow {
+    margin-top: var(--space-2);
+}
+
+.addSessionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: var(--space-3);
+    background: var(--color-bg-secondary);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: var(--space-4);
+}
+
+.addSessionBtn:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+}
+
+.dayNote {
+    margin-top: auto;
+    padding-top: var(--space-6);
+}
+
+.dayNoteHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-2);
+}
+
+.dayNoteLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dayNoteTextarea {
+    width: 100%;
+    background: #FFFAE6;
+    /* Light yellow note background */
+    border: 1px solid #FFE58F;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.dayNoteTextarea:focus {
+    border-color: #FFC53D;
+    box-shadow: 0 0 0 2px rgba(255, 197, 61, 0.2);
+}
+
+.dayNoteReadOnly {
+    background: #FFFAE6;
+    border: 1px solid #FFE58F;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+    white-space: pre-wrap;
+    margin: 0;
+}

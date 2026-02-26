@@ -1,0 +1,274 @@
+/* join.module.css — /join invite landing page styles */
+/* Design System: Athletic Minimal + Glassmorphism */
+/* Mobile-first: 375px base, touch targets ≥44px */
+
+.page {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6) var(--space-4);
+    background: var(--color-bg-primary);
+}
+
+/* ── Main Card ─────────────────────────────────────────────────── */
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8) var(--space-6);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+}
+
+@supports (backdrop-filter: blur(var(--glass-blur))) {
+    .card {
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+    }
+}
+
+/* ── Icon ──────────────────────────────────────────────────────── */
+.iconWrap {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.iconWrapDefault {
+    background: var(--color-accent-light);
+    color: var(--color-accent-primary);
+}
+
+.iconWrapSuccess {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+}
+
+.iconWrapWarning {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    color: var(--color-warning);
+}
+
+.iconWrapError {
+    background: color-mix(in srgb, var(--color-error) 12%, transparent);
+    color: var(--color-error);
+}
+
+/* ── Text ──────────────────────────────────────────────────────── */
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: var(--leading-tight);
+}
+
+.subtitle {
+    font-size: var(--text-base);
+    color: var(--color-text-secondary);
+    margin: var(--space-2) 0 0;
+    line-height: var(--leading-relaxed);
+}
+
+.hint {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    margin: 0;
+    line-height: var(--leading-relaxed);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.btnGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+}
+
+.btnPrimary {
+    width: 100%;
+    min-height: 48px;
+    padding: var(--space-3) var(--space-6);
+    background: var(--color-accent-primary);
+    color: var(--color-text-on-accent);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background var(--duration-fast) var(--ease-default),
+        transform var(--duration-fast) var(--ease-default);
+}
+
+.btnPrimary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+}
+
+.btnPrimary:active {
+    transform: translateY(0);
+}
+
+.btnPrimary:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+.btnSecondary {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--space-3) var(--space-6);
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: border-color var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.btnSecondary:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+}
+
+.btnSecondary:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────── */
+.spinner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text-secondary);
+    font-size: var(--text-base);
+}
+
+.spinIcon {
+    animation: spin 1s linear infinite;
+    color: var(--color-accent-primary);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Success extras ────────────────────────────────────────────── */
+.hintList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.hintItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-relaxed);
+}
+
+.hintDot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-success);
+    flex-shrink: 0;
+    margin-top: 7px;
+}
+
+/* ── Skeleton Loading ──────────────────────────────────────────── */
+.skeletonIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: var(--color-skeleton-bg);
+}
+
+.skeletonTitle {
+    height: 28px;
+    width: 70%;
+    border-radius: var(--radius-md);
+    background: var(--color-skeleton-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeletonText {
+    height: 18px;
+    width: 85%;
+    border-radius: var(--radius-sm);
+    background: var(--color-skeleton-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeletonBtn {
+    height: 48px;
+    width: 100%;
+    border-radius: var(--radius-md);
+    background: var(--color-skeleton-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeletonTitle::after,
+.skeletonText::after,
+.skeletonBtn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--color-skeleton-shimmer) 50%,
+            transparent 100%);
+    animation: shimmer 1.4s var(--ease-default) infinite;
+}
+
+@keyframes shimmer {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
+}

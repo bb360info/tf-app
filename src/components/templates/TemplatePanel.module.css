@@ -1,0 +1,345 @@
+/* ==========================================================================
+   Template Panel — Mobile (BottomSheet) & Desktop (Sidebar) Styles
+   ========================================================================== */
+
+/* ── UI Composition ──────────────────────────────────────────────────────── */
+
+/* Hide mobile wrapper on desktop */
+@media (min-width: 1024px) {
+    .mobileWrapper {
+        display: none;
+    }
+}
+
+/* Hide desktop sidebar entirely from layout on mobile */
+@media (max-width: 1023px) {
+    .sidebarWrapper {
+        display: none;
+    }
+}
+
+/* ── Desktop Overlay Sidebar ──────────────────────────────────────────────── */
+
+.sidebarWrapper {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    pointer-events: none;
+    /* Let clicks pass through when hidden */
+    display: flex;
+    justify-content: flex-end;
+}
+
+.sidebarWrapper.open {
+    pointer-events: auto;
+}
+
+.sidebarOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    transition: background var(--duration-default) var(--ease-default);
+    pointer-events: none;
+}
+
+.sidebarWrapper.open .sidebarOverlay {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    pointer-events: auto;
+}
+
+.sidebar {
+    position: relative;
+    width: 400px;
+    height: 100dvh;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-left: 1px solid var(--glass-border);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--duration-default) var(--ease-spring);
+    pointer-events: auto;
+}
+
+.sidebarWrapper.open .sidebar {
+    transform: translateX(0);
+}
+
+.sidebarHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.sidebarTitle {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.closeButton {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.closeButton:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+}
+
+.sidebarBody {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-4);
+}
+
+/* ── Content Area Shared Styles ─────────────────────────────────────────── */
+
+.contentWrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--space-4);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.createHeaderBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-accent-primary);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.createHeaderBtn:hover {
+    background: var(--color-accent-hover);
+}
+
+.tabs {
+    display: flex;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: var(--space-1);
+}
+
+.tab {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.activeTab {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.refreshBtn {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.refreshBtn:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-tertiary);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+    color: var(--color-accent-primary);
+    border-color: var(--color-accent-primary);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Filters ────────────────────────────────────────────────────────────── */
+
+.filters {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    /* For scrollbar if it exists */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.filters::-webkit-scrollbar {
+    display: none;
+}
+
+.filterChip {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.activeFilter {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+/* ── List Area ───────────────────────────────────────────────────────────── */
+
+.listContainer {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+
+.emptyState {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-6);
+    color: var(--color-text-tertiary);
+    gap: var(--space-4);
+}
+
+.createBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--glass-bg);
+    border: 1px dashed var(--color-border);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.createBtn:hover {
+    border-color: var(--color-accent-primary);
+    color: var(--color-accent-primary);
+    background: var(--color-accent-light);
+}
+
+/* ── States ─────────────────────────────────────────────────────────────── */
+
+.loadingContainer,
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.skeletonTop {
+    height: 40px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-4);
+    animation: pulse 1.5s infinite var(--ease-default);
+}
+
+.skeletonItem {
+    height: 60px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    animation: pulse 1.5s infinite var(--ease-default);
+}
+
+.errorText {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    text-align: center;
+}
+
+.retryBtn {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}

@@ -1,0 +1,72 @@
+.page {
+    min-height: 100vh;
+    padding-bottom: 80px;
+    /* Space for BottomTabBar */
+}
+
+.section {
+    margin-top: var(--space-6);
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-3);
+    padding: 0 var(--space-4);
+}
+
+.menuList {
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: background-color var(--duration-fast) var(--ease-default);
+}
+
+.menuItem:not(:last-child) {
+    border-bottom: 1px solid var(--color-border-separator, rgba(0, 0, 0, 0.05));
+}
+
+@media (prefers-color-scheme: dark) {
+    .menuItem:not(:last-child) {
+        border-bottom: 1px solid var(--color-border-separator, rgba(255, 255, 255, 0.05));
+    }
+}
+
+.menuItem:hover {
+    background-color: var(--color-bg-elevated);
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+}
+
+.menuLabel {
+    font-size: 1rem;
+    font-weight: var(--weight-medium);
+}
+
+.teasers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0 var(--space-4);
+}

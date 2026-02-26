@@ -1,0 +1,127 @@
+/* ==========================================================================
+   BottomSheet — Shared sliding modal panel
+   Uses Glassmorphism and Athletic Pulse animations
+   ========================================================================== */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-modal);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--motion-flow, 250ms) var(--ease-default),
+        visibility var(--motion-flow, 250ms) var(--ease-default);
+
+    /* Center aligning for wide screens, but sheet attaches to bottom */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sheet {
+    width: 100%;
+    max-width: 600px;
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border-light);
+    border-bottom: none;
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--sheet-border-radius, 24px) var(--sheet-border-radius, 24px) 0 0;
+    padding: var(--space-4);
+    padding-bottom: calc(var(--space-4) + var(--safe-bottom));
+
+    transform: translateY(100%);
+    transition: transform var(--motion-flow, 250ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform;
+
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+/* Fallback for no backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+    .sheet {
+        background: var(--color-bg-elevated);
+    }
+}
+
+.overlay.open .sheet {
+    transform: translateY(0);
+}
+
+.handleArea {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-2) 0 var(--space-4) 0;
+    margin-top: calc(var(--space-2) * -1);
+    cursor: grab;
+    touch-action: pan-y;
+}
+
+.handleArea:active {
+    cursor: grabbing;
+}
+
+.handle {
+    width: var(--sheet-handle-width, 36px);
+    height: var(--sheet-handle-height, 5px);
+    background-color: var(--color-text-tertiary);
+    border-radius: 99px;
+    opacity: 0.5;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+}
+
+.closeButton {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: var(--space-2);
+    margin: calc(var(--space-2) * -1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.closeButton:hover {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    /* Soft scrollbar for webkit */
+    scrollbar-width: thin;
+    overscroll-behavior-y: contain;
+}

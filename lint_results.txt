@@ -1,0 +1,136 @@
+
+> encyclopedia-jumper@0.1.0 lint /Users/bogdan/antigravity/skills master/tf
+> eslint
+
+
+/Users/bogdan/antigravity/skills master/tf/cloudflare-worker/push-service/src/index.js
+  276:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+/Users/bogdan/antigravity/skills master/tf/src/app/[locale]/(protected)/analytics/page.tsx
+  101:8  warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  118:8  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/bogdan/antigravity/skills master/tf/src/app/[locale]/(protected)/notifications/NotificationsClientPage.tsx
+  156:33  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/bogdan/antigravity/skills master/tf/src/app/[locale]/(protected)/settings/groups/page.tsx
+  653:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/bogdan/antigravity/skills master/tf/src/app/[locale]/(public)/join/JoinContent.tsx
+  33:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/bogdan/antigravity/skills master/tf/src/app/[locale]/(public)/join/JoinContent.tsx:33:13
+  31 |     useEffect(() => {
+  32 |         if (!code) {
+> 33 |             setState({ type: 'noCode' });
+     |             ^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |             return;
+  35 |         }
+  36 |  react-hooks/set-state-in-effect
+
+/Users/bogdan/antigravity/skills master/tf/src/components/shared/BottomSheet.tsx
+   3:46  warning  'useCallback' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  27:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/bogdan/antigravity/skills master/tf/src/components/shared/BottomSheet.tsx:27:9
+  25 |
+  26 |     useEffect(() => {
+> 27 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  28 |         // Handle escape key
+  29 |         const handleKeyDown = (e: KeyboardEvent) => {
+  30 |             if (e.key === 'Escape' && isOpen && onClose) {  react-hooks/set-state-in-effect
+
+/Users/bogdan/antigravity/skills master/tf/src/components/shared/BottomTabBar.tsx
+  10:5  warning  'Settings' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/AthleteSeasonsList.tsx
+  35:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/AthleteSeasonsList.tsx:35:9
+  33 |         if (!athleteId) return;
+  34 |         let cancelled = false;
+> 35 |         setLoading(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  36 |         listSeasonsForAthlete(athleteId)
+  37 |             .then((data) => { if (!cancelled) setSeasons(data); })
+  38 |             .catch(() => { /* ignore — silently degrade */ })  react-hooks/set-state-in-effect
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/AthleteTrainingView.tsx
+  593:8   warning  React Hook useEffect has a missing dependency: 'onAthleteIdResolved'. Either include it or remove the dependency array. If 'onAthleteIdResolved' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+  604:8   warning  React Hook useEffect has a missing dependency: 'weekStart'. Either include it or remove the dependency array                                                                                                                                           react-hooks/exhaustive-deps
+  604:26  warning  React Hook useEffect has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked                                                                                                               react-hooks/exhaustive-deps
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/CoachLogViewer.tsx
+  19:36  warning  'LogExercisesRecord' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/DayColumn.tsx
+  508:25  warning  'setRestSeconds' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/QuickPlanBuilder.tsx
+  101:12  warning  'libraryError' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/TrainingLog.tsx
+  186:8  warning  React Hook useCallback has a missing dependency: 'session'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/bogdan/antigravity/skills master/tf/src/components/training/WeekConstructor.tsx
+  173:11  warning  'dayExercises' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/bogdan/antigravity/skills master/tf/src/lib/hooks/useNotifications.ts
+  105:21  error  Error: Cannot access variable before it is declared
+
+`subscribeSSE` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/bogdan/antigravity/skills master/tf/src/lib/hooks/useNotifications.ts:105:21
+  103 |
+  104 |                 reconnectTimer.current = setTimeout(() => {
+> 105 |                     subscribeSSE();
+      |                     ^^^^^^^^^^^^ `subscribeSSE` accessed before it is declared
+  106 |                 }, delay);
+  107 |             });
+  108 |
+
+/Users/bogdan/antigravity/skills master/tf/src/lib/hooks/useNotifications.ts:85:5
+   83 |
+   84 |     /** Subscribe to SSE with exponential backoff on error */
+>  85 |     const subscribeSSE = useCallback(() => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  86 |         if (!userId || isSseActive.current) return;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  87 |
+      …
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 108 |
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 109 |     }, [userId, addNotification, removeNotification]);
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `subscribeSSE` is declared here
+  110 |
+  111 |     /** BG Sync polling — for China/offline (15min interval) */
+  112 |     const startBgSync = useCallback(() => {  react-hooks/immutability
+
+/Users/bogdan/antigravity/skills master/tf/src/lib/pocketbase/services/compliance.ts
+  11:36  warning  'LogExercisesRecord' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  12:15  warning  'RecordModel' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+
+✖ 21 problems (4 errors, 17 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+
+ ELIFECYCLE  Command failed with exit code 1.

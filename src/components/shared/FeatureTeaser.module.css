@@ -1,0 +1,53 @@
+.teaserCard {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+}
+
+.badge {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium);
+    border-radius: 99px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-tertiary);
+    border: 1px solid var(--color-border-light);
+    white-space: nowrap;
+}

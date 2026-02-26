@@ -1,0 +1,160 @@
+.row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 120px;
+    position: relative;
+    /* For drag animation */
+    will-change: transform;
+}
+
+.rowDragging {
+    opacity: 0.5;
+    z-index: 50;
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent-primary);
+}
+
+.rowHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.dragHandle {
+    color: var(--color-text-tertiary);
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    padding: var(--space-1);
+    margin-left: calc(var(--space-1) * -1);
+    touch-action: none;
+}
+
+.dragHandle:active {
+    cursor: grabbing;
+}
+
+.cnsDot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+}
+
+.rowName {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rowMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.dosageBtn {
+    background: var(--color-bg-secondary);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 2px var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dosageBtn:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.editForm {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--color-bg-secondary);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    flex-wrap: wrap;
+}
+
+.editInput {
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-text-primary);
+    width: 60px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.editInputSmall {
+    width: 50px;
+}
+
+.editInput:focus {
+    border-color: var(--color-accent-primary);
+}
+
+.editSeparator {
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+}
+
+.saveBtn {
+    background: var(--color-success);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.rowActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.actionBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.actionBtn:hover svg {
+    color: var(--color-danger);
+}

@@ -1,0 +1,69 @@
+/* ExerciseItem.module.css */
+
+.exerciseItem {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+    transition: border-color var(--duration-fast);
+}
+
+.exerciseItemDone {
+    border-color: var(--color-success);
+}
+
+.exerciseHeader {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    min-height: 64px;
+    transition: background var(--duration-fast);
+}
+
+.exerciseHeader:hover {
+    background: var(--color-bg-secondary);
+}
+
+.exerciseDot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.exerciseInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.exerciseName {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.exerciseDosage {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.doneIcon {
+    color: var(--color-success);
+    flex-shrink: 0;
+}
+
+.exerciseLog {
+    padding: 0 var(--space-4) var(--space-4);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+}
