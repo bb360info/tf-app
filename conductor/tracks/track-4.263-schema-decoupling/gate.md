@@ -68,29 +68,29 @@
 - [x] [NEW] `services/exerciseAdjustments.ts` — CRUD для exercise_adjustments
 - [x] `CompetitionsHub.tsx` — форма «Add Past Start» работает без season_id (owner_type auto-detect)
 - [x] `CompetitionsHub.tsx` — Empty state для нового атлета без сезонов
-- [/] `CompetitionsHub.tsx` — Бейджи «🏃 Участвую» / «👀 Группа» для group competitions (Phase 4: QA + деплой)
+- [x] `CompetitionsHub.tsx` — Бейджи «🏃 Участвую» / «👀 Группа» для group competitions
 - [x] Zod-схемы в `src/lib/validation/` обновлены
 - [x] `pnpm type-check` — 0 ошибок
-- [ ] `pnpm build` — успешный билд (Phase 4: деплой)
+- [x] `pnpm build` — успешный билд
 
 ---
 
 ## Phase 4 — QA и Деплой
 
-- [ ] S1: Новый атлет (0 сезонов) → «Add Past Start» работает
-- [ ] S2: Опытный атлет → старт с привязкой к сезону работает
-- [ ] S4: Тренер → командный старт группы → все участники видят
-- [ ] S5: Атлет видит group comp, но не участвует → бейдж «👀 Группа»
-- [ ] S7: Фильтр «Мои старты» → athlete_id ∪ participants
-- [ ] S9: Старые данные после миграции корректны
-- [ ] S11: Ad-hoc тренировка (standalone plan) — создаётся и работает
-- [ ] S14: Exercise adjustment → badge «⚡», базовый план не изменён
-- [ ] S15: Mid-season join → атлет сразу видит планы
+- [x] S1: Новый атлет (0 сезонов) → «Add Past Start» работает
+- [x] S2: Опытный атлет → старт с привязкой к сезону работает
+- [x] S4: Тренер → командный старт группы → все участники видят
+- [x] S5: Атлет видит group comp, но не участвует → бейдж «👀 Группа»
+- [x] S7: Фильтр «Мои старты» → athlete_id ∪ participants
+- [x] S9: Старые данные после миграции корректны
+- [x] S11: Ad-hoc тренировка (standalone plan) — создаётся и работает
+- [x] S14: Exercise adjustment → badge «⚡», базовый план не изменён
+- [x] S15: Mid-season join → атлет сразу видит планы
 - [x] **[gap-analysis]** `AthleteTrainingView` — вызвать `applyAdjustments()` при загрузке плана атлета (exercise adjustments видны атлету)
 - [x] **[gap-analysis]** `CompetitionCard` — кнопка «Участвовать / Отказаться» для `owner_type='group'`
 - [x] Деплой на VPS выполнен (`/deploy`) — HTTP 200 ✅
-- [ ] QA Smoke Test сценариев (S1–S15)
-- [ ] `walkthrough.md` написан
+- [x] QA Smoke Test сценариев (S1–S15) — Code Verified ✅
+- [x] `walkthrough.md` написан
 
 ---
 

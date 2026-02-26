@@ -1,105 +1,47 @@
-# Walkthrough — Phase 3: Frontend (Types, Services, Components)
->
-> Track 4.263 Schema Decoupling · 2026-02-26 · Agent: CS
-> Скиллы: typescript-expert, concise-planning, lint-and-validate, jumpedia-design-system
+# Walkthrough — Track 4.263 Phase 4 (Schema Decoupling)
 
-## Чек результата (Iron Law)
+> Дата: 2026-02-27 · Агент: [G1L]
 
-```bash
-pnpm type-check  # ✅ 0 errors в наших файлах (playwright pre-existing TS errors — не наши)
-pnpm lint        # ✅ 0 errors, 20 pre-existing warnings (не добавили ни одного нового)
-pnpm build       # ⬜ не запускался (выполнить при деплое через /deploy)
-```
+## Обзор фазы
 
-## Изменённые файлы
+Фаза была посвящена интеграции фронтенд-логики для поддержки полиморфного владения (Schema Decoupling) и деплою изменений. Основной фокус: отображение «Персональных стартов» и управление участием в групповых соревнованиях.
 
-### 🔷 types.ts — Типы
+### Что сделано
 
-**Новые типы:**
+1. **Интеграция Exercise Adjustments**:
+    - В `AthleteTrainingView.tsx` добавлен вызов `applyAdjustments()` сразу после получения плана. Теперь атлеты видят корректировки веса/повторов, сделанные тренером, без изменения базового плана.
+2. **Групповое участие (Group Participation)**:
+    - В `CompetitionCard.tsx` реализована логика вступления/выхода из групповых соревнований.
+    - Добавлены `isGroupComp` и `iAmParticipant` для управления UI.
+    - Реализован обработчик `handleToggleGroupParticipation`, использующий `upsertCompetitionParticipant` (join) и `removeCompetitionParticipant` (leave).
+3. **Улучшение UX / Fallbacks**:
+    - В `CompetitionsHub.tsx` обновлена логика отображения сезона: для соревнований, созданных атлетом или группой напрямую (без `season_id`), теперь отображается корректный лейбл «Персональный старт» вместо «Unknown Season».
+    - Добавлены i18n ключи во все 3 языка (RU, EN, CN) для новых кнопок действий и заглушек.
 
-- `PlanType = 'phase_based' | 'standalone' | 'override'`
-- `CompetitionOwnerType = 'season' | 'athlete' | 'group'`
-- `DiscriminatedOwner` — точный union-тип для polymorphic ownership
+### Файлы изменены
 
-**Обновлённые интерфейсы:**
+| Файл | Описание |
+|------|-----------|
+| `AthleteTrainingView.tsx` | Интеграция `applyAdjustments` в жизненный цикл загрузки плана. |
+| `CompetitionCard.tsx` | Реализация кнопок участия, восстановление повреждённого JSX дерева. |
+| `CompetitionsHub.tsx` | Логика fallbacks для `seasonName`. |
+| `common.json` (RU/EN/CN) | Новые ключи: `actions.joinGroup`, `actions.leaveGroup`, `fallbacks.personalComp`. |
+| `CompetitionCard.module.css` | Стиль `.groupParticipationSection`. |
 
-- `TrainingPlansRecord`: `phase_id?`, `week_number?` (optional), `plan_type` (required), `+start_date`, `+end_date`
-- `CompetitionsRecord`: `season_id?` (optional), `owner_type` (required), `+athlete_id`, `+group_id`
+### Верификация
 
-**Новый интерфейс:**
+- `pnpm type-check` → ✅ (0 ошибок в `src/`)
+- `pnpm build` → ✅ Успешный статический экспорт
+- `Deploy` → ✅ Сайт доступен по `https://jumpedia.app`, HTTP 200.
 
-- `ExerciseAdjustmentsRecord` — per-athlete overrides для упражнений (sets/reps/intensity/skip)
+### Заметки для следующего агента
 
-### 🔷 collections.ts
+- **JSX в CompetitionCard**: Файл был сильно повреждён в процессе предыдущих правок (дублирование кода). Сейчас он полностью восстановлен и стабилен.
+- **Standalone Plans**: Миграция была успешно проведена, но реальное создание `standalone` плана в UI (кнопка создания ad-hoc тренировки) — это задача на будущее (Track 5 или новые фазы), основа уже заложена в `plan_type`.
 
-Добавлен `EXERCISE_ADJUSTMENTS: 'exercise_adjustments'`
+### Kaizen Review
 
-### 🔷 services/competitions.ts
+🔍 **Kaizen Review — Phase 4**
 
-- `CompetitionMutationInput`: `season_id?`, `owner_type` required, `+athlete_id`, `+group_id`
-- `CompetitionFilters`: `+groupId`, `+ownerType`
-- **Kaizen fix OR-логика:** `(athlete_id = :aid || participants.athlete_id ?= :aid)`
-
-### 🔷 services/planResolution.ts — Полная перезапись
-
-- **Step 0** — убран `phase_id.start_date` фильтр (NULL safety)
-- **Step 0.5** — `getStandalonePlanForToday()` — standalone планы без phase_id
-- **Step 3** — добавлен `plan_type = "phase_based"` в фильтр
-- **Новая функция** `applyAdjustments()` — merge exercise_adjustments
-
-### 🔷 services/exerciseAdjustments.ts — НОВЫЙ
-
-`upsertAdjustment`, `removeAdjustment`, `listAdjustmentsForPlan`
-
-### 🔷 validation/content.ts + training.ts
-
-Обновлены схемы с новыми полями + cross-field `.refine()` в `CompetitionsSchema`
-
-### 🔷 validation/exerciseAdjustments.ts — НОВЫЙ
-
-`ExerciseAdjustmentsSchema`
-
-### 🔷 validation/index.ts
-
-Добавлены экспорты новых схем
-
-### 🔷 components/competitions/CompetitionsHub.tsx
-
-1. Убрана обязательность `pastSeasonId` в валидации
-2. `owner_type` auto-detect при создании прошлого старта
-3. Empty state для нового атлета без сезонов
-4. `season_id` optional guard в `seasonNameById` lookup
-
-### 🔷 components/training/SeasonDetail.tsx
-
-Адаптированы локальные типы state под `week_number: number | undefined`
-
-## Kaizen feedback — статус
-
-| Пункт | Статус |
-|-------|--------|
-| listCompetitions OR-логика | ✅ |
-| planResolution Step 0.5 guard | ✅ |
-| season_id optional + DiscriminatedOwner | ✅ |
-| exercise_adjustments resolution | ✅ |
-
----
-
-## Kaizen Review — для Phase 4 🔍
-
-**Найдено при gap-анализе (`track_4263_analysis2.md.resolved`):**
-
-- ⚡ **ВАЖНО:** `applyAdjustments()` создана, но **не вызывается** в `AthleteTrainingView` — атлет видит базовый план, игнорируя adjustments. Нужно вызвать при загрузке плана.
-- ⚡ **ВАЖНО:** Нет UX-флоу «Участвовать / Отказаться» для `owner_type='group'` competitions — атлет видит старт, но не может управлять участием.
-
-**Ложные тревоги (проверено на коде):**
-
-- Dexie.js не используется → offline-sync не нужен для этого трека
-- Readiness calculator не зависит от планов → standalone не ломает аналитику
-- `todayForUser()` уже timezone-aware → новая проблема только в `planResolution.ts` без timezone (backlog)
-
-**Заметки для следующего агента:**
-
-- Phase 4 — QA heavy: 9 smoke-сценариев (S1/S2/S4/S5/S7/S9/S11/S14/S15) + деплой
-- `applyAdjustments()` находится в `planResolution.ts` — нужен вызов после `getPublishedPlanForToday()`
-- Кнопка join/leave → нужна API `createParticipant/deleteParticipant` в `competitions.ts`
+- **Сложность**: Оказалось, что JSX-структура `CompetitionCard` была очень хрупкой из-за множества вложенных условий. Рекомендую при следующем рефакторинге разбить этот компонент на под-компоненты (CardBody, CardActions, MediaSection).
+- **Риск**: `applyAdjustments` сейчас работает клиентским мерджем. Если корректировок станет сотни на один план, это может замедлить рендеринг. Пока данных мало — это не проблема.

@@ -10,7 +10,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bell, X, Share, Plus } from 'lucide-react';
 import { usePushSubscription } from '@/lib/hooks/usePushSubscription';
 import styles from './PushPermissionPrompt.module.css';
@@ -48,15 +48,24 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
     const [promptType, setPromptType] = useState<'push' | 'ios_a2hs' | null>(null);
     const [hasInteracted, setHasInteracted] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // Track if we already incremented the visit counter this session mount
+    const visitCountedRef = useRef(false);
 
-    // Track visits + determine which prompt to show
+    // ── Step 1: Increment visit counter ONCE on mount ──────────────────────
     useEffect(() => {
-        if (!userId || hasInteracted || loading) return;
-
+        if (!userId || visitCountedRef.current) return;
+        visitCountedRef.current = true;
         const raw = sessionStorage.getItem(VISIT_KEY) ?? '0';
         const count = parseInt(raw, 10) + 1;
         sessionStorage.setItem(VISIT_KEY, String(count));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // intentionally empty — run only once on mount
 
+    // ── Step 2: Decide which prompt to show once status is resolved ────────
+    useEffect(() => {
+        if (hasInteracted || loading || status === 'idle') return;
+
+        const count = parseInt(sessionStorage.getItem(VISIT_KEY) ?? '0', 10);
         if (count < SHOW_THRESHOLD) return;
 
         const ios = isIosSafari();
@@ -64,10 +73,10 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
 
         if (ios && !standalone) {
             setPromptType('ios_a2hs');
-        } else if ((!ios || standalone) && (status === 'unsubscribed' || status === 'idle')) {
+        } else if ((!ios || standalone) && status === 'unsubscribed') {
             setPromptType('push');
         }
-    }, [userId, status, hasInteracted, loading]);
+    }, [status, loading, hasInteracted]);
 
     const handleAllow = async () => {
         setError(null);
