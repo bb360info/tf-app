@@ -49,7 +49,7 @@
 - [x] API Rules: `competition_proposals` — обновлены (каскадная зависимость)
 - [x] API Rules: `training_plans` — обновлены (Season Membership Inheritance)
 - [x] API Rules: `plan_assignments` — обновлены (nullable phase_id)
-- [ ] API Rules: `exercise_adjustments` — созданы
+- [x] API Rules: `exercise_adjustments` — созданы
 - [x] Индексы: `competitions` (athlete_id, group_id, owner_type+date)
 - [x] Индексы: `training_plans` (plan_type, standalone+athlete, start_date)
 - [x] Индексы: `exercise_adjustments` (UNIQUE + athlete + plan_exercise)
