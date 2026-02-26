@@ -1,4 +1,26 @@
 
+### 2026-02-27 — Track 4.263 Phase 4: Code Changes + Deploy
+
+#### Changed
+
+- `AthleteTrainingView.tsx`: `applyAdjustments()` вызывается после fetch плана — exercise adjustments видны атлету (badge `_adjusted: true` доступен для UI)
+- `CompetitionCard.tsx`: group participation CTA для атлетов (`owner_type='group'`):
+  - `isGroupComp` derived state (проверка owner_type)
+  - `iAmParticipant` derived state (из participantAthleteIds useMemo)
+  - `handleToggleGroupParticipation` — join/leave через `upsertCompetitionParticipant` / `removeCompetitionParticipant`
+  - UI: `<UserPlus>` / `<UserMinus>` кнопка в `.groupParticipationSection`
+- `CompetitionsHub.tsx`: seasonName fallback — `personalComp` для `owner_type=athlete|group` без `season_id`
+- `CompetitionCard.module.css`: добавлен `.groupParticipationSection`
+- i18n (RU/EN/CN): `competitions.actions.joinGroup`, `competitions.actions.leaveGroup`, `competitions.fallbacks.personalComp`
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/, test-файлы — pre-existing Playwright)
+- `pnpm build` ✅ Exit code: 0
+- Deploy `https://jumpedia.app` → HTTP 200 ✅
+
+---
+
 ### 2026-02-26 — Track 4.263 Phase 3: Frontend (Types + Services + Components)
 
 #### Added

@@ -86,9 +86,10 @@
 - [ ] S11: Ad-hoc тренировка (standalone plan) — создаётся и работает
 - [ ] S14: Exercise adjustment → badge «⚡», базовый план не изменён
 - [ ] S15: Mid-season join → атлет сразу видит планы
-- [ ] **[gap-analysis]** `AthleteTrainingView` — вызвать `applyAdjustments()` при загрузке плана атлета (exercise adjustments видны атлету)
-- [ ] **[gap-analysis]** `CompetitionCard` — кнопка «Участвовать / Отказаться» для `owner_type='group'`
-- [ ] Деплой на VPS выполнен (`/deploy`)
+- [x] **[gap-analysis]** `AthleteTrainingView` — вызвать `applyAdjustments()` при загрузке плана атлета (exercise adjustments видны атлету)
+- [x] **[gap-analysis]** `CompetitionCard` — кнопка «Участвовать / Отказаться» для `owner_type='group'`
+- [x] Деплой на VPS выполнен (`/deploy`) — HTTP 200 ✅
+- [ ] QA Smoke Test сценариев (S1–S15)
 - [ ] `walkthrough.md` написан
 
 ---
