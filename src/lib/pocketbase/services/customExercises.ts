@@ -58,7 +58,7 @@ export async function createCustomExercise(
  */
 export async function listMyCustomExercises(coachId: string): Promise<CustomExercisesRecord[]> {
     return pb.collection(Collections.CUSTOM_EXERCISES).getFullList<CustomExercisesRecord>({
-        filter: `coach_id = "${coachId}" && deleted_at = ""`,
+        filter: pb.filter('coach_id = {:coachId} && deleted_at = ""', { coachId }),
 
     });
 }

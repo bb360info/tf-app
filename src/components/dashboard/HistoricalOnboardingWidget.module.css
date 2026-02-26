@@ -1,0 +1,94 @@
+/* HistoricalOnboardingWidget — PR onboarding prompt on athlete dashboard */
+
+/* Mobile base (375px+): widget wraps and CTA is full-width */
+.widget {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--color-accent-primary);
+    text-decoration: none;
+    box-shadow: var(--glass-shadow);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+    .widget {
+        background: var(--color-bg-elevated);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+.icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    color: var(--color-accent-primary);
+}
+
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+    line-height: var(--leading-tight);
+}
+
+.desc {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: var(--leading-normal);
+}
+
+/* Mobile base: CTA takes full width */
+.cta {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-accent-primary);
+    color: var(--color-text-on-accent);
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    white-space: nowrap;
+    min-height: 44px;
+    /* touch target */
+    transition: opacity var(--duration-fast) var(--ease-default);
+}
+
+.cta:hover {
+    opacity: 0.88;
+}
+
+/* Tablet+: widget doesn't wrap, CTA shrinks to content */
+@media (min-width: 480px) {
+    .widget {
+        flex-wrap: nowrap;
+    }
+
+    .cta {
+        width: auto;
+        justify-content: flex-start;
+    }
+}

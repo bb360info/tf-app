@@ -46,11 +46,12 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
     const { status, loading, subscribe, decline } = usePushSubscription(userId);
     // Single state — null = hidden, 'push' | 'ios_a2hs' = shown
     const [promptType, setPromptType] = useState<'push' | 'ios_a2hs' | null>(null);
+    const [hasInteracted, setHasInteracted] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Track visits + determine which prompt to show
     useEffect(() => {
-        if (!userId) return;
+        if (!userId || hasInteracted || loading) return;
 
         const raw = sessionStorage.getItem(VISIT_KEY) ?? '0';
         const count = parseInt(raw, 10) + 1;
@@ -62,15 +63,15 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
         const standalone = isStandalone();
 
         if (ios && !standalone) {
-            // setState in effect is intentional: prompt type derived from env, not React state
             setPromptType('ios_a2hs');
-        } else if ((!ios || standalone) && status === 'unsubscribed') {
+        } else if ((!ios || standalone) && (status === 'unsubscribed' || status === 'idle')) {
             setPromptType('push');
         }
-    }, [userId, status]);
+    }, [userId, status, hasInteracted, loading]);
 
     const handleAllow = async () => {
         setError(null);
+        setHasInteracted(true);
         try {
             await subscribe();
             setPromptType(null);
@@ -78,10 +79,14 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
             const { logError } = await import('@/lib/utils/errors');
             logError(err, { component: 'PushPermissionPrompt', action: 'subscribe' });
             setError(labels?.notifTitle ? 'Failed to enable notifications' : 'Ошибка подписки');
+            // If it failed, we still hide the prompt to not annoy the user
+            // or we keep it to show the error. Currently, the code says it shows the error.
+            // If error is shown, we shouldn't setPromptType(null) here.
         }
     };
 
     const handleDismiss = () => {
+        setHasInteracted(true);
         decline();
         setPromptType(null);
     };
@@ -95,7 +100,10 @@ export function PushPermissionPrompt({ userId, labels }: PushPermissionPromptPro
                 <button
                     type="button"
                     className={styles.closeBtn}
-                    onClick={() => setPromptType(null)}
+                    onClick={() => {
+                        setHasInteracted(true);
+                        setPromptType(null);
+                    }}
                     aria-label="Close"
                 >
                     <X size={16} aria-hidden="true" />

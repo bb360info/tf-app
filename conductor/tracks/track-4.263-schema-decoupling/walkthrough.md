@@ -1,80 +1,105 @@
-# Walkthrough — Track 4.263: Schema Decoupling (Polymorphic Ownership)
+# Walkthrough — Phase 3: Frontend (Types, Services, Components)
+>
+> Track 4.263 Schema Decoupling · 2026-02-26 · Agent: CS
+> Скиллы: typescript-expert, concise-planning, lint-and-validate, jumpedia-design-system
+
+## Чек результата (Iron Law)
+
+```bash
+pnpm type-check  # ✅ 0 errors в наших файлах (playwright pre-existing TS errors — не наши)
+pnpm lint        # ✅ 0 errors, 20 pre-existing warnings (не добавили ни одного нового)
+pnpm build       # ⬜ не запускался (выполнить при деплое через /deploy)
+```
+
+## Изменённые файлы
+
+### 🔷 types.ts — Типы
+
+**Новые типы:**
+
+- `PlanType = 'phase_based' | 'standalone' | 'override'`
+- `CompetitionOwnerType = 'season' | 'athlete' | 'group'`
+- `DiscriminatedOwner` — точный union-тип для polymorphic ownership
+
+**Обновлённые интерфейсы:**
+
+- `TrainingPlansRecord`: `phase_id?`, `week_number?` (optional), `plan_type` (required), `+start_date`, `+end_date`
+- `CompetitionsRecord`: `season_id?` (optional), `owner_type` (required), `+athlete_id`, `+group_id`
+
+**Новый интерфейс:**
+
+- `ExerciseAdjustmentsRecord` — per-athlete overrides для упражнений (sets/reps/intensity/skip)
+
+### 🔷 collections.ts
+
+Добавлен `EXERCISE_ADJUSTMENTS: 'exercise_adjustments'`
+
+### 🔷 services/competitions.ts
+
+- `CompetitionMutationInput`: `season_id?`, `owner_type` required, `+athlete_id`, `+group_id`
+- `CompetitionFilters`: `+groupId`, `+ownerType`
+- **Kaizen fix OR-логика:** `(athlete_id = :aid || participants.athlete_id ?= :aid)`
+
+### 🔷 services/planResolution.ts — Полная перезапись
+
+- **Step 0** — убран `phase_id.start_date` фильтр (NULL safety)
+- **Step 0.5** — `getStandalonePlanForToday()` — standalone планы без phase_id
+- **Step 3** — добавлен `plan_type = "phase_based"` в фильтр
+- **Новая функция** `applyAdjustments()` — merge exercise_adjustments
+
+### 🔷 services/exerciseAdjustments.ts — НОВЫЙ
+
+`upsertAdjustment`, `removeAdjustment`, `listAdjustmentsForPlan`
+
+### 🔷 validation/content.ts + training.ts
+
+Обновлены схемы с новыми полями + cross-field `.refine()` в `CompetitionsSchema`
+
+### 🔷 validation/exerciseAdjustments.ts — НОВЫЙ
+
+`ExerciseAdjustmentsSchema`
+
+### 🔷 validation/index.ts
+
+Добавлены экспорты новых схем
+
+### 🔷 components/competitions/CompetitionsHub.tsx
+
+1. Убрана обязательность `pastSeasonId` в валидации
+2. `owner_type` auto-detect при создании прошлого старта
+3. Empty state для нового атлета без сезонов
+4. `season_id` optional guard в `seasonNameById` lookup
+
+### 🔷 components/training/SeasonDetail.tsx
+
+Адаптированы локальные типы state под `week_number: number | undefined`
+
+## Kaizen feedback — статус
+
+| Пункт | Статус |
+|-------|--------|
+| listCompetitions OR-логика | ✅ |
+| planResolution Step 0.5 guard | ✅ |
+| season_id optional + DiscriminatedOwner | ✅ |
+| exercise_adjustments resolution | ✅ |
 
 ---
 
-## Phase 2A — Миграция БД: Schema (PocketBase)
->
-> Дата: 2026-02-26 · Агент: [G3H]
+## Kaizen Review — для Phase 4 🔍
 
-### Что сделано
+**Найдено при gap-анализе (`track_4263_analysis2.md.resolved`):**
 
-- `competitions.season_id` → `required: false` через PocketBase MCP API
-- Добавлены поля в `competitions`: `owner_type` (select: season/athlete/group, required), `athlete_id` (FK→athletes, nullable), `group_id` (FK→groups, nullable)
-- Добавлены поля в `training_plans`: `plan_type` (select: phase_based/standalone/override, required); `phase_id` + `week_number` → nullable; `start_date`, `end_date` (optional dates)
-- Создана новая коллекция `exercise_adjustments` (12 полей: plan_exercise_id✓, athlete_id✓, sets, reps, intensity, weight, duration, distance, rest_seconds, notes, skip, deleted_at) — UNIQUE index на `(plan_exercise_id, athlete_id)`
-- Добавлен `competition_id` (nullable FK → competitions) в `personal_records`
-- Добавлены индексы: `competitions` (5 индексов), `training_plans` (4 индекса), `exercise_adjustments` (2 индекса)
+- ⚡ **ВАЖНО:** `applyAdjustments()` создана, но **не вызывается** в `AthleteTrainingView` — атлет видит базовый план, игнорируя adjustments. Нужно вызвать при загрузке плана.
+- ⚡ **ВАЖНО:** Нет UX-флоу «Участвовать / Отказаться» для `owner_type='group'` competitions — атлет видит старт, но не может управлять участием.
 
-### Файлы изменены
+**Ложные тревоги (проверено на коде):**
 
-| Файл | Изменение |
-|------|-----------|
-| PocketBase: `competitions` | schema update через MCP |
-| PocketBase: `training_plans` | schema update через MCP |
-| PocketBase: `exercise_adjustments` | новая коллекция |
-| PocketBase: `personal_records` | +competition_id |
-| `conductor/tracks/track-4.263-schema-decoupling/gate.md` | Phase 2A: все [x] |
+- Dexie.js не используется → offline-sync не нужен для этого трека
+- Readiness calculator не зависит от планов → standalone не ломает аналитику
+- `todayForUser()` уже timezone-aware → новая проблема только в `planResolution.ts` без timezone (backlog)
 
-### Верификация
+**Заметки для следующего агента:**
 
-- `pnpm type-check` → ⚠️ только pre-existing Playwright ошибки в `tests/` (не в `src/`)
-- `pnpm build` → ✅ Exit 0
-- `pnpm test` → —
-
-### Заметки для следующего агента
-
-- Правильные `collectionId` для relations: `athletes=pbc_401194191`, `groups=pbc_3346940990`, `competitions=pbc_4031054395`, `training_plans=pbc_4250298155`, `plan_exercises=pbc_2559885587`
-- PocketBase MCP `create_collection` не принимает `@request.data.*` в createRule — обходи через pb_hook
-- Все существующие записи: `competitions` имеют `season_id`, `training_plans` имеют `phase_id` — Phase 3 это нужно учесть в типах TypeScript
-
----
-
-## Phase 2B — Миграция БД: Data + Hooks + Rules
->
-> Дата: 2026-02-26 · Агент: [G3H]
-
-### Что сделано
-
-- Написан и запущен скрипт-мигратор `/tmp/migrate-4263.mjs` с DRY_RUN mode
-  - 11 competitions → `owner_type='season'` (все имели `season_id`, 0 orphans)
-  - 12 training_plans → `plan_type='phase_based'` (все имели `phase_id`, 0 orphans)
-- Создан `pb_hooks/ownership_integrity.pb.js` — onRecordCreate/onRecordUpdate hooks для `competitions` (валидация FK consistency по owner_type)
-- Обновлены API Rules для 6 коллекций с owner_type-ветвлением:
-  - `competitions` — polymorphic listRule/viewRule/updateRule/deleteRule
-  - `competition_participants`, `competition_media`, `competition_proposals` — каскадные правила
-  - `training_plans` — Season Membership Inheritance + nullable phase_id
-  - `plan_assignments` — поддержка `plan_id.athlete_id.coach_id`
-
-### Файлы изменены
-
-| Файл | Изменение |
-|------|-----------|
-| `pb_hooks/ownership_integrity.pb.js` | новый validation hook |
-| PocketBase: 6 коллекций | API Rules обновлены |
-| `CHANGELOG.md` | +запись Phase 2A+2B |
-| `conductor/tracks/track-4.263-schema-decoupling/gate.md` | Phase 2B: все [x] |
-
-### Верификация
-
-- `pnpm type-check` → ⚠️ только pre-existing Playwright ошибки в `tests/` (не в `src/`)
-- `pnpm build` → ✅ Exit 0
-- `pnpm test` → —
-
-### Kaizen
-
-> Накопленные наблюдения для Phase 3
-
-- `listCompetitions` в `services/competitions.ts` сейчас фильтрует только по `season_id` — Phase 3 должна добавить OR-логику: `athlete_id = me ∪ competition_participants where athlete_id = me`
-- `planResolution.ts` Step 0 предполагает `phase_id.season_id.coach_id` — для `standalone` планов цепочка оборвётся на NULL `phase_id` → нужен Step 0.5 guard
-- В `types.ts` `CompetitionsRecord` сейчас требует `season_id: string` — нужно сделать `season_id?: string` и добавить discriminated union для `owner_type`
-- Поле `exercise_adjustments` не имеет связи с `training_logs` — при логировании тренировки нужно будет resolve adjustments перед отображением
+- Phase 4 — QA heavy: 9 smoke-сценариев (S1/S2/S4/S5/S7/S9/S11/S14/S15) + деплой
+- `applyAdjustments()` находится в `planResolution.ts` — нужен вызов после `getPublishedPlanForToday()`
+- Кнопка join/leave → нужна API `createParticipant/deleteParticipant` в `competitions.ts`

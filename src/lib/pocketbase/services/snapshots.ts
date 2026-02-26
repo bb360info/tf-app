@@ -14,7 +14,7 @@ export interface PlanSnapshot extends PlanSnapshotsRecord {
 export async function createSnapshot(planId: string, snapshotData: Record<string, unknown>): Promise<PlanSnapshot> {
     // 1. Get last version to increment
     const last = await pb.collection('plan_snapshots').getList(1, 1, {
-        filter: `plan_id = "${planId}"`,
+        filter: pb.filter('plan_id = {:planId}', { planId }),
         sort: '-version',
     });
 
@@ -35,7 +35,7 @@ export async function createSnapshot(planId: string, snapshotData: Record<string
  */
 export async function listSnapshots(planId: string): Promise<PlanSnapshot[]> {
     const list = await pb.collection('plan_snapshots').getList(1, 50, {
-        filter: `plan_id = "${planId}"`,
+        filter: pb.filter('plan_id = {:planId}', { planId }),
         sort: '-version',
     });
     return list.items as PlanSnapshot[];

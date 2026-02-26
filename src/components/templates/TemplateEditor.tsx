@@ -226,8 +226,8 @@ function CustomStepForm({ onAdd }: CustomStepFormProps) {
                 onChange={(e) => setDur(Number(e.target.value))}
                 className={styles.fieldInput} aria-label={t('durationSec')} />
             <div className={styles.customActions}>
-                <button type="button" className={styles.saveMiniBtn} onClick={submit}><Plus size={14} /></button>
-                <button type="button" className={styles.cancelMiniBtn} onClick={() => setOpen(false)}><X size={14} /></button>
+                <button type="button" className={styles.saveMiniBtn} onClick={submit} aria-label={t('save')}><Plus size={14} /></button>
+                <button type="button" className={styles.cancelMiniBtn} onClick={() => setOpen(false)} aria-label={t('cancel')}><X size={14} /></button>
             </div>
         </div>
     );

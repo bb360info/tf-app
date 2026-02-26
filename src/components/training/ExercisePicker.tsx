@@ -2,7 +2,7 @@
 
 /**
  * ExercisePicker — refactored.
- * - phaseType сделан optional (QuickPlanBuilder не привязан к фазе)
+ * - phaseType сделан optional (QuickWorkout не привязан к фазе)
  * - добавлена вкладка «Мои упражнения» (custom_exercises)
  */
 
@@ -265,6 +265,7 @@ export default function ExercisePicker({ phaseType, onSelect, onClose }: Props) 
                             <button
                                 key={exercise.id}
                                 className={styles.exerciseRow}
+                                style={{ borderLeftColor: CATEGORY_COLORS[exercise.training_category] }}
                                 onClick={() => onSelect(exercise, 'library')}
                             >
                                 <div className={styles.exerciseInfo}>
@@ -298,6 +299,7 @@ export default function ExercisePicker({ phaseType, onSelect, onClose }: Props) 
                             <button
                                 key={exercise.id}
                                 className={styles.exerciseRow}
+                                style={{ borderLeftColor: CATEGORY_COLORS[exercise.training_category] }}
                                 onClick={() => onSelect(exercise, 'custom')}
                             >
                                 <div className={styles.exerciseInfo}>

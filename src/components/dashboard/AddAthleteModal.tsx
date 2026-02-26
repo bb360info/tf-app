@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { AthleteForm, type AthleteFormInitialData, type AthleteFormSubmitPayload } from '@/components/athletes';
 import { createAthlete } from '@/lib/pocketbase/services/athletes';
 import styles from './AddAthleteModal.module.css';
 
@@ -12,26 +12,37 @@ interface AddAthleteModalProps {
 }
 
 export function AddAthleteModal({ onClose, onCreated }: AddAthleteModalProps) {
-    const t = useTranslations('dashboard.newAthlete');
-
-    const [name, setName] = useState('');
-    const [birthDate, setBirthDate] = useState('');
-    const [gender, setGender] = useState<'male' | 'female' | ''>('');
-    const [heightCm, setHeightCm] = useState('');
+    const t = useTranslations('athleteForm');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = useCallback(async () => {
-        if (!name.trim()) return;
+    const initialData: AthleteFormInitialData = {
+        name: '',
+        birthDate: '',
+        gender: '',
+        heightCm: '',
+        primaryDiscipline: '',
+        secondaryDisciplines: [],
+    };
+
+    const handleSubmit = useCallback(async (payload: AthleteFormSubmitPayload) => {
+        const name = payload.athletePatch.name?.trim();
+        if (!name) return;
+
         setIsLoading(true);
         setError('');
+
         try {
-            await createAthlete({
-                name: name.trim(),
-                birth_date: birthDate || undefined,
-                gender: (gender as 'male' | 'female') || undefined,
-                height_cm: heightCm ? Number(heightCm) : undefined,
+            const athlete = await createAthlete({
+                name,
+                birth_date: payload.athletePatch.birth_date,
+                gender: payload.athletePatch.gender,
+                height_cm: payload.athletePatch.height_cm,
+                primary_discipline: payload.athletePatch.primary_discipline,
+                secondary_disciplines: payload.athletePatch.secondary_disciplines,
             });
+
+
             onCreated();
         } catch (err) {
             const { logError } = await import('@/lib/utils/errors');
@@ -40,100 +51,27 @@ export function AddAthleteModal({ onClose, onCreated }: AddAthleteModalProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [name, birthDate, gender, heightCm, onCreated, t]);
+    }, [onCreated, t]);
 
     return (
         <div
             className={styles.overlay}
             role="dialog"
             aria-modal="true"
-            aria-label={t('title')}
+            aria-label={t('createTitle')}
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
             <div className={styles.modal}>
-                <h2 className={styles.modalTitle}>{t('title')}</h2>
-
-                {error && <div className={styles.error}>{error}</div>}
-
-                {/* Name (required) */}
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="athlete-name">
-                        {t('name')} *
-                    </label>
-                    <input
-                        id="athlete-name"
-                        type="text"
-                        className={styles.input}
-                        placeholder={t('namePlaceholder')}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-
-                {/* Birth date + Gender */}
-                <div className={styles.row}>
-                    <div className={styles.field}>
-                        <label className={styles.label} htmlFor="athlete-birth">
-                            {t('birthDate')}
-                        </label>
-                        <input
-                            id="athlete-birth"
-                            type="date"
-                            className={styles.input}
-                            value={birthDate}
-                            onChange={(e) => setBirthDate(e.target.value)}
-                        />
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label} htmlFor="athlete-gender">
-                            {t('gender')}
-                        </label>
-                        <select
-                            id="athlete-gender"
-                            className={styles.select}
-                            value={gender}
-                            onChange={(e) => setGender(e.target.value as '' | 'male' | 'female')}
-                        >
-                            <option value="">—</option>
-                            <option value="male">{t('genderMale')}</option>
-                            <option value="female">{t('genderFemale')}</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Height */}
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="athlete-height">
-                        {t('heightCm')}
-                    </label>
-                    <input
-                        id="athlete-height"
-                        type="number"
-                        min="100"
-                        max="250"
-                        step="1"
-                        className={styles.input}
-                        placeholder="185"
-                        value={heightCm}
-                        onChange={(e) => setHeightCm(e.target.value)}
-                    />
-                </div>
-
-                {/* Actions */}
-                <div className={styles.actions}>
-                    <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                        {t('cancel')}
-                    </button>
-                    <button
-                        type="button"
-                        className={styles.saveBtn}
-                        onClick={handleSubmit}
-                        disabled={!name.trim() || isLoading}
-                    >
-                        {isLoading ? <Loader2 size={16} aria-hidden="true" style={{ animation: 'spin 0.7s linear infinite' }} /> : t('save')}
-                    </button>
-                </div>
+                <h2 className={styles.modalTitle}>{t('createTitle')}</h2>
+                <AthleteForm
+                    mode="create"
+                    initialData={initialData}
+                    isSubmitting={isLoading}
+                    error={error}
+                    submitLabel={t('addCta')}
+                    onCancel={onClose}
+                    onSubmit={handleSubmit}
+                />
             </div>
         </div>
     );

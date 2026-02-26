@@ -7,13 +7,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Search, Star, X, Filter } from 'lucide-react';
+import { Search, Star, X, Filter, Plus } from 'lucide-react';
 import { searchExercises } from '@/lib/pocketbase/services/exercises';
 import type { ExercisesRecord, TrainingCategory, ExerciseLevel, PhaseType } from '@/lib/pocketbase/types';
 import type { Language } from '@/lib/pocketbase/types';
 import { useExerciseFavorites } from '@/lib/hooks/useExerciseFavorites';
 import { ExerciseDetailSheet } from './ExerciseDetailSheet';
 import { ShowAthleteOverlay } from './ShowAthleteOverlay';
+import { ExerciseConstructor } from './ExerciseConstructor';
 import styles from './ExerciseCatalog.module.css';
 
 type FilterTab = 'all' | 'favorites';
@@ -52,6 +53,7 @@ export function ExerciseCatalog() {
     const [showFilters, setShowFilters] = useState(false);
     const [selectedExercise, setSelectedExercise] = useState<ExercisesRecord | null>(null);
     const [showAthleteEx, setShowAthleteEx] = useState<ExercisesRecord | null>(null);
+    const [showConstructor, setShowConstructor] = useState(false);
 
     // Debounce search query
     useEffect(() => {
@@ -102,6 +104,19 @@ export function ExerciseCatalog() {
 
     return (
         <div className={styles.root}>
+            {/* Top row: Search + Create button */}
+            <div className={styles.topRow}>
+                <button
+                    type="button"
+                    className={styles.createBtn}
+                    onClick={() => setShowConstructor(true)}
+                    aria-label={t('createExercise')}
+                >
+                    <Plus size={16} aria-hidden="true" />
+                    {t('createExercise')}
+                </button>
+            </div>
+
             {/* Search bar */}
             <div className={styles.searchRow}>
                 <div className={styles.searchWrap}>
@@ -393,6 +408,17 @@ export function ExerciseCatalog() {
                     locale={locale}
                     onClose={() => setShowAthleteEx(null)}
                     labels={{ close: t('close'), dosage: t('dosage') }}
+                />
+            )}
+
+            {/* Exercise Constructor (create custom exercise) */}
+            {showConstructor && (
+                <ExerciseConstructor
+                    onClose={() => setShowConstructor(false)}
+                    onCreated={() => {
+                        setShowConstructor(false);
+                        loadExercises();
+                    }}
                 />
             )}
         </div>

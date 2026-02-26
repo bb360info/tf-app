@@ -4,12 +4,16 @@
  */
 
 import pb from '../client';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
 import { Collections } from '../collections';
 import type {
     SeasonsRecord,
     TrainingPhasesRecord,
     CompetitionsRecord,
     PhaseType,
+    CompetitionStatus,
+    Discipline,
+    SeasonType,
 } from '../types';
 import type { RecordModel } from 'pocketbase';
 
@@ -59,6 +63,30 @@ export async function listSeasonsForAthlete(athleteId: string): Promise<SeasonWi
         sort: '-start_date',
         expand: 'training_phases(season_id),competitions(season_id)',
     });
+}
+
+/**
+ * Get the currently active season for an athlete.
+ * "Active" = today falls within start_date..end_date (inclusive).
+ * Returns null if no active season is found.
+ */
+export async function getActiveSeasonForAthlete(
+    athleteId: string
+): Promise<SeasonWithRelations | null> {
+    const today = toLocalISODate(new Date());
+    try {
+        const records = await pb.collection(Collections.SEASONS).getFullList<SeasonWithRelations>({
+            filter: pb.filter(
+                'athlete_id = {:aid} && deleted_at = "" && start_date <= {:today} && end_date >= {:today}',
+                { aid: athleteId, today }
+            ),
+            sort: '-start_date',
+            expand: 'training_phases(season_id),competitions(season_id)',
+        });
+        return records[0] ?? null;
+    } catch {
+        return null;
+    }
 }
 
 /** Get a single season with phases and competitions */
@@ -173,6 +201,13 @@ export async function createCompetition(data: {
     name: string;
     date: string;
     priority: 'A' | 'B' | 'C';
+    discipline?: Discipline;
+    season_type?: SeasonType;
+    website?: string;
+    status?: CompetitionStatus;
+    official_result?: number;
+    official_updated_by?: string;
+    official_updated_at?: string;
     location?: string;
     notes?: string;
 }): Promise<CompetitionRecord> {
@@ -182,7 +217,23 @@ export async function createCompetition(data: {
 /** Update a competition */
 export async function updateCompetition(
     id: string,
-    data: Partial<Pick<CompetitionsRecord, 'name' | 'date' | 'priority' | 'location' | 'notes'>>
+    data: Partial<
+        Pick<
+            CompetitionsRecord,
+            | 'name'
+            | 'date'
+            | 'priority'
+            | 'discipline'
+            | 'season_type'
+            | 'website'
+            | 'status'
+            | 'official_result'
+            | 'official_updated_by'
+            | 'official_updated_at'
+            | 'location'
+            | 'notes'
+        >
+    >
 ): Promise<CompetitionRecord> {
     return pb.collection(Collections.COMPETITIONS).update<CompetitionRecord>(id, data);
 }

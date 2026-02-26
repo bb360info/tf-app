@@ -1,18 +1,20 @@
-
 import pb from '../client';
 import { CheckinData } from '@/lib/readiness/types';
 import { DailyCheckinsRecord } from '../types';
+import type { AthleteWithStats } from '@/lib/pocketbase/services/athletes';
+import { getSelfAthleteProfile } from '@/lib/pocketbase/services/athletes';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
 
 /**
  * Get the daily check-in for a specific athlete and date.
  * Default date is today (local time).
  */
 export async function getTodayCheckin(athleteId: string): Promise<DailyCheckinsRecord | null> {
-    const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const date = toLocalISODate();
 
     try {
         const record = await pb.collection('daily_checkins').getFirstListItem<DailyCheckinsRecord>(
-            `athlete_id = "${athleteId}" && date >= "${date} 00:00:00"`,
+            pb.filter('athlete_id = {:aid} && date >= {:dateStart}', { aid: athleteId, dateStart: `${date} 00:00:00` }),
             { requestKey: null } // Disable auto-cancellation
         );
         return record;
@@ -79,24 +81,35 @@ export async function getSelfAthleteId(): Promise<string> {
         throw new Error('getSelfAthleteId is only for athlete-role users, not coaches.');
     }
 
-    try {
-        const athletes = await pb.collection('athletes').getList(1, 1, {
-            filter: `user_id = "${user.id}"`,
-            requestKey: null,
-        });
-
-        if (athletes.items.length > 0) {
-            return athletes.items[0].id;
-        }
-
-        throw new Error(
-            `No athlete record linked to user ${user.id}. ` +
-            'Contact your coach to set up your athlete profile.'
-        );
-    } catch (e: unknown) {
-        const pbErr = e as { status?: number; message?: string; response?: { data?: unknown }; data?: unknown };
-        console.error('Error getting self athlete:', pbErr?.status, pbErr?.message);
-        console.error('PB response:', pbErr?.response?.data || pbErr?.data || 'no response data');
-        throw e;
+    const profile = await getSelfAthleteProfile();
+    if (profile) {
+        return profile.id;
     }
+
+    throw new Error(
+        `No active athlete record linked to user ${user.id}. ` +
+        'Join by coach invite to create an athlete profile.'
+    );
+}
+
+/**
+ * Filter athletes to find those with a low readiness score (<= 40) today
+ * OR with 2+ consecutive missed check-in days.
+ * Pure helper function for the Coach Dashboard Team Alerts.
+ */
+export function getTeamReadinessAlerts(athletes: AthleteWithStats[]): AthleteWithStats[] {
+    const today = toLocalISODate();
+    const yesterday = toLocalISODate(new Date(Date.now() - 86_400_000));
+    return athletes.filter(a => {
+        const lowReadiness =
+            a.latestCheckinDate === today &&
+            a.latestReadiness !== undefined &&
+            a.latestReadiness <= 40;
+        // 2+ consecutive missed days: last checkin was not today and not yesterday
+        const missedStreak =
+            !!a.latestCheckinDate &&
+            a.latestCheckinDate !== today &&
+            a.latestCheckinDate !== yesterday;
+        return lowReadiness || missedStreak;
+    });
 }

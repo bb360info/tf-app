@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, ChevronLeft, ChevronRight, Zap, Wand2, Send, RotateCcw, AlertTriangle, CalendarDays, Printer, FileText, History, Save, UserCog } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Zap, Wand2, Send, RotateCcw, CalendarDays, Printer, History, Save, UserCog, MoreVertical } from 'lucide-react';
 import {
     getOrCreatePlan,
     listPlanExercises,
@@ -10,22 +10,25 @@ import {
     updatePlanExercise,
     removePlanExercise,
     reorderExercises,
-    groupByDay,
     groupByDayAndSession,
     calculateWeeklyCNS,
     publishPlan,
     revertToDraft,
     updatePlan,
 } from '@/lib/pocketbase/services/plans';
-import type { UpdateExerciseData, AdHocWarmupData } from './DayColumn';
+import type { UpdateExerciseData, AdHocWarmupData } from './types';
 import { autoFillWeek } from '@/lib/autofill/processor';
 import { getSelfAthleteId } from '@/lib/pocketbase/services/readiness';
 import { getLogsForPlan } from '@/lib/pocketbase/services/logs';
 import { stampTemplate, ejectTemplate, addWarmupItem } from '@/lib/pocketbase/services/templates';
+import { TemplatePanel } from '@/components/templates/TemplatePanel';
 import type { PlanExerciseWithExpand, PlanWithExercises } from '@/lib/pocketbase/services/plans';
 import type { ExerciseRecord } from '@/lib/pocketbase/services/exercises';
 import type { PhaseType } from '@/lib/pocketbase/types';
-import DayColumn from './DayColumn';
+import { useOverrideModal } from './hooks/useOverrideModal';
+import { WeekStrip } from './WeekStrip';
+import { WeekSummary } from './WeekSummary';
+import { QuickWorkout } from './QuickWorkout';
 import dynamic from 'next/dynamic';
 import styles from './WeekConstructor.module.css';
 
@@ -37,6 +40,9 @@ const PlanHistoryModalLazy = dynamic(() => import('./PlanHistoryModal'), {
 });
 const TrainingLogLazy = dynamic(() => import('./TrainingLog'), {
     loading: () => null,
+});
+const DayConstructorLazy = dynamic(() => import('./DayConstructor').then(mod => mod.DayConstructor), {
+    loading: () => <div className={styles.loading}>Loading day...</div>,
 });
 
 interface Props {
@@ -73,6 +79,7 @@ export default function WeekConstructor({
     const [isPublishing, setIsPublishing] = useState(false);
     const [athleteId, setAthleteId] = useState<string | null>(null);
     const [logActiveDay, setLogActiveDay] = useState<number | null>(null);
+    const [activeDay, setActiveDay] = useState<number | null>(null);
     /** Set of day indices (0-6) that already have a log this week */
     const [loggedDays, setLoggedDays] = useState<Set<number>>(new Set());
     /** Per-day coach notes: key = day index (0-6) as string, value = note text */
@@ -80,14 +87,31 @@ export default function WeekConstructor({
     /** Group readiness data: Map<athleteId, score> */
     const [groupReadiness, setGroupReadiness] = useState<Map<string, number>>(new Map());
 
-    // Override modal state
-    const [showOverrideModal, setShowOverrideModal] = useState(false);
-    const [overrideAthletes, setOverrideAthletes] = useState<Array<{ id: string; name: string }>>([]);
-    const [overrideAthleteId, setOverrideAthleteId] = useState('');
-    const [isCreatingOverride, setIsCreatingOverride] = useState(false);
-    const [overrideError, setOverrideError] = useState<string | null>(null);
-    const [overrideSuccess, setOverrideSuccess] = useState(false);
-    const [overrideAthletesLoading, setOverrideAthletesLoading] = useState(false);
+    // Override modal — extracted to useOverrideModal hook
+    const {
+        showOverrideModal, setShowOverrideModal,
+        overrideAthletes, overrideAthleteId, setOverrideAthleteId,
+        isCreatingOverride, overrideError, overrideSuccess, overrideAthletesLoading,
+        handleOpenOverrideModal, handleCreateOverride,
+    } = useOverrideModal({ plan, t });
+    const [templatePanelTarget, setTemplatePanelTarget] = useState<{ day: number; session: number } | null>(null);
+
+
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
+    const [showQuickWorkout, setShowQuickWorkout] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // click outside
+    useEffect(() => {
+        if (!showMoreMenu) return;
+        function handleClick(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setShowMoreMenu(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, [showMoreMenu]);
 
     // Load plan for current week
     const loadPlan = useCallback(async () => {
@@ -170,7 +194,6 @@ export default function WeekConstructor({
     }, [loadPlan]);
 
     // Group exercises by day and session
-    const dayExercises = groupByDay(exercises);
     const dayExercisesBySession = groupByDayAndSession(exercises);
     const cns = calculateWeeklyCNS(exercises);
 
@@ -198,53 +221,7 @@ export default function WeekConstructor({
 
     const [showHistory, setShowHistory] = useState(false);
 
-    // ─── Override Handlers ───────────────────────────────────────
-
-    const handleOpenOverrideModal = useCallback(async () => {
-        setShowOverrideModal(true);
-        setOverrideError(null);
-        setOverrideSuccess(false);
-        setOverrideAthleteId('');
-        if (overrideAthletes.length === 0) {
-            setOverrideAthletesLoading(true);
-            try {
-                const { listMyAthletes } = await import('@/lib/pocketbase/services/athletes');
-                const athletes = await listMyAthletes();
-                setOverrideAthletes(
-                    athletes.map((a) => ({
-                        id: a.id,
-                        name: a.name ?? a.id,
-                    }))
-                );
-            } catch (err) {
-                const { logError } = await import('@/lib/utils/errors');
-                logError(err, { component: 'WeekConstructor', action: 'loadAthletes' });
-                setOverrideError(t('errors.networkError'));
-            } finally {
-                setOverrideAthletesLoading(false);
-            }
-        }
-    }, [overrideAthletes.length, t]);
-
-    const handleCreateOverride = useCallback(async () => {
-        if (!plan || !overrideAthleteId || isCreatingOverride) return;
-        setIsCreatingOverride(true);
-        setOverrideError(null);
-        try {
-            const { createIndividualOverride } = await import('@/lib/pocketbase/services/plans');
-            await createIndividualOverride(plan.id, overrideAthleteId);
-            setOverrideSuccess(true);
-            setTimeout(() => {
-                setShowOverrideModal(false);
-                setOverrideSuccess(false);
-                setOverrideAthleteId('');
-            }, 1500);
-        } catch (err) {
-            setOverrideError(err instanceof Error ? err.message : t('errors.networkError'));
-        } finally {
-            setIsCreatingOverride(false);
-        }
-    }, [plan, overrideAthleteId, isCreatingOverride, t]);
+    // Override handlers are now in useOverrideModal hook
 
     const handleSaveSnapshot = useCallback(async () => {
         if (!plan) return;
@@ -266,27 +243,12 @@ export default function WeekConstructor({
     // ─── Phase 4: Template Integration Handlers ───────────────────
 
     /** Append training_day template exercises to a day (append-only, no eject) */
-    const handleAppendTemplate = useCallback(
-        async (day: number, session: number, templateId: string) => {
-            if (!plan) return;
-            try {
-                const { appendTemplate } = await import('@/lib/pocketbase/services/templates');
-                await appendTemplate(templateId, plan.id, day, session);
-                await loadPlan();
-            } catch (err) {
-                console.error('Failed to append template:', err);
-            }
-        },
-        [plan, loadPlan]
-    );
-
-    /** Save a plan day as a new training_day template (inline name from DayColumn) */
     const handleSaveAsTemplate = useCallback(
         async (day: number, session: number, name: string) => {
             if (!plan || !name.trim()) return;
             try {
                 const pb = (await import('@/lib/pocketbase/client')).default;
-                const coachId = pb.authStore.model?.id as string | undefined;
+                const coachId = pb.authStore.record?.id as string | undefined;
                 if (!coachId) return;
                 const { createTemplateFromPlanDay } = await import('@/lib/pocketbase/services/templates');
                 await createTemplateFromPlanDay(plan.id, day, session, coachId, {
@@ -396,18 +358,18 @@ export default function WeekConstructor({
 
     // ─── Warmup Handlers ─────────────────────────────────────
 
-    const handleStampTemplate = useCallback(
-        async (day: number, session: number, templateId: string) => {
-            if (!plan) return;
-            try {
-                await stampTemplate(templateId, plan.id, day, session);
-                await loadPlan();
-            } catch (err) {
-                console.error('Failed to stamp template:', err);
-            }
-        },
-        [plan, loadPlan]
-    );
+    // ─── Warmup Handlers ─────────────────────────────────────
+
+    const handleApplyTemplate = async (templateId: string) => {
+        if (!plan || !templatePanelTarget) return;
+        try {
+            await stampTemplate(templateId, plan.id, templatePanelTarget.day, templatePanelTarget.session);
+            await loadPlan(); // Re-fetch to show new items
+        } catch (err) {
+            console.error('Failed to stamp template', err);
+            throw err; // For ErrorBoundary or UI handle
+        }
+    };
 
     const handleEjectWarmup = useCallback(
         async (day: number, session: number) => {
@@ -584,7 +546,7 @@ export default function WeekConstructor({
                         className={styles.publishBtn}
                         onClick={handlePublish}
                         disabled={isPublishing}
-                        title={isPublished ? t('training.planStatus_draft') : t('training.planStatus_published')}
+                        title={isPublished ? t('training.revertAction') : t('training.publishAction')}
                         style={{
                             background: isPublished
                                 ? 'var(--color-warning)'
@@ -594,48 +556,55 @@ export default function WeekConstructor({
                         {isPublished ? <RotateCcw size={16} /> : <Send size={16} />}
                     </button>
 
-                    <div className={styles.exportControls}>
+                    <div className={styles.moreMenuContainer} ref={menuRef}>
                         <button
                             className={styles.exportBtn}
-                            onClick={() => window.print()}
-                            title={t('training.print')}
+                            onClick={() => setShowMoreMenu(!showMoreMenu)}
+                            title={t('training.moreActions')}
                         >
-                            <Printer size={16} />
+                            <MoreVertical size={16} />
                         </button>
-                        <button
-                            className={styles.exportBtn}
-                            onClick={async () => {
-                                const { generatePDF } = await import('@/lib/export/pdf-generator');
-                                await generatePDF('week-grid-container', `${phaseName}-week-${weekNumber}`);
-                            }}
-                            title={t('training.savePdf')}
-                        >
-                            <FileText size={16} />
-                        </button>
-                        <button
-                            className={styles.exportBtn}
-                            onClick={() => setShowHistory(true)}
-                            title={t('training.history')}
-                        >
-                            <History size={16} />
-                        </button>
-                        <button
-                            className={styles.exportBtn}
-                            onClick={handleSaveSnapshot}
-                            title={t('training.saveVersion')}
-                        >
-                            <Save size={16} />
-                        </button>
-                        {/* Override button — only for published plans */}
-                        {isPublished && (
-                            <button
-                                className={styles.exportBtn}
-                                onClick={handleOpenOverrideModal}
-                                title={t('training.createOverride')}
-                                aria-label={t('training.createOverride')}
-                            >
-                                <UserCog size={16} />
-                            </button>
+
+                        {showMoreMenu && (
+                            <div className={styles.moreMenuDropdown}>
+                                <button
+                                    className={styles.dropdownItem}
+                                    onClick={() => { setShowQuickWorkout(true); setShowMoreMenu(false); }}
+                                >
+                                    <Zap size={16} />
+                                    {t('training.quickWorkout') || 'Quick Workout'}
+                                </button>
+                                <button
+                                    className={styles.dropdownItem}
+                                    onClick={() => { window.print(); setShowMoreMenu(false); }}
+                                >
+                                    <Printer size={16} />
+                                    {t('training.print')}
+                                </button>
+                                <button
+                                    className={styles.dropdownItem}
+                                    onClick={() => { setShowHistory(true); setShowMoreMenu(false); }}
+                                >
+                                    <History size={16} />
+                                    {t('training.history')}
+                                </button>
+                                <button
+                                    className={styles.dropdownItem}
+                                    onClick={() => { handleSaveSnapshot(); setShowMoreMenu(false); }}
+                                >
+                                    <Save size={16} />
+                                    {t('training.saveVersion')}
+                                </button>
+                                {isPublished && (
+                                    <button
+                                        className={styles.dropdownItem}
+                                        onClick={() => { handleOpenOverrideModal(); setShowMoreMenu(false); }}
+                                    >
+                                        <UserCog size={16} />
+                                        {t('training.createOverride')}
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
 
@@ -652,51 +621,46 @@ export default function WeekConstructor({
 
             {/* Status badge */}
             {plan && (
-                <div className={styles.statusRow}>
-                    <span className={`${styles.statusBadge} ${styles[`status_${plan.status}`]}`}>
-                        {t(`training.planStatus_${plan.status}`)}
-                    </span>
-                    <span className={styles.exerciseTotal}>
-                        {exercises.length} {t('training.exercisesFound')}
-                    </span>
-
-                    {/* Adaptation Warning */}
-                    {readinessScore !== undefined && readinessScore < 50 && (
-                        <div className={styles.adaptationWarning}>
-                            <AlertTriangle size={14} /> {t('training.lowReadinessWarning')} — {t('training.reduceVolume')}
-                        </div>
-                    )}
-                </div>
+                <WeekSummary
+                    planStatus={plan.status}
+                    exerciseCount={exercises.length}
+                    readinessScore={readinessScore}
+                />
             )}
 
-            {/* 7-day grid */}
-            <div id="week-grid-container" className={styles.grid}>
-                {Array.from({ length: 7 }, (_, day) => (
-                    <DayColumn
-                        key={day}
-                        dayOfWeek={day}
-                        date={getDayDate(day)}
-                        groupReadiness={groupReadiness}
-                        exercisesBySession={dayExercisesBySession[day] ?? { 0: [] }}
-                        onAdd={(session) => { setPickerSession(session); setPickerDay(day); }}
-                        onUpdate={handleUpdateExercise}
-                        onRemove={handleRemoveExercise}
-                        onReorder={handleReorder}
-                        onStampTemplate={!isReadOnly ? handleStampTemplate : undefined}
-                        onEjectWarmup={!isReadOnly ? handleEjectWarmup : undefined}
-                        onAddWarmupItem={!isReadOnly ? handleAddWarmupItem : undefined}
-                        onAppendTemplate={!isReadOnly ? handleAppendTemplate : undefined}
-                        onSaveAsTemplate={!isReadOnly ? handleSaveAsTemplate : undefined}
-                        planId={plan?.id}
-                        athleteId={athleteId ?? undefined}
-                        hasLog={loggedDays.has(day)}
-                        onLogResult={() => setLogActiveDay(day)}
-                        readOnly={isReadOnly}
-                        dayNote={dayNotes[String(day)] ?? ''}
-                        onDayNoteChange={!isReadOnly ? (note) => handleDayNoteChange(day, note) : undefined}
-                    />
-                ))}
-            </div>
+            {activeDay !== null ? (
+                <DayConstructorLazy
+                    dayOfWeek={activeDay}
+                    date={getDayDate(activeDay)}
+                    exercisesBySession={dayExercisesBySession[activeDay] ?? { 0: [] }}
+                    onAdd={(session) => { setPickerSession(session); setPickerDay(activeDay); }}
+                    onUpdate={handleUpdateExercise}
+                    onRemove={handleRemoveExercise}
+                    onReorder={handleReorder}
+                    onEjectWarmup={!isReadOnly ? handleEjectWarmup : undefined}
+                    onAddWarmupItem={!isReadOnly ? handleAddWarmupItem : undefined}
+                    onOpenTemplates={!isReadOnly ? (session) => setTemplatePanelTarget({ day: activeDay, session }) : undefined}
+                    onSaveAsTemplate={!isReadOnly ? (session, name) => handleSaveAsTemplate(activeDay, session, name) : undefined}
+                    hasLog={loggedDays.has(activeDay)}
+                    readOnly={isReadOnly}
+                    dayNote={dayNotes[String(activeDay)] ?? ''}
+                    onDayNoteChange={!isReadOnly ? (note) => handleDayNoteChange(activeDay, note) : undefined}
+                    onReorderDrag={!isReadOnly ? async (updates) => {
+                        await reorderExercises(updates);
+                        await loadPlan();
+                    } : undefined}
+                    groupReadiness={groupReadiness}
+                    onClose={() => setActiveDay(null)}
+                />
+            ) : (
+                <WeekStrip
+                    dayExercisesBySession={dayExercisesBySession}
+                    loggedDays={loggedDays}
+                    groupReadiness={groupReadiness}
+                    onOpenDay={setActiveDay}
+                    getDayDate={getDayDate}
+                />
+            )}
 
             {/* Training Log Modal */}
             {logActiveDay !== null && plan && athleteId && (
@@ -785,6 +749,18 @@ export default function WeekConstructor({
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* Template Panel */}
+            <TemplatePanel
+                isOpen={!!templatePanelTarget}
+                onClose={() => setTemplatePanelTarget(null)}
+                onApplyTemplate={handleApplyTemplate}
+            />
+
+            {/* Quick Workout Modal */}
+            {showQuickWorkout && (
+                <QuickWorkout onClose={() => setShowQuickWorkout(false)} />
             )}
         </div>
     );

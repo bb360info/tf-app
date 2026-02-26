@@ -21,7 +21,7 @@ import { listUnread } from '@/lib/pocketbase/services/notifications';
 import type { NotificationsRecord } from '@/lib/pocketbase/types';
 
 const CHINA_MODE_KEY = 'china_mode';
-const BG_POLL_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
+const BG_POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (was 15, China needs more frequent)
 const SSE_MAX_BACKOFF_MS = 60_000;
 const SSE_INITIAL_BACKOFF_MS = 1_000;
 
@@ -58,6 +58,9 @@ export function useNotifications(userId: string) {
 
     /** Clear all notifications (mark all read) */
     const clearAll = useCallback(() => {
+        // Clear seenIds too — so new notifications arriving after "mark all read"
+        // are not incorrectly deduplicated on next loadInitial()
+        seenIds.current.clear();
         setNotifications([]);
         setUnreadCount(0);
     }, []);
@@ -67,16 +70,22 @@ export function useNotifications(userId: string) {
         if (!userId) return;
         try {
             const { items } = await listUnread(userId);
-            for (const n of items) seenIds.current.add(n.id);
-            setNotifications(items);
-            setUnreadCount(items.length);
+            const now = new Date();
+            // Filter expired notifications (expires_at < now)
+            const valid = items.filter((n) => {
+                if (!n.expires_at) return true; // no expiry = always valid
+                return new Date(n.expires_at) >= now;
+            });
+            for (const n of valid) seenIds.current.add(n.id);
+            setNotifications(valid);
+            setUnreadCount(valid.length);
         } catch {
             /* non-critical: notification fetch */
         }
     }, [userId]);
 
     /** Subscribe to SSE with exponential backoff on error */
-    const subscribeSSE = useCallback(() => {
+    const subscribeSSE = useCallback(function subscribe() {
         if (!userId || isSseActive.current) return;
 
         isSseActive.current = true;
@@ -96,14 +105,14 @@ export function useNotifications(userId: string) {
                 backoffMs.current = Math.min(delay * 2, SSE_MAX_BACKOFF_MS);
 
                 reconnectTimer.current = setTimeout(() => {
-                    subscribeSSE();
+                    subscribe();
                 }, delay);
             });
 
     }, [userId, addNotification, removeNotification]);
 
-    /** BG Sync polling — for China/offline (15min interval) */
-    const startBgSync = useCallback(() => {
+    /** BG Sync polling — for China/offline. interval defaults to BG_POLL_INTERVAL_MS (5min) */
+    const startBgSync = useCallback((interval = BG_POLL_INTERVAL_MS) => {
         if (!userId) return;
 
         const poll = async () => {
@@ -117,7 +126,7 @@ export function useNotifications(userId: string) {
             }
         };
 
-        const timer = setInterval(() => void poll(), BG_POLL_INTERVAL_MS);
+        const timer = setInterval(() => void poll(), interval);
         return () => clearInterval(timer);
     }, [userId, addNotification]);
 
@@ -133,11 +142,10 @@ export function useNotifications(userId: string) {
         // SSE subscription
         subscribeSSE();
 
-        // BG Sync polling (always on in china mode, or as fallback)
-        let cleanupBgSync: (() => void) | undefined;
-        if (chinaMode) {
-            cleanupBgSync = startBgSync();
-        }
+        // BG Sync polling:
+        //   - China mode: 5min interval (SSE blocked by firewall)
+        //   - All others: 30min fallback (in case SSE silently fails)
+        const cleanupBgSync = startBgSync(chinaMode ? BG_POLL_INTERVAL_MS : 30 * 60 * 1000);
 
         // navigator.onLine reconnect (BUG-3 fix)
         const handleOnline = () => {
@@ -180,6 +188,23 @@ export function useNotifications(userId: string) {
             navigator.serviceWorker?.removeEventListener('message', handleSWMessage);
         };
     }, [userId, loadInitial, subscribeSSE, startBgSync]);
+
+    // ── App Badge API: sync unread count with OS badge ─────────────────────
+    useEffect(() => {
+        // Feature-detect: Badge API not available in all browsers (not in Firefox, China WebViews)
+        if (typeof navigator === 'undefined') return;
+        const nav = navigator as Navigator & { setAppBadge?(count?: number): Promise<void>; clearAppBadge?(): Promise<void> };
+
+        if (unreadCount > 0) {
+            if ('setAppBadge' in nav && typeof nav.setAppBadge === 'function') {
+                void nav.setAppBadge(unreadCount).catch(() => { /* non-critical */ });
+            }
+        } else {
+            if ('clearAppBadge' in nav && typeof nav.clearAppBadge === 'function') {
+                void nav.clearAppBadge().catch(() => { /* non-critical */ });
+            }
+        }
+    }, [unreadCount]);
 
     return {
         notifications,

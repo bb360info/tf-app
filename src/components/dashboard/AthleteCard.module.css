@@ -201,6 +201,7 @@
     opacity: 0.4;
     cursor: not-allowed;
 }
+
 /* ── Group badge ───────────────────────────────────── */
 
 .groupBadge {
@@ -250,4 +251,19 @@
 .complianceBadge[data-level='low'] {
     background: color-mix(in srgb, var(--color-error) 15%, transparent);
     color: var(--color-error);
+}
+
+/* ── Discipline chip (under name) ────────────────────────── */
+
+.disciplineChip {
+    display: inline-block;
+    margin-top: var(--space-1);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    color: var(--color-accent-primary);
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: capitalize;
 }

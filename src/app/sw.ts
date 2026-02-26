@@ -86,6 +86,12 @@ self.addEventListener("push", (event: PushEvent) => {
                 data: { link },
                 requireInteraction: data.priority === "urgent",
             });
+
+            // Increment app icon badge (PWA Badge API)
+            if ('setAppBadge' in self.navigator) {
+                try { await (self.navigator as Navigator & { setAppBadge(count?: number): Promise<void> }).setAppBadge(1); }
+                catch { /* not critical: badge API may not be available */ }
+            }
         })()
     );
 });
@@ -97,6 +103,12 @@ self.addEventListener("push", (event: PushEvent) => {
  */
 self.addEventListener("notificationclick", (event: NotificationEvent) => {
     event.notification.close();
+
+    // Clear app icon badge when user acts on a notification (PWA Badge API)
+    if ('clearAppBadge' in self.navigator) {
+        try { void (self.navigator as Navigator & { clearAppBadge(): Promise<void> }).clearAppBadge(); }
+        catch { /* not critical */ }
+    }
 
     const link: string = (event.notification.data?.link as string) ?? "/";
 

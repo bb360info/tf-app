@@ -8,6 +8,7 @@
 
 import pb from '../client';
 import { Collections } from '../collections';
+import { getDisplayName } from '@/lib/utils/nameHelpers';
 import type { GroupsRecord } from '../types';
 import type { RecordModel } from 'pocketbase';
 
@@ -19,11 +20,11 @@ export type GroupWithRelations = GroupsRecord & RecordModel;
 
 /** List all groups for the current coach */
 export async function listMyGroups(): Promise<GroupWithRelations[]> {
-    const user = pb.authStore.model;
+    const user = pb.authStore.record;
     if (!user) throw new Error('Not authenticated');
     try {
         return await pb.collection(Collections.GROUPS).getFullList<GroupWithRelations>({
-            filter: `coach_id = "${user.id}" && deleted_at = ""`,
+            filter: pb.filter('coach_id = {:cid} && deleted_at = ""', { cid: user.id }),
         });
     } catch {
         // New users have no groups — return empty list gracefully
@@ -39,7 +40,7 @@ export async function getGroup(groupId: string): Promise<GroupWithRelations> {
 
 /** Create a new group */
 export async function createGroup(name: string, timezone?: string): Promise<GroupWithRelations> {
-    const user = pb.authStore.model;
+    const user = pb.authStore.record;
     if (!user) throw new Error('Not authenticated');
     return pb.collection(Collections.GROUPS).create<GroupWithRelations>({
         coach_id: user.id,
@@ -90,7 +91,8 @@ export async function joinByInviteCode(code: string): Promise<GroupWithRelations
     const safeCode = code.toUpperCase().replace(/"/g, '');
     const now = new Date().toISOString();
     const groups = await pb.collection(Collections.GROUPS).getList<GroupWithRelations>(1, 1, {
-        filter: `invite_code = "${safeCode}" && invite_expires > "${now}"`,
+        // Fix: also filter out soft-deleted groups — they must not accept invites
+        filter: pb.filter('invite_code = {:code} && invite_expires > {:now} && deleted_at = ""', { code: safeCode, now }),
     });
 
     if (groups.items.length === 0) {
@@ -106,36 +108,87 @@ export async function joinByInviteCode(code: string): Promise<GroupWithRelations
         throw new Error('invite.coachCannotJoin');
     }
 
-    // Find or create athlete record linked to this user & group's coach
+    // Find or create athlete record linked to this user and align it with the invite coach.
     let athleteId: string;
-    try {
-        // Look for existing athlete record for this user under this group's coach
-        const existing = await pb.collection(Collections.ATHLETES).getFirstListItem<RecordModel>(
-            pb.filter('user_id = {:uid} && coach_id = {:cid} && deleted_at = ""', {
+    const byCoach = await pb.collection(Collections.ATHLETES).getFullList<RecordModel>({
+        filter: pb.filter('user_id = {:uid} && coach_id = {:cid} && deleted_at = ""', {
+            uid: user.id,
+            cid: group.coach_id,
+        }),
+        requestKey: null,
+    });
+
+    if (byCoach.length > 0) {
+        athleteId = byCoach[0].id;
+    } else {
+        const selfProfiles = await pb.collection(Collections.ATHLETES).getFullList<RecordModel>({
+            filter: pb.filter('user_id = {:uid} && deleted_at = ""', {
                 uid: user.id,
-                cid: group.coach_id,
-            })
-        );
-        athleteId = existing.id;
-    } catch {
-        // No athlete record yet — auto-create one
-        const newAthlete = await pb.collection(Collections.ATHLETES).create({
-            name: user.name || user.email?.split('@')[0] || 'Athlete',
-            coach_id: group.coach_id,
-            user_id: user.id,
+            }),
+            requestKey: null,
         });
-        athleteId = newAthlete.id;
+
+        if (selfProfiles.length > 0) {
+            const selfProfile = selfProfiles[0];
+            const linkedCoachId = String((selfProfile as Record<string, unknown>).coach_id ?? '');
+
+            if (linkedCoachId !== group.coach_id) {
+                await pb.collection(Collections.ATHLETES).update(selfProfile.id, {
+                    coach_id: group.coach_id,
+                });
+            }
+            athleteId = selfProfile.id;
+        } else {
+            // No athlete record yet — auto-create one
+            const newAthlete = await pb.collection(Collections.ATHLETES).create({
+                name: getDisplayName(user as unknown as import('@/lib/utils/nameHelpers').HasName) || user.email?.split('@')[0] || 'Athlete',
+                coach_id: group.coach_id,
+                user_id: user.id,
+            });
+            athleteId = newAthlete.id;
+        }
     }
 
-    // Add athlete as group member (idempotent — PB unique constraint handles duplicates)
+    // Add athlete as group member — differentiate alreadyMember from other errors
     try {
         await pb.collection(Collections.GROUP_MEMBERS).create({
             group_id: group.id,
             athlete_id: athleteId,
         });
-    } catch {
-        // Already a member — ignore unique constraint error
+    } catch (err: unknown) {
+        // Fix: re-throw as specific error so /join page can show correct UI feedback
+        const message = err instanceof Error ? err.message : String(err);
+        if (message.toLowerCase().includes('unique')) {
+            throw new Error('invite.alreadyMember');
+        }
+        throw err; // Re-throw unexpected errors
     }
+
+    // Notify: athlete gets confirmation, coach gets alert (fire-and-forget)
+    const currentUserId = user.id;
+    const coachId = group.coach_id;
+    const athleteName = getDisplayName(user as unknown as import('@/lib/utils/nameHelpers').HasName) || user.email?.split('@')[0] || 'Athlete';
+    void (async () => {
+        try {
+            const { sendNotification } = await import('./notifications');
+            // Notify the athlete who just joined
+            await sendNotification({
+                userId: currentUserId,
+                type: 'system',
+                messageKey: 'joinedGroup',
+                messageParams: { groupName: group.name },
+            });
+            // Notify the coach about the new member
+            await sendNotification({
+                userId: coachId,
+                type: 'invite_accepted',
+                messageKey: 'inviteAccepted',
+                messageParams: { athleteName, groupName: group.name },
+            });
+        } catch {
+            /* non-critical: notification failed */
+        }
+    })();
 
     return group;
 }
@@ -162,6 +215,7 @@ export interface GroupMember extends RecordModel {
     expand?: {
         athlete_id?: RecordModel & {
             name: string;
+            user_id?: string;   // FK → users (needed for notifications in Track 4.23+)
             birth_date?: string;
             height_cm?: number;
         };
@@ -171,7 +225,7 @@ export interface GroupMember extends RecordModel {
 /** List all members of a group with athlete info */
 export async function listGroupMembers(groupId: string): Promise<GroupMember[]> {
     return pb.collection(Collections.GROUP_MEMBERS).getFullList<GroupMember>({
-        filter: `group_id = "${groupId}"`,
+        filter: pb.filter('group_id = {:gid}', { gid: groupId }),
         expand: 'athlete_id',
 
     });
@@ -214,3 +268,91 @@ export async function deleteGroup(groupId: string): Promise<void> {
     });
 }
 
+// ─── Group Member Management ──────────────────────────────────────
+
+/**
+ * Move an athlete from one group to another (or add to an additional group).
+ * Strategy: CREATE new membership first, THEN DELETE old (create-first for network safety).
+ * Guard: both groups must belong to the current coach.
+ *
+ * @param keepInOriginal - if true, athlete stays in the original group ("Add to" mode)
+ */
+export async function moveAthleteToGroup(
+    athleteId: string,
+    fromGroupId: string,
+    toGroupId: string,
+    keepInOriginal = false
+): Promise<void> {
+    const user = pb.authStore.record;
+    if (!user) throw new Error('Not authenticated');
+
+    // Guard: both groups must belong to the current coach (prevents DevTools manipulation)
+    const [fromGroup, toGroup] = await Promise.all([
+        getGroup(fromGroupId),
+        getGroup(toGroupId),
+    ]);
+    // Also guard against soft-deleted groups
+    if (fromGroup.deleted_at || toGroup.deleted_at) {
+        throw new Error('groups.groupDeleted');
+    }
+    if (fromGroup.coach_id !== user.id || toGroup.coach_id !== user.id) {
+        throw new Error('groups.unauthorized');
+    }
+
+    // Step 1: Create new membership first (create-first strategy)
+    // If network fails after this, athlete is in 2 groups — better than 0
+    try {
+        await pb.collection(Collections.GROUP_MEMBERS).create({
+            group_id: toGroupId,
+            athlete_id: athleteId,
+        });
+    } catch {
+        /* unique constraint → already a member of target group → OK, continue */
+    }
+
+    // Step 2: Remove from original group (only if not "add to" mode)
+    if (!keepInOriginal) {
+        const oldMember = await pb.collection(Collections.GROUP_MEMBERS)
+            .getFirstListItem(pb.filter(
+                'group_id = {:gid} && athlete_id = {:aid}',
+                { gid: fromGroupId, aid: athleteId }
+            ));
+        await pb.collection(Collections.GROUP_MEMBERS).delete(oldMember.id);
+    }
+
+    // Notify athlete about group move (fire-and-forget)
+    if (!keepInOriginal) {
+        void (async () => {
+            try {
+                const athlete = await pb.collection(Collections.ATHLETES).getOne(athleteId);
+                const userId = (athlete as unknown as { user_id?: string }).user_id ?? '';
+                if (userId) {
+                    const { sendNotification } = await import('./notifications');
+                    await sendNotification({
+                        userId,
+                        type: 'system',
+                        messageKey: 'movedToGroup',
+                        messageParams: { groupName: toGroup.name },
+                    });
+                }
+            } catch {
+                /* non-critical: notification failed */
+            }
+        })();
+    }
+}
+
+/**
+ * Check if a group has at least one active plan assignment.
+ * Used to warn coaches before moving athletes between groups.
+ */
+export async function hasActiveGroupPlan(groupId: string): Promise<boolean> {
+    try {
+        const result = await pb.collection(Collections.PLAN_ASSIGNMENTS).getList(1, 1, {
+            filter: pb.filter('group_id = {:gid} && status = "active"', { gid: groupId }),
+        });
+        return result.totalItems > 0;
+    } catch {
+        return false;
+    }
+}

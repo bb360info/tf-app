@@ -35,7 +35,7 @@ flowchart TD
 
 ---
 
-## API Rules (21 Collections)
+## API Rules (24 Collections)
 
 ### Pattern: Coach Access
 ```javascript
@@ -75,6 +75,9 @@ flowchart TD
 | `seasons` | coach | coach | coach | coach (soft) |
 | `training_phases` | coach | coach | coach | coach (soft) |
 | `competitions` | coach | coach | coach | coach (soft) |
+| `competition_participants` | coach + participant athlete | coach | coach | coach (soft) |
+| `competition_proposals` | coach + proposal owner athlete | athlete participant | coach review | coach (soft) |
+| `competition_media` | coach + related athletes | related athlete | coach + author | coach + author (soft) |
 | `training_plans` | coach+athletes | coach | coach | coach (soft) |
 | `plan_exercises` | coach+athletes | coach | coach | coach (soft) |
 | `plan_snapshots` | coach+athletes | coach | — | — |
@@ -90,6 +93,41 @@ flowchart TD
 | `notifications` | own | system | own (read) | own |
 | `error_logs` | — | auth | — | — |
 | `audit_log` | admin | system | — | — |
+
+### Competitions Domain Rules (Track 4.243, Phase 1)
+
+`competitions`
+- Athlete: read-only access for own assigned seasons/group scope.
+- Coach: full CRUD in own season scope.
+
+`competition_participants`
+- Athlete: read own participant rows.
+- Coach: full CRUD for participant registry of own competitions.
+- Unique constraint: `(competition_id, athlete_id)`.
+
+`competition_proposals`
+- Athlete: create only `pending` proposals for own athlete identity.
+- Coach: review (`approved | rejected | superseded`) with `reviewed_by` and `reviewed_at`.
+- Athlete cannot overwrite `official_result` in `competitions`.
+- Ordering/indexing uses explicit `proposed_at` (not system `created`) for stable PB SQL indexes.
+
+`competition_media`
+- Athlete: upload own media (`uploader_athlete_id = own athlete`), edit own metadata (`caption`, `kind`, `visibility`).
+- Coach: edit metadata for all media in own competition scope and moderate visibility status.
+- `subject_athlete_id`: only athlete from current `competition_participants` (or empty for self-only context).
+- Visibility policy:
+  - `public`: any authenticated user in competition access scope.
+  - `team`: coach + athletes from season owner/group scope.
+  - `participants`: coach + athletes assigned in `competition_participants`.
+  - `private`: coach + uploader + `subject_athlete_id`.
+- Hidden (`moderation_status = hidden`) records are visible only to coach until unhidden.
+
+Competition media security test scenarios:
+- `hidden` media is not visible to athletes (including uploader/subject), only to coach.
+- `private` media is visible only to coach + uploader + `subject_athlete_id`; any other athlete in the same season/group is denied.
+- `participants` media is visible only for assigned competition participants; non-participant athletes are denied.
+- Athlete cannot edit metadata of foreign media (`uploader_athlete_id` mismatch).
+- Coach can execute `hide/unhide` with moderation reason capture in UI and PB moderation fields (`moderation_status`, `moderated_by`, `moderated_at`).
 
 ---
 

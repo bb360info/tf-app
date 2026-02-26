@@ -58,20 +58,20 @@
 
 ## Phase 3 — Обновление Фронтенда
 
-- [ ] `types.ts` — `CompetitionsRecord`: season_id optional, +athlete_id, +group_id, +owner_type
-- [ ] `types.ts` — `TrainingPlansRecord`: phase_id/week_number optional, +plan_type, +start_date, +end_date
-- [ ] `types.ts` — `ExerciseAdjustmentsRecord` — новый интерфейс
-- [ ] `services/competitions.ts` — `CompetitionMutationInput`: season_id optional, +owner_type, +athlete_id, +group_id
-- [ ] `services/competitions.ts` — `listCompetitions`: OR-логика (athlete_id ∪ competition_participants)
-- [ ] `services/planResolution.ts` — Step 0.5: standalone plan lookup по start_date
-- [ ] `services/planResolution.ts` — `applyAdjustments()` merge для exercise_adjustments
-- [ ] [NEW] `services/exerciseAdjustments.ts` — CRUD для exercise_adjustments
-- [ ] `CompetitionsHub.tsx` — форма «Add Past Start» работает без season_id (owner_type auto-detect)
-- [ ] `CompetitionsHub.tsx` — Empty state для нового атлета без сезонов
-- [ ] `CompetitionsHub.tsx` — Бейджи «🏃 Участвую» / «👀 Группа» для group competitions
-- [ ] Zod-схемы в `src/lib/validation/` обновлены
-- [ ] `pnpm type-check` — 0 ошибок
-- [ ] `pnpm build` — успешный билд
+- [x] `types.ts` — `CompetitionsRecord`: season_id optional, +athlete_id, +group_id, +owner_type
+- [x] `types.ts` — `TrainingPlansRecord`: phase_id/week_number optional, +plan_type, +start_date, +end_date
+- [x] `types.ts` — `ExerciseAdjustmentsRecord` — новый интерфейс
+- [x] `services/competitions.ts` — `CompetitionMutationInput`: season_id optional, +owner_type, +athlete_id, +group_id
+- [x] `services/competitions.ts` — `listCompetitions`: OR-логика (athlete_id ∪ competition_participants)
+- [x] `services/planResolution.ts` — Step 0.5: standalone plan lookup по start_date
+- [x] `services/planResolution.ts` — `applyAdjustments()` merge для exercise_adjustments
+- [x] [NEW] `services/exerciseAdjustments.ts` — CRUD для exercise_adjustments
+- [x] `CompetitionsHub.tsx` — форма «Add Past Start» работает без season_id (owner_type auto-detect)
+- [x] `CompetitionsHub.tsx` — Empty state для нового атлета без сезонов
+- [/] `CompetitionsHub.tsx` — Бейджи «🏃 Участвую» / «👀 Группа» для group competitions (Phase 4: QA + деплой)
+- [x] Zod-схемы в `src/lib/validation/` обновлены
+- [x] `pnpm type-check` — 0 ошибок
+- [ ] `pnpm build` — успешный билд (Phase 4: деплой)
 
 ---
 
@@ -86,6 +86,8 @@
 - [ ] S11: Ad-hoc тренировка (standalone plan) — создаётся и работает
 - [ ] S14: Exercise adjustment → badge «⚡», базовый план не изменён
 - [ ] S15: Mid-season join → атлет сразу видит планы
+- [ ] **[gap-analysis]** `AthleteTrainingView` — вызвать `applyAdjustments()` при загрузке плана атлета (exercise adjustments видны атлету)
+- [ ] **[gap-analysis]** `CompetitionCard` — кнопка «Участвовать / Отказаться» для `owner_type='group'`
 - [ ] Деплой на VPS выполнен (`/deploy`)
 - [ ] `walkthrough.md` написан
 

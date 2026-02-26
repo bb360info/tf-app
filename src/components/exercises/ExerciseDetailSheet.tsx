@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Star, Eye, Tag, Dumbbell, Zap } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { ExercisesRecord } from '@/lib/pocketbase/types';
@@ -71,7 +72,12 @@ export function ExerciseDetailSheet({ exercise, onClose, onShowAthlete }: Exerci
 
     const cnsColor = CNS_COLORS[exercise.cns_cost] ?? '#9b9b9b';
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    const portalElement = document.getElementById('portal-root');
+    if (!portalElement) return null;
+
+    return createPortal(
         <div
             className={styles.backdrop}
             role="dialog"
@@ -205,6 +211,7 @@ export function ExerciseDetailSheet({ exercise, onClose, onShowAthlete }: Exerci
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        portalElement
     );
 }

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { AthleteForm, type AthleteFormInitialData, type AthleteFormSubmitPayload } from '@/components/athletes';
 import { updateAthlete, type AthleteWithStats } from '@/lib/pocketbase/services/athletes';
 import styles from './AddAthleteModal.module.css';
 
@@ -13,129 +13,64 @@ interface EditAthleteModalProps {
 }
 
 export function EditAthleteModal({ athlete, onClose, onUpdated }: EditAthleteModalProps) {
-    const t = useTranslations('dashboard.newAthlete');
-    const tDash = useTranslations('dashboard');
-
-    const [name, setName] = useState(athlete.name);
-    const [birthDate, setBirthDate] = useState(athlete.birth_date || '');
-    const [gender, setGender] = useState<'male' | 'female' | ''>(athlete.gender || '');
-    const [heightCm, setHeightCm] = useState(athlete.height_cm?.toString() || '');
+    const t = useTranslations('athleteForm');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = useCallback(async () => {
-        if (!name.trim()) return;
+    const initialData: AthleteFormInitialData = {
+        name: athlete.name,
+        birthDate: athlete.birth_date || '',
+        gender: athlete.gender || '',
+        heightCm: athlete.height_cm?.toString() || '',
+        primaryDiscipline: athlete.primary_discipline ?? '',
+        secondaryDisciplines: athlete.secondary_disciplines ?? [],
+    };
+
+
+    const handleSubmit = useCallback(async (payload: AthleteFormSubmitPayload) => {
         setIsLoading(true);
         setError('');
+
         try {
             await updateAthlete(athlete.id, {
-                name: name.trim(),
-                birth_date: birthDate || undefined,
-                gender: (gender as 'male' | 'female') || undefined,
-                height_cm: heightCm ? Number(heightCm) : undefined,
+                name: payload.athletePatch.name?.trim() || athlete.name,
+                birth_date: payload.athletePatch.birth_date,
+                gender: payload.athletePatch.gender,
+                height_cm: payload.athletePatch.height_cm,
+                primary_discipline: payload.athletePatch.primary_discipline,
+                secondary_disciplines: payload.athletePatch.secondary_disciplines,
             });
+
+
             onUpdated();
         } catch (err) {
             const { logError } = await import('@/lib/utils/errors');
             logError(err, { component: 'EditAthleteModal', action: 'update' });
-            setError(tDash('updateFailed'));
+            setError(t('updateFailed'));
         } finally {
             setIsLoading(false);
         }
-    }, [name, birthDate, gender, heightCm, athlete.id, onUpdated, tDash]);
+    }, [athlete.id, athlete.name, onUpdated, t]);
 
     return (
         <div
             className={styles.overlay}
             role="dialog"
             aria-modal="true"
-            aria-label={tDash('editAthlete')}
+            aria-label={t('editTitle')}
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
             <div className={styles.modal}>
-                <h2 className={styles.modalTitle}>{tDash('editAthlete')}</h2>
-
-                {error && <div className={styles.error}>{error}</div>}
-
-                {/* Name (required) */}
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="edit-athlete-name">
-                        {t('name')} *
-                    </label>
-                    <input
-                        id="edit-athlete-name"
-                        type="text"
-                        className={styles.input}
-                        placeholder={t('namePlaceholder')}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-
-                {/* Birth date + Gender */}
-                <div className={styles.row}>
-                    <div className={styles.field}>
-                        <label className={styles.label} htmlFor="edit-athlete-birth">
-                            {t('birthDate')}
-                        </label>
-                        <input
-                            id="edit-athlete-birth"
-                            type="date"
-                            className={styles.input}
-                            value={birthDate}
-                            onChange={(e) => setBirthDate(e.target.value)}
-                        />
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label} htmlFor="edit-athlete-gender">
-                            {t('gender')}
-                        </label>
-                        <select
-                            id="edit-athlete-gender"
-                            className={styles.select}
-                            value={gender}
-                            onChange={(e) => setGender(e.target.value as '' | 'male' | 'female')}
-                        >
-                            <option value="">—</option>
-                            <option value="male">{t('genderMale')}</option>
-                            <option value="female">{t('genderFemale')}</option>
-                        </select>
-                    </div>
-                </div>
-
-                {/* Height */}
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="edit-athlete-height">
-                        {t('heightCm')}
-                    </label>
-                    <input
-                        id="edit-athlete-height"
-                        type="number"
-                        min="100"
-                        max="250"
-                        step="1"
-                        className={styles.input}
-                        placeholder="185"
-                        value={heightCm}
-                        onChange={(e) => setHeightCm(e.target.value)}
-                    />
-                </div>
-
-                {/* Actions */}
-                <div className={styles.actions}>
-                    <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                        {t('cancel')}
-                    </button>
-                    <button
-                        type="button"
-                        className={styles.saveBtn}
-                        onClick={handleSubmit}
-                        disabled={!name.trim() || isLoading}
-                    >
-                        {isLoading ? <Loader2 size={16} aria-hidden="true" style={{ animation: 'spin 0.7s linear infinite' }} /> : t('save')}
-                    </button>
-                </div>
+                <h2 className={styles.modalTitle}>{t('editTitle')}</h2>
+                <AthleteForm
+                    mode="edit"
+                    initialData={initialData}
+                    isSubmitting={isLoading}
+                    error={error}
+                    submitLabel={t('saveChangesCta')}
+                    onCancel={onClose}
+                    onSubmit={handleSubmit}
+                />
             </div>
         </div>
     );

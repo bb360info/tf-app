@@ -37,7 +37,7 @@ export function useTemplates({ isOpen = true, type }: UseTemplatesOptions = {}) 
             const data = await listTemplates(type);
             setTemplates(data);
             hasFetched.current = true;
-        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        } catch (err: unknown) {
             console.error('useTemplates fetch error:', err);
             setError(err instanceof Error ? err : new Error(String(err)));
         } finally {

@@ -48,7 +48,7 @@ export default function NotificationSettingsPage() {
 
     const [prefs, setPrefs] = useState<NotificationPreferencesRecord | null>(null);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [quietSaving, setQuietSaving] = useState(false);
 
     // Local editable copy
     const [pushEnabled, setPushEnabled] = useState(true);
@@ -82,32 +82,62 @@ export default function NotificationSettingsPage() {
             .finally(() => setLoading(false));
     }, [user, showToast, ts]);
 
-    const toggleType = useCallback((type: NotificationType) => {
-        setDisabledTypes((prev) =>
-            prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-        );
-    }, []);
-
-    const handleSave = useCallback(async () => {
+    // Silent auto-save helper for individual field changes
+    const autoSave = useCallback(async (patch: Partial<Parameters<typeof updatePreferences>[1]>) => {
         if (!prefs) return;
-        setSaving(true);
+        try {
+            await updatePreferences(prefs.id, patch);
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'NotificationSettingsPage', action: 'autoSave' });
+            showToast({ message: ts('saveFailed'), type: 'error' });
+        }
+    }, [prefs, showToast, ts]);
+
+    const handlePushToggle = useCallback((checked: boolean) => {
+        setPushEnabled(checked);
+        void autoSave({ push_enabled: checked });
+    }, [autoSave]);
+
+    const handleEmailToggle = useCallback((checked: boolean) => {
+        setEmailEnabled(checked);
+        void autoSave({ email_enabled: checked });
+    }, [autoSave]);
+
+    const toggleType = useCallback((type: NotificationType) => {
+        setDisabledTypes((prev) => {
+            const next = prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type];
+            void autoSave({ disabled_types: next });
+            return next;
+        });
+    }, [autoSave]);
+
+    const handleQuietToggle = useCallback((checked: boolean) => {
+        setQuietEnabled(checked);
+        if (!checked) {
+            // When disabling quiet hours, auto-save to clear them
+            void autoSave({ quiet_hours_start: undefined, quiet_hours_end: undefined });
+        }
+    }, [autoSave]);
+
+    // Save button only for quiet hours time inputs
+    const handleQuietSave = useCallback(async () => {
+        if (!prefs) return;
+        setQuietSaving(true);
         try {
             await updatePreferences(prefs.id, {
-                push_enabled: pushEnabled,
-                email_enabled: emailEnabled,
-                disabled_types: disabledTypes,
-                quiet_hours_start: quietEnabled ? quietStart || undefined : undefined,
-                quiet_hours_end: quietEnabled ? quietEnd || undefined : undefined,
+                quiet_hours_start: quietStart || undefined,
+                quiet_hours_end: quietEnd || undefined,
             });
             showToast({ message: ts('saved'), type: 'success' });
         } catch (err) {
             const { logError } = await import('@/lib/utils/errors');
-            logError(err, { component: 'NotificationSettingsPage', action: 'save' });
+            logError(err, { component: 'NotificationSettingsPage', action: 'quietSave' });
             showToast({ message: ts('saveFailed'), type: 'error' });
         } finally {
-            setSaving(false);
+            setQuietSaving(false);
         }
-    }, [prefs, pushEnabled, emailEnabled, disabledTypes, quietEnabled, quietStart, quietEnd, showToast, ts]);
+    }, [prefs, quietStart, quietEnd, showToast, ts]);
 
     if (loading) {
         return (
@@ -152,54 +182,56 @@ export default function NotificationSettingsPage() {
                                 id="push-toggle"
                                 type="checkbox"
                                 checked={pushEnabled}
-                                onChange={(e) => setPushEnabled(e.target.checked)}
+                                onChange={(e) => handlePushToggle(e.target.checked)}
                             />
                             <span className={styles.toggleTrack} />
                         </label>
                     </div>
 
-                    {/* Push subscription status */}
-                    <div className={styles.pushStatusRow}>
-                        {pushSub.status === 'subscribed' && (
-                            <>
-                                <div className={styles.pushBadge} data-status="active">
-                                    <ShieldCheck size={14} aria-hidden="true" />
-                                    {ts('pushActive')}
-                                </div>
+                    {/* Push subscription status — only show when push is enabled */}
+                    {pushEnabled && (
+                        <div className={styles.pushStatusRow}>
+                            {pushSub.status === 'subscribed' && (
+                                <>
+                                    <div className={styles.pushBadge} data-status="active">
+                                        <ShieldCheck size={14} aria-hidden="true" />
+                                        {ts('pushActive')}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className={styles.pushActionBtn}
+                                        onClick={() => void pushSub.unsubscribe()}
+                                        disabled={pushSub.loading}
+                                    >
+                                        {ts('pushUnsubscribe')}
+                                    </button>
+                                </>
+                            )}
+                            {(pushSub.status === 'unsubscribed' || pushSub.status === 'declined') && (
                                 <button
                                     type="button"
-                                    className={styles.pushActionBtn}
-                                    onClick={() => void pushSub.unsubscribe()}
+                                    className={styles.pushSubscribeBtn}
+                                    onClick={() => void pushSub.subscribe()}
                                     disabled={pushSub.loading}
                                 >
-                                    {ts('pushUnsubscribe')}
+                                    <Bell size={14} aria-hidden="true" />
+                                    {ts('pushSubscribe')}
                                 </button>
-                            </>
-                        )}
-                        {(pushSub.status === 'unsubscribed' || pushSub.status === 'declined') && (
-                            <button
-                                type="button"
-                                className={styles.pushSubscribeBtn}
-                                onClick={() => void pushSub.subscribe()}
-                                disabled={pushSub.loading}
-                            >
-                                <Bell size={14} aria-hidden="true" />
-                                {ts('pushSubscribe')}
-                            </button>
-                        )}
-                        {pushSub.status === 'denied' && (
-                            <div className={styles.pushBadge} data-status="denied">
-                                <ShieldX size={14} aria-hidden="true" />
-                                {ts('pushDenied')}
-                            </div>
-                        )}
-                        {pushSub.status === 'unsupported' && (
-                            <div className={styles.pushBadge} data-status="unsupported">
-                                <ShieldAlert size={14} aria-hidden="true" />
-                                {ts('pushUnsupported')}
-                            </div>
-                        )}
-                    </div>
+                            )}
+                            {pushSub.status === 'denied' && (
+                                <div className={styles.pushBadge} data-status="denied">
+                                    <ShieldX size={14} aria-hidden="true" />
+                                    {ts('pushDenied')}
+                                </div>
+                            )}
+                            {pushSub.status === 'unsupported' && (
+                                <div className={styles.pushBadge} data-status="unsupported">
+                                    <ShieldAlert size={14} aria-hidden="true" />
+                                    {ts('pushUnsupported')}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Email toggle */}
                     <div className={styles.row}>
@@ -217,7 +249,7 @@ export default function NotificationSettingsPage() {
                                 id="email-toggle"
                                 type="checkbox"
                                 checked={emailEnabled}
-                                onChange={(e) => setEmailEnabled(e.target.checked)}
+                                onChange={(e) => handleEmailToggle(e.target.checked)}
                             />
                             <span className={styles.toggleTrack} />
                         </label>
@@ -272,58 +304,60 @@ export default function NotificationSettingsPage() {
                                 id="quiet-toggle"
                                 type="checkbox"
                                 checked={quietEnabled}
-                                onChange={(e) => setQuietEnabled(e.target.checked)}
+                                onChange={(e) => handleQuietToggle(e.target.checked)}
                             />
                             <span className={styles.toggleTrack} />
                         </label>
                     </div>
 
                     {quietEnabled && (
-                        <div className={styles.quietTimeRow}>
-                            <div className={styles.timeField}>
-                                <label htmlFor="quiet-start" className={styles.timeLabel}>
-                                    {t('quietHours.from')}
-                                </label>
-                                <input
-                                    id="quiet-start"
-                                    type="time"
-                                    className={styles.timeInput}
-                                    value={quietStart}
-                                    onChange={(e) => setQuietStart(e.target.value)}
-                                />
+                        <>
+                            <div className={styles.quietTimeRow}>
+                                <div className={styles.timeField}>
+                                    <label htmlFor="quiet-start" className={styles.timeLabel}>
+                                        {t('quietHours.from')}
+                                    </label>
+                                    <input
+                                        id="quiet-start"
+                                        type="time"
+                                        className={styles.timeInput}
+                                        value={quietStart}
+                                        onChange={(e) => setQuietStart(e.target.value)}
+                                    />
+                                </div>
+                                <div className={styles.timeSeparator}>—</div>
+                                <div className={styles.timeField}>
+                                    <label htmlFor="quiet-end" className={styles.timeLabel}>
+                                        {t('quietHours.to')}
+                                    </label>
+                                    <input
+                                        id="quiet-end"
+                                        type="time"
+                                        className={styles.timeInput}
+                                        value={quietEnd}
+                                        onChange={(e) => setQuietEnd(e.target.value)}
+                                    />
+                                </div>
                             </div>
-                            <div className={styles.timeSeparator}>—</div>
-                            <div className={styles.timeField}>
-                                <label htmlFor="quiet-end" className={styles.timeLabel}>
-                                    {t('quietHours.to')}
-                                </label>
-                                <input
-                                    id="quiet-end"
-                                    type="time"
-                                    className={styles.timeInput}
-                                    value={quietEnd}
-                                    onChange={(e) => setQuietEnd(e.target.value)}
-                                />
+                            <div className={styles.saveWrap}>
+                                <button
+                                    type="button"
+                                    className={styles.saveBtn}
+                                    onClick={handleQuietSave}
+                                    disabled={quietSaving}
+                                    id="save-quiet-hours"
+                                >
+                                    {quietSaving
+                                        ? <Loader2 size={16} aria-hidden="true" className={styles.spinner} />
+                                        : <Check size={16} aria-hidden="true" />}
+                                    {ts('save')}
+                                </button>
                             </div>
-                        </div>
+                        </>
                     )}
                 </section>
 
-                {/* Save button */}
-                <div className={styles.saveWrap}>
-                    <button
-                        type="button"
-                        className={styles.saveBtn}
-                        onClick={handleSave}
-                        disabled={saving}
-                        id="save-notification-settings"
-                    >
-                        {saving
-                            ? <Loader2 size={16} aria-hidden="true" className={styles.spinner} />
-                            : <Check size={16} aria-hidden="true" />}
-                        {ts('save')}
-                    </button>
-                </div>
+
             </PageWrapper>
         </div>
     );

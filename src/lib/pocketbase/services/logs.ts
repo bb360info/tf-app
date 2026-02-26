@@ -13,7 +13,10 @@ import type {
     ExercisesRecord,
 } from '../types';
 import type { RecordModel } from 'pocketbase';
-import type { PlanWithExercises } from './plans';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
+
+// Re-export plan resolution (moved to planResolution.ts for SRP)
+export { getPublishedPlanForToday } from './planResolution';
 
 // ─── Type Helpers ─────────────────────────────────────────────────
 
@@ -28,153 +31,6 @@ export type TrainingLogWithRelations = TrainingLogsRecord & RecordModel;
 
 // ─── Private Helpers ──────────────────────────────────────────────
 
-function todayISO(): string {
-    return new Date().toISOString().split('T')[0];
-}
-
-// ─── Plan Fetch ───────────────────────────────────────────────────
-
-const PLAN_EXPAND = 'plan_exercises(plan_id).exercise_id';
-
-/**
- * Private helper: fetch a plan by ID with full exercise expand,
- * validating it is published and not deleted.
- */
-async function getActivePlan(planId: string): Promise<PlanWithExercises | null> {
-    try {
-        const plan = await pb.collection(Collections.TRAINING_PLANS).getOne<PlanWithExercises>(
-            planId,
-            { expand: PLAN_EXPAND }
-        );
-        if (plan.status === 'published' && !plan.deleted_at) return plan;
-        return null;
-    } catch {
-        /* expected: 404 — plan not found or not published */
-        return null;
-    }
-}
-
-/**
- * Step 1+2: Try to find a published plan via plan_assignments.
- * Priority: direct athlete assignment → group assignment (via getMyGroupIds).
- */
-async function getPublishedPlanViaAssignments(
-    athleteId: string
-): Promise<PlanWithExercises | null> {
-    // Step 1: direct assignment to athlete
-    try {
-        const direct = await pb.collection(Collections.PLAN_ASSIGNMENTS).getFirstListItem<RecordModel>(
-            pb.filter('athlete_id = {:aid} && status = "active"', { aid: athleteId })
-        );
-        if (direct?.plan_id) {
-            const plan = await getActivePlan(direct.plan_id as string);
-            if (plan) return plan;
-        }
-    } catch { /* 404 = no direct assignment */ }
-
-    // Step 2: assignment via group (two-step: get group IDs first)
-    try {
-        const { getMyGroupIds } = await import('./groups');
-        const groupIds = await getMyGroupIds(athleteId);
-        if (groupIds.length > 0) {
-            // Build OR filter for each group_id
-            const groupFilter = groupIds
-                .map((id) => `group_id = "${id}"`)
-                .join(' || ');
-            const groupAssign = await pb
-                .collection(Collections.PLAN_ASSIGNMENTS)
-                .getFirstListItem<RecordModel>(
-                    pb.filter(`(${groupFilter}) && status = "active"`)
-                );
-            if (groupAssign?.plan_id) {
-                const plan = await getActivePlan(groupAssign.plan_id as string);
-                if (plan) return plan;
-            }
-        }
-    } catch { /* no group assignment */ }
-
-    return null;
-}
-
-/**
- * Step 0: Check for individual override on training_plans.
- * Override = training_plans row WHERE athlete_id = X AND parent_plan_id != "".
- * This is the highest-priority resolution — overrides the group plan for one athlete.
- */
-async function getPublishedOverrideForAthlete(
-    athleteId: string
-): Promise<PlanWithExercises | null> {
-    try {
-        const override = await pb
-            .collection(Collections.TRAINING_PLANS)
-            .getFirstListItem<PlanWithExercises>(
-                pb.filter(
-                    'athlete_id = {:aid} && parent_plan_id != "" && status = "published" && deleted_at = ""',
-                    { aid: athleteId }
-                ),
-                { expand: PLAN_EXPAND }
-            );
-        return override ?? null;
-    } catch {
-        return null; // 404 = no override
-    }
-}
-
-/**
- * Find the published plan for an athlete based on the current date.
- * Resolution order (highest priority first):
- *   0. Individual override: training_plans WHERE athlete_id + parent_plan_id set (NEW Phase 3)
- *   1. plan_assignments → athlete direct
- *   2. plan_assignments → group membership
- *   3. Fallback: season.athlete_id → active phase → published plan
- */
-export async function getPublishedPlanForToday(athleteId: string): Promise<PlanWithExercises | null> {
-    const today = todayISO();
-
-    // Step 0: individual override (highest priority)
-    const override = await getPublishedOverrideForAthlete(athleteId);
-    if (override) return override;
-
-    // Steps 1 + 2: via plan_assignments
-    const viaAssignment = await getPublishedPlanViaAssignments(athleteId);
-    if (viaAssignment) return viaAssignment;
-
-    // Step 3: fallback — season.athlete_id based lookup
-    try {
-        const seasons = await pb.collection(Collections.SEASONS).getFullList({
-            filter: pb.filter(
-                'athlete_id = {:aid} && start_date <= {:today} && end_date >= {:today}',
-                { aid: athleteId, today }
-            ),
-            sort: '-start_date',
-        });
-        if (!seasons.length) return null;
-        const season = seasons[0];
-
-        const phases = await pb.collection(Collections.TRAINING_PHASES).getFullList({
-            filter: pb.filter(
-                'season_id = {:sid} && start_date <= {:today} && end_date >= {:today}',
-                { sid: season.id, today }
-            ),
-            sort: '-start_date',
-        });
-        if (!phases.length) return null;
-        const phase = phases[0];
-
-        const plans = await pb.collection(Collections.TRAINING_PLANS).getFullList<PlanWithExercises>({
-            filter: pb.filter(
-                'phase_id = {:pid} && status = "published" && deleted_at = "" && parent_plan_id = ""',
-                { pid: phase.id }
-            ),
-            expand: PLAN_EXPAND,
-
-        });
-        return plans[0] ?? null;
-    } catch {
-        /* expected: season fallback — no active phase or published plan */
-        return null;
-    }
-}
 
 // ─── Training Logs ────────────────────────────────────────────────
 
@@ -241,7 +97,7 @@ export async function getLogIfExists(
 
 /** List today's training logs for an athlete */
 export async function listTodayLogs(athleteId: string): Promise<TrainingLogWithRelations[]> {
-    const today = todayISO();
+    const today = toLocalISODate();
     const todayEnd = today + 'T23:59:59';
     return pb.collection(Collections.TRAINING_LOGS).getFullList<TrainingLogWithRelations>({
         filter: pb.filter(
@@ -390,3 +246,94 @@ export async function batchSaveLogExercises(
         )
     );
 }
+
+/**
+ * Get the last (most recent) log exercise for a specific athlete and exercise.
+ * Used for Autofill functionality.
+ */
+export async function getLastExerciseLog(
+    athleteId: string,
+    exerciseId: string
+): Promise<LogExerciseWithExpand | null> {
+    try {
+        return await pb.collection(Collections.LOG_EXERCISES).getFirstListItem<LogExerciseWithExpand>(
+            pb.filter(
+                'log_id.athlete_id = {:aid} && exercise_id = {:eid}',
+                { aid: athleteId, eid: exerciseId }
+            ),
+            {
+                sort: '-id',
+                expand: 'exercise_id',
+            }
+        );
+    } catch {
+        return null; // 404 if no previous log exists
+    }
+}
+
+/**
+ * Compare weekly volume (total sets) for a given week vs the previous week.
+ * @param athleteId
+ * @param weekStartDate - ISO date string (YYYY-MM-DD) for Monday of the target week.
+ */
+export async function getWeeklyVolumeDelta(
+    athleteId: string,
+    weekStartDate: string
+): Promise<{ current: number; previous: number; delta: number }> {
+    const start = weekStartDate.slice(0, 10);
+    const currentLogs = await listWeekLogs(athleteId, start);
+
+    const prevWeekStart = new Date(new Date(start).getTime() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+    const prevLogs = await listWeekLogs(athleteId, prevWeekStart);
+
+    const countSets = async (logs: TrainingLogWithRelations[]) => {
+        let total = 0;
+        for (const log of logs) {
+            const exercises = await listLogExercises(log.id);
+            total += exercises.reduce((acc, ex) => acc + (ex.sets_data?.length || 0), 0);
+        }
+        return total;
+    };
+
+    const current = await countSets(currentLogs);
+    const previous = await countSets(prevLogs);
+
+    return {
+        current,
+        previous,
+        delta: current - previous,
+    };
+}
+
+// ─── Week Status Mapping ───────────────────────────────────────────
+
+export type DayStatus = 'done' | 'missed' | 'rest' | 'today' | 'future';
+
+/**
+ * Convert training logs for a week into a 7-slot DayStatus array (Mon–Sun).
+ * @param logs - result of listWeekLogs()
+ * @param weekStart - Monday of the week (YYYY-MM-DD)
+ * @param today - today's date (YYYY-MM-DD), from todayForUser()
+ * @param plannedDays - set of ISO date strings when training is planned
+ */
+export function mapLogsToWeekStatus(
+    logs: TrainingLogWithRelations[],
+    weekStart: string,
+    today: string,
+    plannedDays: Set<string> = new Set()
+): DayStatus[] {
+    const logDates = new Set(logs.map((l) => l.date.slice(0, 10)));
+    return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso === today) return 'today';
+        if (iso > today) return 'future';
+        if (logDates.has(iso)) return 'done';
+        if (plannedDays.has(iso)) return 'missed';
+        return 'rest';
+    });
+}
+

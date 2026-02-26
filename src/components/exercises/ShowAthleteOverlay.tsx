@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import type { ExercisesRecord } from '@/lib/pocketbase/types';
 import type { Language } from '@/lib/pocketbase/types';
@@ -62,7 +63,12 @@ export function ShowAthleteOverlay({ exercise, locale, onClose, labels }: ShowAt
     const name = getExerciseName(exercise, locale);
     const description = getDescription(exercise, locale);
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    const portalElement = document.getElementById('portal-root');
+    if (!portalElement) return null;
+
+    return createPortal(
         <div
             className={styles.overlay}
             role="dialog"
@@ -95,6 +101,7 @@ export function ShowAthleteOverlay({ exercise, locale, onClose, labels }: ShowAt
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        portalElement
     );
 }

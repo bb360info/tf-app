@@ -14,9 +14,15 @@ export const UserRoleSchema = z.enum(['coach', 'athlete', 'admin']);
 export const LanguageSchema = z.enum(['ru', 'en', 'cn']);
 export const UnitSystemSchema = z.enum(['metric', 'imperial']);
 
+export const DisciplineSchema = z.enum(['triple_jump', 'long_jump', 'high_jump']);
+export const SeasonTypeSchema = z.enum(['indoor', 'outdoor']);
+export const PRSourceSchema = z.enum(['competition', 'training']);
+
 export const UsersSchema = z.object({
     email: z.email(),
     name: z.string().min(1).max(255),
+    first_name: z.string().max(100).optional(),
+    last_name: z.string().max(100).optional(),
     role: UserRoleSchema,
     language: LanguageSchema,
     units: UnitSystemSchema,
@@ -33,9 +39,11 @@ export const LoginSchema = z.object({
 export const RegisterSchema = z
     .object({
         email: z.email(),
-        name: z.string().min(1).max(255),
+        first_name: z.string().min(1).max(100),
+        last_name: z.string().max(100).optional().default(''),
         password: z.string().min(8),
         passwordConfirm: z.string().min(8),
+        role: z.enum(['coach', 'athlete']).optional().default('coach'),
     })
     .refine((data) => data.password === data.passwordConfirm, {
         message: 'Passwords must match',
@@ -46,13 +54,23 @@ export const RegisterSchema = z
 
 export const GenderSchema = z.enum(['male', 'female']);
 
-export const AthletesSchema = z.object({
-    coach_id: pbId,
-    name: z.string().min(1).max(255),
-    birth_date: optionalDatetime,
-    gender: GenderSchema.optional(),
-    height_cm: z.number().int().min(100).max(250).optional(),
-});
+export const AthletesSchema = z
+    .object({
+        coach_id: pbId,
+        name: z.string().min(1).max(255),
+        birth_date: optionalDatetime,
+        gender: GenderSchema.optional(),
+        height_cm: z.number().int().min(100).max(250).optional(),
+        primary_discipline: DisciplineSchema.optional(),
+        secondary_disciplines: z.array(DisciplineSchema).max(2).optional(),
+    })
+    .refine(
+        (data) => {
+            if (!data.primary_discipline || !data.secondary_disciplines) return true;
+            return !data.secondary_disciplines.includes(data.primary_discipline);
+        },
+        { message: 'Secondary discipline cannot repeat primary', path: ['secondary_disciplines'] }
+    );
 
 // ─── Groups ────────────────────────────────────────────────────────
 

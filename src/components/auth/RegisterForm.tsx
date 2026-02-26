@@ -1,23 +1,61 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/lib/pocketbase/AuthProvider';
 import { Link } from '@/i18n/navigation';
 import { RegisterSchema } from '@/lib/validation/core';
+import { getMyPreferences } from '@/lib/pocketbase/services/preferences';
+import pb from '@/lib/pocketbase/client';
 import styles from './AuthForms.module.css';
+
+async function isOnboardingDone(): Promise<boolean> {
+    if (typeof window !== 'undefined' && localStorage.getItem('onboarding_done') === '1') {
+        return true;
+    }
+    try {
+        const prefs = await getMyPreferences();
+        if (prefs?.onboarding_complete) {
+            localStorage.setItem('onboarding_done', '1');
+            return true;
+        }
+    } catch {
+        /* ignore */
+    }
+    return false;
+}
 
 export default function RegisterForm() {
     const t = useTranslations();
     const router = useRouter();
     const { register, loginGoogle } = useAuth();
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [hasPendingInvite, setHasPendingInvite] = useState(false);
+    const returnTo = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('returnTo')
+        : null;
+    const oauthRoleHref = returnTo
+        ? `/auth/oauth-role?returnTo=${encodeURIComponent(returnTo)}`
+        : '/auth/oauth-role';
+    const loginHref = returnTo
+        ? `/auth/login?returnTo=${encodeURIComponent(returnTo)}`
+        : '/auth/login';
+
+    useEffect(() => {
+        // Lazy import: pendingInvite.ts only loaded when needed
+        import('@/lib/utils/pendingInvite').then(({ getPendingInvite }) => {
+            if (getPendingInvite() !== null) {
+                setHasPendingInvite(true);
+            }
+        });
+    }, []);
 
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
@@ -26,9 +64,11 @@ export default function RegisterForm() {
         // Validate with Zod
         const result = RegisterSchema.safeParse({
             email,
-            name,
+            first_name: firstName,
+            last_name: lastName,
             password,
             passwordConfirm,
+            role: hasPendingInvite ? 'athlete' : 'coach',
         });
 
         if (!result.success) {
@@ -36,7 +76,7 @@ export default function RegisterForm() {
             const field = firstIssue?.path[0];
             if (field === 'email') {
                 setError(t('errors.invalidEmail'));
-            } else if (field === 'name') {
+            } else if (field === 'first_name') {
                 setError(t('errors.required'));
             } else if (field === 'passwordConfirm') {
                 setError(t('errors.passwordMismatch'));
@@ -48,12 +88,25 @@ export default function RegisterForm() {
 
         setIsLoading(true);
         try {
-            await register(email, password, name, 'athlete');
+            const role = hasPendingInvite ? 'athlete' : 'coach';
+            await register({
+                email,
+                password,
+                first_name: firstName,
+                last_name: lastName,
+                role,
+                allowAthleteViaInvite: hasPendingInvite,
+            });
             router.push('/onboarding');
         } catch (err) {
             const { logError } = await import('@/lib/utils/errors');
             logError(err, { component: 'RegisterForm', action: 'register' });
-            setError(t('errors.registerFailed'));
+            const message = err instanceof Error ? err.message : String(err);
+            if (message.includes('athleteInviteOnly')) {
+                setError(t('auth.athleteInviteOnlyError'));
+            } else {
+                setError(t('errors.registerFailed'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -63,9 +116,39 @@ export default function RegisterForm() {
         setError('');
         setIsLoading(true);
         try {
-            await loginGoogle();
-            // New Google user → onboarding to set role, name, preferences
-            router.push('/onboarding');
+            const authData = await loginGoogle();
+            const role = (authData.record?.role as string | undefined) ?? (pb.authStore.record?.role as string | undefined);
+            const isNewOAuthUser = Boolean((authData as { meta?: { isNew?: boolean } }).meta?.isNew);
+            const invalidRole = role !== 'coach' && role !== 'athlete';
+
+            if (isNewOAuthUser || invalidRole) {
+                router.push(oauthRoleHref);
+                return;
+            }
+
+            if (role === 'athlete') {
+                const { joinWithPendingInvite } = await import('@/lib/utils/pendingInvite');
+                const joinResult = await joinWithPendingInvite();
+                if (joinResult.status === 'invalidOrExpired') {
+                    setError(t('auth.inviteExpiredLogin'));
+                    return;
+                }
+                if (joinResult.status === 'coachCannotJoin') {
+                    setError(t('auth.inviteCoachBlocked'));
+                    return;
+                }
+                if (joinResult.status === 'error') {
+                    setError(t('auth.inviteJoinFailed'));
+                    return;
+                }
+            }
+
+            if (returnTo) {
+                window.location.href = decodeURIComponent(returnTo);
+                return;
+            }
+            const done = await isOnboardingDone();
+            router.push(done ? '/dashboard' : '/onboarding');
         } catch (err) {
             const { logError } = await import('@/lib/utils/errors');
             logError(err, { component: 'RegisterForm', action: 'googleRegister' });
@@ -85,21 +168,53 @@ export default function RegisterForm() {
                 </div>
             )}
 
+            {/* Invite banner — shown when user arrived via an invite link */}
+            {hasPendingInvite && (
+                <div className={styles.infoBanner} role="note">
+                    {t('auth.inviteBanner')}
+                </div>
+            )}
+
+            {!hasPendingInvite && (
+                <div className={styles.infoBanner} role="note">
+                    {t('auth.athleteInviteOnlyHint')}
+                </div>
+            )}
+
             <form onSubmit={handleSubmit} className={styles.form}>
-                <div className={styles.field}>
-                    <label htmlFor="register-name" className={styles.label}>
-                        {t('auth.name')}
-                    </label>
-                    <input
-                        id="register-name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className={styles.input}
-                        autoComplete="name"
-                        required
-                        disabled={isLoading}
-                    />
+                {/* First Name + Last Name side-by-side */}
+                <div className={styles.nameRow}>
+                    <div className={styles.field}>
+                        <label htmlFor="register-first-name" className={styles.label}>
+                            {t('auth.firstName')}
+                        </label>
+                        <input
+                            id="register-first-name"
+                            type="text"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            placeholder={t('auth.firstNamePlaceholder')}
+                            className={styles.input}
+                            autoComplete="given-name"
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className={styles.field}>
+                        <label htmlFor="register-last-name" className={styles.label}>
+                            {t('auth.lastName')}
+                        </label>
+                        <input
+                            id="register-last-name"
+                            type="text"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            placeholder={t('auth.lastNamePlaceholder')}
+                            className={styles.input}
+                            autoComplete="family-name"
+                            disabled={isLoading}
+                        />
+                    </div>
                 </div>
 
                 <div className={styles.field}>
@@ -196,7 +311,7 @@ export default function RegisterForm() {
 
             <p className={styles.switchLink}>
                 {t('auth.hasAccount')}{' '}
-                <Link href="/auth/login">{t('auth.signIn')}</Link>
+                <Link href={loginHref}>{t('auth.signIn')}</Link>
             </p>
         </div>
     );

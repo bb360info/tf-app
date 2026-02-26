@@ -6,24 +6,130 @@
 
 import pb from '@/lib/pocketbase/client';
 import { Collections } from '@/lib/pocketbase/collections';
-import type { NotificationsRecord } from '@/lib/pocketbase/types';
+import type {
+    NotificationsRecord,
+    NotificationType,
+    NotificationPriority,
+    NotificationPreferencesRecord,
+} from '@/lib/pocketbase/types';
 
 
-/** Send a coach_note notification to an athlete. Creates a record in PB. */
+// ─── Unified Notification Sender ────────────────────────────────────
+
+interface SendNotificationParams {
+    userId: string;
+    type: NotificationType;
+    messageKey: string;
+    messageParams?: Record<string, string | number>;
+    link?: string;
+    priority?: NotificationPriority;
+}
+
+/**
+ * Unified notification creator.
+ * 1. Validates userId (throws if empty — Poka-Yoke: fail fast)
+ * 2. Checks notification preferences (disabled_types) — fail-soft
+ * 3. Creates notification record in PocketBase
+ */
+export async function sendNotification(
+    params: SendNotificationParams
+): Promise<NotificationsRecord | null> {
+    if (!params.userId) {
+        throw new Error('sendNotification: userId is required');
+    }
+
+    // Preference check: if type is muted → skip (fail-soft: no prefs = allow all)
+    try {
+        const prefs = await pb
+            .collection(Collections.NOTIFICATION_PREFERENCES)
+            .getFirstListItem<NotificationPreferencesRecord>(
+                pb.filter('user_id = {:uid}', { uid: params.userId })
+            );
+        if (prefs.disabled_types?.includes(params.type)) return null;
+    } catch {
+        // No prefs record → all types allowed (safe default)
+    }
+
+    return pb.collection(Collections.NOTIFICATIONS).create<NotificationsRecord>({
+        user_id: params.userId,
+        type: params.type,
+        message_key: params.messageKey,
+        message_params: params.messageParams ?? {},
+        message: params.messageKey, // fallback for old clients / debug
+        read: false,
+        link: params.link ?? '',
+        priority: params.priority ?? 'normal',
+    });
+}
+
+/**
+ * Batch check notification preferences for multiple users.
+ * Single HTTP request instead of N sequential calls.
+ * Returns Set<userId> of users ALLOWED to receive this notification type.
+ */
+export async function batchCheckPreferences(
+    userIds: string[],
+    type: NotificationType
+): Promise<Set<string>> {
+    if (userIds.length === 0) return new Set();
+
+    const allowed = new Set(userIds); // default: all allowed
+
+    try {
+        // Build OR filter: user_id = {:uid0} || user_id = {:uid1} || ...
+        const filterParts = userIds.map((_, i) => `user_id = {:uid${i}}`).join(' || ');
+        const filterParams = Object.fromEntries(userIds.map((uid, i) => [`uid${i}`, uid]));
+
+        const prefs = await pb
+            .collection(Collections.NOTIFICATION_PREFERENCES)
+            .getFullList<NotificationPreferencesRecord>({
+                filter: pb.filter(filterParts, filterParams),
+            });
+
+        for (const pref of prefs) {
+            if (pref.disabled_types?.includes(type)) {
+                allowed.delete(pref.user_id);
+            }
+        }
+    } catch {
+        // Collection inaccessible or no results → allow all (safe default)
+    }
+
+    return allowed;
+}
+
+// ─── Coach Note (convenience wrapper) ───────────────────────────────
+
+/**
+ * Send a coach_note notification to an athlete.
+ * Resolves athlete.user_id (strict — no fallback to athleteId).
+ * Preserves custom coach message text via messageParams.text.
+ * Returns null if athlete has no linked user_id.
+ */
 export async function sendCoachNote(
     athleteId: string,
     message: string,
     link?: string
-): Promise<NotificationsRecord> {
-    return pb.collection(Collections.NOTIFICATIONS).create<NotificationsRecord>({
-        user_id: athleteId,
+): Promise<NotificationsRecord | null> {
+    // Resolve user_id from athlete record — STRICT, no fallback
+    const athlete = await pb.collection(Collections.ATHLETES).getOne(athleteId);
+    const userId = (athlete as unknown as { user_id?: string }).user_id ?? '';
+
+    if (!userId) {
+        console.warn('sendCoachNote: athlete has no linked user_id, skipping notification');
+        return null;
+    }
+
+    return sendNotification({
+        userId,
         type: 'coach_note',
-        message,
-        read: false,
-        link: link ?? '',
-        priority: 'normal',
+        messageKey: 'coachNoteSent',
+        messageParams: message ? { text: message } : {},
+        link,
     });
 }
+
+// ─── Read / List Operations ──────────────────────────────────────────
 
 /** List unread notifications for the current user (first 20, returns totalItems for badge). */
 export async function listUnread(
@@ -31,7 +137,7 @@ export async function listUnread(
 ): Promise<{ items: NotificationsRecord[]; totalItems: number }> {
     const result = await pb.collection(Collections.NOTIFICATIONS).getList<NotificationsRecord>(1, 20, {
         filter: pb.filter('user_id = {:uid} && read = false', { uid: userId }),
-
+        sort: '-id',
     });
     return { items: result.items, totalItems: result.totalItems };
 }
@@ -46,7 +152,7 @@ export async function listPaginated(
         .collection(Collections.NOTIFICATIONS)
         .getList<NotificationsRecord>(page, perPage, {
             filter: pb.filter('user_id = {:uid}', { uid: userId }),
-
+            sort: '-id',
         });
     return { items: result.items, totalItems: result.totalItems, totalPages: result.totalPages };
 }
@@ -62,7 +168,7 @@ export async function listByType(
         .collection(Collections.NOTIFICATIONS)
         .getList<NotificationsRecord>(page, perPage, {
             filter: pb.filter('user_id = {:uid} && type = {:type}', { uid: userId, type }),
-
+            sort: '-id',
         });
     return { items: result.items, totalItems: result.totalItems };
 }

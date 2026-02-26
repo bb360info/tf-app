@@ -1,33 +1,35 @@
 /* ==========================================================================
    Design Tokens — Энциклопедия Прыгуна v2
    Source of truth: docs/DESIGN_SYSTEM.md
-   Last sync: 2026-02-19 (blue #2383e2 per DESIGN_SYSTEM.md)
+   Last sync: 2026-02-23 (Phase 0 tokens: safe areas, motion, scores, charts)
    ========================================================================== */
 
 :root {
     /* ── Typography ─────────────────────────────────────────────────────────── */
+    --font-scale: 1;
+    /* For accessibility font scaling */
     --font-body: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
     --font-display: 'Plus Jakarta Sans', 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 
-    /* ── Font Sizes (clamp for fluid typography) ────────────────────────────── */
-    --text-xs: 0.75rem;
+    /* ── Font Sizes (using --font-scale for accessibility) ────────────────────────────── */
+    --text-xs: calc(0.75rem * var(--font-scale));
     /* 12px */
-    --text-sm: 0.875rem;
+    --text-sm: calc(0.875rem * var(--font-scale));
     /* 14px */
-    --text-base: 1rem;
+    --text-base: calc(1rem * var(--font-scale));
     /* 16px */
-    --text-lg: 1.125rem;
+    --text-lg: calc(1.125rem * var(--font-scale));
     /* 18px */
-    --text-xl: 1.25rem;
+    --text-xl: calc(1.25rem * var(--font-scale));
     /* 20px */
-    --text-2xl: 1.5rem;
+    --text-2xl: calc(1.5rem * var(--font-scale));
     /* 24px */
-    --text-3xl: 1.875rem;
+    --text-3xl: calc(1.875rem * var(--font-scale));
     /* 30px */
-    --text-4xl: 2.25rem;
+    --text-4xl: calc(2.25rem * var(--font-scale));
     /* 36px */
-    --text-5xl: 3rem;
+    --text-5xl: calc(3rem * var(--font-scale));
     /* 48px */
 
     /* ── Font Weights ───────────────────────────────────────────────────────── */
@@ -69,6 +71,12 @@
     --space-24: 6rem;
     /* 96px */
 
+    /* ── PWA Safe Areas ────────────────────────────────────────────────────── */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+
     /* ── Page Layout Widths ─────────────────────────────────────────────────── */
     --page-max-narrow: 640px;
     --page-max-standard: 960px;
@@ -104,6 +112,14 @@
     --ease-in: cubic-bezier(0.4, 0, 1, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ── Athletic Pulse Motion Aliases ──────────────────────────────────────── */
+    --motion-pulse: var(--duration-normal);
+    /* 250ms — quick feedback */
+    --motion-flow: var(--duration-slow);
+    /* 350ms — smooth transitions */
+    --motion-burst: 500ms;
+    /* celebrations, big events */
 
     /* ── Light Theme Colors ─────────────────────────────────────────────────── */
     /* Synced with docs/DESIGN_SYSTEM.md — blue primary, not indigo */
@@ -145,6 +161,34 @@
     --color-flexibility: #56ccf2;
     --color-jump: #ff6b6b;
     --color-favorite: #ffb800;
+
+    /* ── Score Colors (Readiness/Performance) ───────────────────────────────── */
+    --color-score-low: #eb5757;
+    /* Red: readiness < 40 */
+    --color-score-mid: #f2994a;
+    /* Orange: readiness 41-70 */
+    --color-score-high: #00a86b;
+    /* Green: readiness 71+ */
+
+    /* ── Chart Palette (Recharts/graphs) ────────────────────────────────────── */
+    --color-chart-1: #2383e2;
+    /* Primary blue */
+    --color-chart-2: #9b51e0;
+    /* Purple */
+    --color-chart-3: #00a86b;
+    /* Green */
+    --color-chart-4: #f2994a;
+    /* Orange */
+    --color-chart-5: #56ccf2;
+    /* Cyan */
+    --color-chart-6: #eb5757;
+    /* Red */
+
+    /* ── Bottom Sheet ──────────────────────────────────────────────────────── */
+    --sheet-handle-width: 36px;
+    --sheet-handle-height: 4px;
+    --sheet-border-radius: var(--radius-2xl);
+    /* 24px */
 
     /* ── Skeleton Colors ────────────────────────────────────────────────────── */
     --color-skeleton-bg: #f0f0ee;
@@ -281,5 +325,42 @@
 @media (max-width: 480px) {
     .hidden-mobile {
         display: none;
+    }
+}
+
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Skeleton Shimmer Animation ────────────────────────────────────────── */
+.skeleton-shimmer {
+    background: linear-gradient(90deg,
+            var(--color-skeleton-bg) 25%,
+            var(--color-skeleton-shimmer) 50%,
+            var(--color-skeleton-bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Reduced Motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

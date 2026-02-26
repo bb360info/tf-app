@@ -1,0 +1,177 @@
+# Редизайн AthleteTrainingView — Implementation Plan
+
+## Контекст
+
+Текущий [AthleteTrainingView](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteTrainingView.tsx#428-662) рендерит 7 дней вертикально, каждый с полным списком упражнений. При 10-15 упражнениях пользователь теряется в скролле на мобайле. 
+
+**Подтверждённые допущения:**
+- Атлету не нужно видеть всю неделю одновременно
+- Упражнения выполняются по порядку, прыжки по списку маловероятны
+
+---
+
+## Proposed Changes
+
+### Компонент 1: Day Tab Nav (новый)
+
+#### [NEW] [DayTabNav.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/DayTabNav.tsx)
+#### [NEW] [DayTabNav.module.css](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/DayTabNav.module.css)
+
+Горизонтальная полоска с 7 таблетками-днями, заменяет текущий вертикальный рендер всех 7 дней. Тапом по табу переключается вид на один конкретный день.
+
+**Визуал:**
+```
+[Пн] [Вт●] [▶Ср] [Чт] [Пт] [Сб💤] [Вс💤]
+```
+- `●` — день с залогированными результатами (прогресс-дот)
+- `▶` — сегодняшний день (selected по умолчанию, accent-border)
+- `💤` → `Moon` icon (Lucide) для дней отдыха (compact, без отдельной карточки)
+- Горизонтальный `overflow-x: auto` на узких экранах
+- Touch targets: `min-height: 44px; min-width: 44px` (Iron Law)
+
+---
+
+### Компонент 2: ExerciseItem → BottomSheet
+
+#### [MODIFY] [ExerciseItem.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/cards/ExerciseItem.tsx)
+#### [MODIFY] [ExerciseItem.module.css](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/cards/ExerciseItem.module.css)
+
+Вместо инлайн-разворачивания `SetLogger` в потоке списка, тап по упражнению вызывает `onOpenLogger(exerciseId)` → родитель открывает [BottomSheet](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/shared/BottomSheet.tsx#15-156).
+
+**Изменения в ExerciseItem:**
+- Удалить `{open && <div className={styles.exerciseLog}>...</div>}` (инлайн SetLogger)
+- Оставить только compact-карточку: dot + name + dosage + status-icon (✓/○)
+- При тапе: `onClick={() => onSelect(exercise)}`
+- Добавить иконку `Check` (Lucide) для залогированных упражнений
+
+**Новый CSS:**
+- Карточка фокусируется на чистом отображении статуса (done/pending/skipped)
+- `min-height: 48px` для touch target
+- Цветная полоска слева по CNS-cost остаётся
+
+---
+
+### Компонент 3: ExerciseLoggerSheet (новый)
+
+#### [NEW] [ExerciseLoggerSheet.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/cards/ExerciseLoggerSheet.tsx)
+#### [NEW] [ExerciseLoggerSheet.module.css](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/cards/ExerciseLoggerSheet.module.css)
+
+Обёртка вокруг существующего [BottomSheet](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/shared/BottomSheet.tsx#15-156) из [components/shared/BottomSheet.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/shared/BottomSheet.tsx). Контент: `SetLogger` + skip-reason chips + кнопка "Save & Next".
+
+**Логика авто-перехода:**
+- По нажатию "Save & Next":
+  1. Сохраняет текущее упражнение
+  2. Автоматически открывает следующее (по индексу в массиве)
+  3. Если это последнее — BottomSheet закрывается, показывается toast "Тренировка завершена! 🎉"
+
+**Props:**
+```typescript
+interface ExerciseLoggerSheetProps {
+  exercise: PlanExerciseWithExpand | null;  // null = closed
+  onClose: () => void;
+  onSaveAndNext: () => void;
+  logId: string;
+  athleteId: string;
+  locale: Language;
+  isLast: boolean;  // для кнопки "Finish" вместо "Next"
+}
+```
+
+---
+
+### Компонент 4: AthleteTrainingView (refactor)
+
+#### [MODIFY] [AthleteTrainingView.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteTrainingView.tsx)
+#### [MODIFY] [AthleteTrainingView.module.css](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteTrainingView.module.css)
+
+**Структурные изменения:**
+1. **Заменить вертикальный рендер 7 DayCards** → `DayTabNav` + рендер только одного выбранного дня
+2. **Удалить [RestDayCard](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteTrainingView.tsx#175-207)** — дни отдыха представлены как иконка `Moon` в табе, выбранный день отдыха показывает inline-сообщение "День отдыха — восстановление"
+3. **Добавить state** `selectedDay` (по умолчанию `todayIdx`)
+4. **Добавить state** `activeExercise: PlanExerciseWithExpand | null` для BottomSheet
+5. **Sticky DayHeader** → `position: sticky; top: 0` для заголовка выбранного дня
+
+**CSS-фиксы (P0, нарушения дизайн-системы):**
+- `.weekNavBtn` → `min-width: 44px; min-height: 44px` (было 36px)
+- `.stepBtn` → `width: 44px; height: 44px` (было 36px)
+- `.skipChip` → `min-height: 44px` (было 36px)
+- `.rpeInput` → обернуть в 44px hit-area
+- `.coachNoteIcon` → `size={16}` (было 11)
+- `.dayCardPast` → `opacity: 0.7` (было 0.5)
+- `.progressChip` → показывать всегда `0/N` (убрать условие `loggedCount > 0`)
+
+---
+
+### Компонент 5: AthleteContextBanner (compact)
+
+#### [MODIFY] [AthleteContextBanner.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteContextBanner.tsx)
+#### [MODIFY] [AthleteContextBanner.module.css](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/AthleteContextBanner.module.css)
+
+- По умолчанию `collapsed` (1 строка: фаза + дней до старта)
+- Тап разворачивает полный баннер с timeline
+
+---
+
+## Визуальная схема итогового UI
+
+```
+┌─────────────────────────────────────┐
+│  📊 GPP Phase • 12д до старта  [▼]  │  ← collapsed banner (1 line)
+├─────────────────────────────────────┤
+│  ← Feb 23 – Mar 1, 2026 →          │  ← weekNav (44px buttons)
+├─────────────────────────────────────┤
+│ [Пн] [Вт●] [▶Ср] [Чт] [Пт] [💤] [💤] │  ← DayTabNav
+├─────────────────────────────────────┤
+│  Среда, 25 февр.  [Сегодня]  0/15   │  ← sticky header
+│─────────────────────────────────────│
+│  🌬️ Разминка (3)  ▾                 │
+│─────────────────────────────────────│
+│  ● 3-Point Start       3×8    ○     │
+│  ● Back Arch Drill      Reps  ✓     │
+│  ● Block Start          5×4   ○     │
+│  ● Sprint 60m           3×    ○     │
+│  ... (ещё 11 упражнений)            │
+│─────────────────────────────────────│
+│  📝 Заметки атлета...               │
+└─────────────────────────────────────┘
+                                        
+  ┌───── [BottomSheet] ──────────────┐
+  │  ═══════ (drag handle)           │
+  │  Block Start  •  5×4  •  CNS: 3  │
+  │                                   │
+  │  Set 1: [__] reps × [__] kg      │
+  │  Set 2: [__] reps × [__] kg      │
+  │  ...                              │
+  │  RPE: ◉───────○  7               │
+  │                                   │
+  │  [ Skip: Equipment | Pain | ... ] │
+  │                                   │
+  │  [ ✓ Save & Next →]              │
+  └───────────────────────────────────┘
+```
+
+---
+
+## Verification Plan
+
+### Automated Tests
+
+```bash
+pnpm type-check   # Проверка типов всех новых/изменённых файлов
+pnpm build         # Static export (Next.js output: 'export')
+pnpm lint          # ESLint
+pnpm test          # Vitest (существующие тесты не затрагиваются)
+```
+
+### Browser Smoke Test (browser_subagent)
+
+1. Открыть `https://jumpedia.app/ru/dashboard` → перейти на страницу тренировки
+2. Проверить DayTabNav: тап по каждому дню переключает контент
+3. Проверить touch targets: все кнопки ≥ 44×44px визуально
+4. Проверить BottomSheet: тап по упражнению → sheet открывается, drag-to-dismiss работает
+5. Viewport 375×667 (iPhone SE): убедиться что UI помещается без горизонтального скролла
+
+### Manual User Verification
+
+- Попросить пользователя протестировать на реальном мобильном устройстве
+- Проверить тактильные ощущения при логировании 5+ упражнений подряд через BottomSheet

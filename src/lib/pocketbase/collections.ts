@@ -31,6 +31,9 @@ export const Collections = {
 
     // Content & Media
     COMPETITIONS: 'competitions',
+    COMPETITION_PARTICIPANTS: 'competition_participants',
+    COMPETITION_PROPOSALS: 'competition_proposals',
+    COMPETITION_MEDIA: 'competition_media',
     EXERCISE_VIDEOS: 'exercise_videos',
     ACHIEVEMENTS: 'achievements',
     NOTIFICATIONS: 'notifications',
@@ -39,6 +42,12 @@ export const Collections = {
     // Push & Notification Preferences
     PUSH_SUBSCRIPTIONS: 'push_subscriptions',
     NOTIFICATION_PREFERENCES: 'notification_preferences',
+
+    // Track 4.262 additions
+    PERSONAL_RECORDS: 'personal_records',
+
+    // Track 4.263 additions
+    EXERCISE_ADJUSTMENTS: 'exercise_adjustments',
 } as const;
 
 export type CollectionName = (typeof Collections)[keyof typeof Collections];

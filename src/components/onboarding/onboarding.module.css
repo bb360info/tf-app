@@ -58,7 +58,23 @@
     height: 100%;
     background: var(--color-accent-primary);
     border-radius: 0 var(--radius-full) var(--radius-full) 0;
-    transition: width var(--duration-slow) var(--ease-in-out);
+    transition: width var(--duration-slow) var(--ease-default);
+}
+
+.progressStep1 {
+    width: 25%;
+}
+
+.progressStep2 {
+    width: 50%;
+}
+
+.progressStep3 {
+    width: 75%;
+}
+
+.progressStep4 {
+    width: 100%;
 }
 
 /* ── Steps viewport ────────────────────────────────────────────────────── */
@@ -72,7 +88,23 @@
 .stepsTrack {
     display: flex;
     height: 100%;
-    transition: transform var(--duration-slow) var(--ease-in-out);
+    transition: transform var(--duration-slow) var(--ease-default);
+}
+
+.stepsTrackStep0 {
+    transform: translateX(0);
+}
+
+.stepsTrackStep1 {
+    transform: translateX(-100%);
+}
+
+.stepsTrackStep2 {
+    transform: translateX(-200%);
+}
+
+.stepsTrackStep3 {
+    transform: translateX(-300%);
 }
 
 .step {
@@ -134,7 +166,7 @@
     font-weight: var(--weight-medium);
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-in-out);
+    transition: all var(--duration-normal) var(--ease-default);
     min-height: 44px;
     min-width: 80px;
 }
@@ -148,6 +180,11 @@
     background: var(--color-accent-primary);
     border-color: var(--color-accent-primary);
     color: var(--color-text-inverse);
+}
+
+.langChip:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
 }
 
 /* ── Input field ───────────────────────────────────────────────────────── */
@@ -171,12 +208,12 @@
     /* 16px — no iOS zoom */
     color: var(--color-text-primary);
     background: var(--color-bg-primary);
-    transition: border-color var(--duration-normal) var(--ease-in-out),
-        box-shadow var(--duration-normal) var(--ease-in-out);
+    transition: border-color var(--duration-normal) var(--ease-default),
+        box-shadow var(--duration-normal) var(--ease-default);
     outline: none;
 }
 
-.input:focus {
+.input:focus-visible {
     border-color: var(--color-accent-primary);
     box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
@@ -199,18 +236,37 @@
     align-items: center;
     gap: var(--space-3);
     text-align: left;
-    transition: all var(--duration-normal) var(--ease-in-out);
+    transition: all var(--duration-normal) var(--ease-default);
     min-height: 72px;
 }
 
 .roleCard:hover {
     border-color: var(--color-accent-primary);
-    background: var(--color-accent-light, rgba(35, 131, 226, 0.04));
+    background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent);
 }
 
 .roleCardActive {
     border-color: var(--color-accent-primary);
-    background: var(--color-accent-light, rgba(35, 131, 226, 0.08));
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+}
+
+.roleCard:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+.roleCardStatic {
+    cursor: default;
+}
+
+.roleCardStatic:hover {
+    border-color: var(--color-border);
+    background: transparent;
+}
+
+.roleCardCoachIcon {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
 }
 
 .roleCardIcon {
@@ -273,34 +329,50 @@
 
 .toggle {
     flex-shrink: 0;
+    width: 52px;
+    min-height: 44px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+}
+
+.toggle::before {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 4px;
     width: 44px;
     height: 26px;
     border-radius: var(--radius-full);
     background: var(--color-border);
-    border: none;
-    cursor: pointer;
-    position: relative;
-    transition: background var(--duration-normal) var(--ease-in-out);
+    transition: background var(--duration-normal) var(--ease-default);
 }
 
-.toggleActive {
+.toggleActive::before {
     background: var(--color-accent-primary);
 }
 
 .toggleThumb {
     position: absolute;
-    top: 3px;
-    left: 3px;
+    top: 12px;
+    left: 7px;
     width: 20px;
     height: 20px;
     border-radius: var(--radius-full);
-    background: white;
+    background: var(--color-bg-primary);
     box-shadow: var(--shadow-sm);
     transition: transform var(--duration-normal) var(--ease-spring);
 }
 
 .toggleThumbActive {
-    transform: translateX(18px);
+    transform: translateX(20px);
+}
+
+.toggle:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
 }
 
 /* ── Unit selector ─────────────────────────────────────────────────────── */
@@ -322,7 +394,7 @@
     font-weight: var(--weight-medium);
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-in-out);
+    transition: all var(--duration-normal) var(--ease-default);
     min-height: 44px;
 }
 
@@ -334,6 +406,11 @@
     background: var(--color-accent-primary);
     color: var(--color-text-inverse);
     font-weight: var(--weight-semibold);
+}
+
+.unitBtn:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: -2px;
 }
 
 /* ── Done step — feature list ──────────────────────────────────────────── */
@@ -377,6 +454,64 @@
     margin-top: 2px;
 }
 
+/* ── Invite success banner (StepDone) ──────────────────────────────────── */
+.inviteSuccess {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-success);
+}
+
+.inviteError {
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-md);
+    background: var(--color-danger-light);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.inviteErrorText {
+    margin: 0;
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+}
+
+.inviteErrorActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.inviteErrorLink {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+}
+
+.inviteErrorLink:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+
 /* ── Footer ─────────────────────────────────────────────────────────────── */
 
 .footer {
@@ -398,7 +533,7 @@
     height: 6px;
     border-radius: var(--radius-full);
     background: var(--color-border);
-    transition: all var(--duration-normal) var(--ease-in-out);
+    transition: all var(--duration-normal) var(--ease-default);
 }
 
 .dotActive {
@@ -422,8 +557,8 @@
     font-size: var(--text-base);
     font-weight: var(--weight-semibold);
     cursor: pointer;
-    transition: background var(--duration-normal) var(--ease-in-out),
-        opacity var(--duration-fast) var(--ease-in-out);
+    transition: background var(--duration-normal) var(--ease-default),
+        opacity var(--duration-fast) var(--ease-default);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -439,6 +574,11 @@
     pointer-events: none;
 }
 
+.btnNext:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
 .btnSkip {
     height: 48px;
     padding: 0 var(--space-4);
@@ -450,13 +590,18 @@
     font-weight: var(--weight-medium);
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-in-out);
+    transition: all var(--duration-normal) var(--ease-default);
     white-space: nowrap;
 }
 
 .btnSkip:hover {
     border-color: var(--color-text-secondary);
     color: var(--color-text-primary);
+}
+
+.btnSkip:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
 }
 
 /* ── Loading state ─────────────────────────────────────────────────────── */
@@ -487,6 +632,7 @@
 
     .stepsTrack,
     .progressFill,
+    .toggle::before,
     .toggleThumb,
     .dot,
     .dotActive {

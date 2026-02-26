@@ -33,9 +33,15 @@ export const TrainingPhasesSchema = z.object({
 
 export const PlanStatusSchema = z.enum(['draft', 'published', 'archived']);
 
+// [Track 4.263] Plan type discriminator
+export const PlanTypeSchema = z.enum(['phase_based', 'standalone', 'override']);
+
 export const TrainingPlansSchema = z.object({
-    phase_id: pbId,
-    week_number: z.number().int().min(1),
+    plan_type: PlanTypeSchema,                          // [NEW, required]
+    phase_id: pbId.optional(),                         // [CHANGED: required→optional]
+    week_number: z.number().int().min(1).optional(),   // [CHANGED: required→optional]
+    start_date: z.string().optional(),                 // [NEW — ISO date string for standalone]
+    end_date: z.string().optional(),                   // [NEW — ISO date string for standalone]
     status: PlanStatusSchema,
     notes: z.string().optional(),
     sync_id: z.string().optional(),

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Bell, CheckSquare, Clock, Trophy, Info, AlertCircle, MessageSquare } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Bell, CheckSquare, Clock, Trophy, Info, AlertCircle, MessageSquare, UserCheck, Calendar } from 'lucide-react';
 import pb from '@/lib/pocketbase/client';
 import { markRead, markAllRead, listPaginated, listByType } from '@/lib/pocketbase/services/notifications';
 import type { NotificationsRecord, NotificationType } from '@/lib/pocketbase/types';
@@ -26,6 +27,8 @@ const TYPE_ICONS: Record<string, React.FC<{ size: number; 'aria-hidden': true }>
     achievement: (p) => <Trophy {...p} />,
     low_readiness: (p) => <AlertCircle {...p} />,
     coach_note: (p) => <MessageSquare {...p} />,
+    invite_accepted: (p) => <UserCheck {...p} />,
+    competition_upcoming: (p) => <Calendar {...p} />,
     system: (p) => <Info {...p} />,
 };
 
@@ -42,6 +45,7 @@ const FILTER_TYPES: FilterType[] = [
 ];
 
 export function NotificationsClientPage({ labels }: Props) {
+    const tNotif = useTranslations('notifications');
     const userId = pb.authStore.record?.id ?? '';
     const [notifications, setNotifications] = useState<NotificationsRecord[]>([]);
     const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -148,6 +152,18 @@ export function NotificationsClientPage({ labels }: Props) {
                 <ul className={styles.list}>
                     {notifications.map((n) => {
                         const Icon = TYPE_ICONS[n.type] ?? ((p: { size: number; 'aria-hidden': true }) => <Bell {...p} />);
+                        // Resolve i18n message: message_key+params → t(), fallback → n.message
+                        let msg = n.message;
+                        if (n.message_key) {
+                            try {
+                                msg = tNotif(
+                                    n.message_key as Parameters<typeof tNotif>[0],
+                                    n.message_params || {}
+                                );
+                            } catch {
+                                /* fallback to n.message */
+                            }
+                        }
                         return (
                             <li
                                 key={n.id}
@@ -158,7 +174,13 @@ export function NotificationsClientPage({ labels }: Props) {
                                     <Icon size={16} aria-hidden={true} />
                                 </div>
                                 <div className={styles.itemBody}>
-                                    <span className={styles.itemMsg}>{n.message}</span>
+                                    {n.link ? (
+                                        <a href={n.link} className={styles.itemMsg} onClick={() => void handleMarkRead(n.id)}>
+                                            {msg}
+                                        </a>
+                                    ) : (
+                                        <span className={styles.itemMsg}>{msg}</span>
+                                    )}
                                     <span className={styles.itemTime}>{formatTime(n.created)}</span>
                                 </div>
                                 {!n.read && (

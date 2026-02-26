@@ -5,6 +5,9 @@ export {
     UserRoleSchema,
     LanguageSchema,
     UnitSystemSchema,
+    DisciplineSchema,
+    SeasonTypeSchema,
+    PRSourceSchema,
     UsersSchema,
     LoginSchema,
     RegisterSchema,
@@ -49,7 +52,22 @@ export {
 // Content
 export {
     CompetitionPrioritySchema,
+    CompetitionStatusSchema,
+    ParticipantStatusSchema,
+    ProposalStatusSchema,
+    ProposalKindSchema,
+    CompetitionMediaKindSchema,
+    MediaVisibilitySchema,
+    MediaModerationStatusSchema,
     CompetitionsSchema,
+    CompetitionParticipantsSchema,
+    CompetitionProposalsSchema,
+    CompetitionProposalResultPayloadSchema,
+    CompetitionProposalMetadataPayloadSchema,
+    CompetitionProposalPreEventPayloadSchema,
+    CompetitionProposalMediaMetaPayloadSchema,
+    CompetitionProposalPayloadSchema,
+    CompetitionMediaSchema,
     AchievementTypeSchema,
     AchievementsSchema,
     NotificationTypeSchema,
@@ -62,3 +80,24 @@ export {
     PlanAssignmentStatusSchema,
     PlanAssignmentsSchema,
 } from './planAssignments';
+
+
+// Athlete Form
+export {
+    AthletePatchSchema,
+    AthleteFormSubmitPayloadSchema,
+} from './athleteForm';
+
+// Track 4.263
+export {
+    PlanTypeSchema,
+} from './training';
+
+export {
+    CompetitionOwnerTypeSchema,
+} from './content';
+
+export {
+    ExerciseAdjustmentsSchema,
+    type ExerciseAdjustmentsInput,
+} from './exerciseAdjustments';

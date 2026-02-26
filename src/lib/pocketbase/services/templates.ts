@@ -170,7 +170,7 @@ export async function listTemplateItems(templateId: string): Promise<TemplateIte
     return pb
         .collection(Collections.TEMPLATE_ITEMS)
         .getFullList<TemplateItemWithExpand>({
-            filter: `template_id = "${templateId}"`,
+            filter: pb.filter('template_id = {:templateId}', { templateId }),
             sort: 'block,order',
             expand: 'exercise_id',
         });
@@ -307,7 +307,10 @@ async function ejectTemplateItems(
     if (blockFilters.length === 0) return;
 
     const blockCondition = blockFilters.join(' || ');
-    const filter = `plan_id = "${planId}" && day_of_week = ${dayOfWeek} && session = ${session} && (${blockCondition}) && deleted_at = ""`;
+    const filter = pb.filter(
+        `plan_id = {:pid} && day_of_week = {:dow} && session = {:s} && (${blockCondition}) && deleted_at = ""`,
+        { pid: planId, dow: dayOfWeek, s: session }
+    );
 
     const existing = await pb
         .collection(Collections.PLAN_EXERCISES)
@@ -346,7 +349,10 @@ export async function addWarmupItem(
         const existing = await pb
             .collection(Collections.PLAN_EXERCISES)
             .getFullList<PlanExercisesRecord & RecordModel>({
-                filter: `plan_id = "${planId}" && day_of_week = ${dayOfWeek} && session = ${session} && block = "warmup" && deleted_at = ""`,
+                filter: pb.filter(
+                    'plan_id = {:pid} && day_of_week = {:dow} && session = {:s} && block = "warmup" && deleted_at = ""',
+                    { pid: planId, dow: dayOfWeek, s: session }
+                ),
                 sort: '-order',
                 fields: 'order',
             });

@@ -48,6 +48,26 @@ export function AchievementsGrid({ athleteId, title, locale = 'ru' }: Achievemen
                 for (const record of result.newlyEarned) {
                     celebrate(record.type);
                 }
+                // Notify athlete about new achievements (fire-and-forget, low priority)
+                void (async () => {
+                    try {
+                        const { default: pb } = await import('@/lib/pocketbase/client');
+                        const { sendNotification } = await import('@/lib/pocketbase/services/notifications');
+                        const userId = pb.authStore.record?.id ?? '';
+                        if (!userId) return;
+                        for (const record of result.newlyEarned) {
+                            await sendNotification({
+                                userId,
+                                type: 'achievement',
+                                messageKey: 'achievementEarned',
+                                messageParams: { title: record.type },
+                                priority: 'normal',
+                            });
+                        }
+                    } catch {
+                        /* non-critical: achievement notification */
+                    }
+                })();
             }
         } catch {
             /* non-critical: achievements are decorative */

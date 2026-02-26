@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
-import { Plus, Copy, RefreshCw, Users, Clock, Check, Trash2, ChevronDown, ChevronUp, UserMinus } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { Plus, Copy, RefreshCw, Users, Clock, Check, Trash2, ChevronDown, ChevronUp, UserMinus, Share2, QrCode, X } from 'lucide-react';
+import { useToast } from '@/lib/hooks/useToast';
 import { useAuth } from '@/lib/hooks/useAuth';
 import {
     listMyGroups,
@@ -13,6 +15,8 @@ import {
     listGroupMembers,
     removeGroupMember,
     deleteGroup,
+    moveAthleteToGroup,
+    hasActiveGroupPlan,
     type GroupWithRelations,
     type GroupMember,
 } from '@/lib/pocketbase/services/groups';
@@ -31,7 +35,10 @@ interface GroupInfo extends GroupWithRelations {
 
 export default function GroupsPage() {
     const t = useTranslations('groups');
+    const locale = useLocale();
+    const router = useRouter();
     const { isCoach, isAthlete } = useAuth();
+    const { showToast } = useToast();
     const [groups, setGroups] = useState<GroupInfo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCreate, setShowCreate] = useState(false);
@@ -49,6 +56,26 @@ export default function GroupsPage() {
 
     // Copy animation
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [linkCopiedId, setLinkCopiedId] = useState<string | null>(null);
+
+    // Move/Add athlete state
+    interface MoveTarget { member: GroupMember; fromGroup: GroupInfo }
+    const [moveTarget, setMoveTarget] = useState<MoveTarget | null>(null);
+    const [moveToGroupId, setMoveToGroupId] = useState<string>('');
+    const [keepInOriginal, setKeepInOriginal] = useState(false);
+    const [moveWarning, setMoveWarning] = useState<string>('');
+    const [confirmMoveOpen, setConfirmMoveOpen] = useState(false);
+    const [moving, setMoving] = useState(false);
+    const [manageDialogOpen, setManageDialogOpen] = useState(false);
+    const [manageTarget, setManageTarget] = useState<MoveTarget | null>(null);
+    const [manageToGroupId, setManageToGroupId] = useState('');
+    const [manageMode, setManageMode] = useState<'add' | 'move'>('add');
+
+    // QR Code state
+    interface QrTarget { name: string; code: string; url: string }
+    const [qrTarget, setQrTarget] = useState<QrTarget | null>(null);
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+    const qrRef = useRef<HTMLImageElement>(null);
 
     const loadGroups = useCallback(async () => {
         setIsLoading(true);
@@ -176,6 +203,149 @@ export default function GroupsPage() {
         }
     }
 
+    // ── Phase 3: Share Link ─────────────────────────────────────────────────
+    async function handleShareLink(code: string, groupName: string, expires: string, groupId: string) {
+        const expiresIn = new Date(expires).getTime() - Date.now();
+        const oneDayMs = 24 * 60 * 60 * 1000;
+
+        // Warn if expiring within 24h and offer to regenerate
+        if (expiresIn < oneDayMs) {
+            const confirmed = window.confirm(t('linkExpiringSoon'));
+            if (confirmed) {
+                await handleGenerate(groupId);
+                return; // New code generated — user can share again
+            }
+        }
+
+        const url = `${window.location.origin}/${locale}/join?code=${code}`;
+
+        // Use Web Share API only on touch/mobile devices.
+        // On desktop (pointer: fine), macOS/Windows show a native share sheet
+        // which is confusing UX — always fall back to clipboard instead.
+        const isMobile =
+            typeof window !== 'undefined' &&
+            window.matchMedia('(pointer: coarse)').matches;
+
+        if (isMobile && typeof navigator !== 'undefined' && navigator.share) {
+            try {
+                await navigator.share({
+                    title: t('inviteTitle'),
+                    text: `${t('inviteText', { group: groupName })}\n${t('linkExpiry')}`,
+                    url,
+                });
+            } catch {
+                /* user cancelled Web Share — OK */
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(url);
+                setLinkCopiedId(groupId);
+                setTimeout(() => setLinkCopiedId(null), 2000);
+                showToast({ message: t('linkCopied'), type: 'success' });
+            } catch {
+                /* clipboard not available */
+            }
+        }
+    }
+
+    // ── Phase 4: Move Athletes ──────────────────────────────────────────────
+    async function handleMoveAttempt(member: GroupMember, fromGroup: GroupInfo, toGroupId: string, keepOriginal: boolean) {
+        if (!toGroupId) return;
+        setMoveTarget({ member, fromGroup });
+        setMoveToGroupId(toGroupId);
+        setKeepInOriginal(keepOriginal);
+
+        // Check active plans in both groups to generate appropriate warning
+        const toGroup = groups.find(g => g.id === toGroupId);
+        const [fromHasPlan, toHasPlan] = await Promise.all([
+            keepOriginal ? Promise.resolve(false) : hasActiveGroupPlan(fromGroup.id),
+            hasActiveGroupPlan(toGroupId),
+        ]);
+
+        let warning = '';
+        if (fromHasPlan && toHasPlan) {
+            warning = t('moveWarningBoth', { from: fromGroup.name, to: toGroup?.name ?? toGroupId });
+        } else if (fromHasPlan) {
+            warning = t('moveWarning', { from: fromGroup.name });
+        } else if (toHasPlan) {
+            warning = t('moveWarningGain', { to: toGroup?.name ?? toGroupId });
+        }
+        setMoveWarning(warning);
+        setConfirmMoveOpen(true);
+    }
+
+    function handleOpenManageDialog(member: GroupMember, fromGroup: GroupInfo) {
+        const availableGroups = groups.filter(og => og.id !== fromGroup.id);
+        if (availableGroups.length === 0) return;
+        setManageTarget({ member, fromGroup });
+        setManageToGroupId(availableGroups[0].id);
+        setManageMode('add');
+        setManageDialogOpen(true);
+    }
+
+    async function handleManageSubmit() {
+        if (!manageTarget || !manageToGroupId) return;
+        setManageDialogOpen(false);
+        await handleMoveAttempt(
+            manageTarget.member,
+            manageTarget.fromGroup,
+            manageToGroupId,
+            manageMode === 'add'
+        );
+    }
+
+    async function handleMoveConfirm() {
+        if (!moveTarget || !moveToGroupId) return;
+        setMoving(true);
+        setConfirmMoveOpen(false);
+        try {
+            await moveAthleteToGroup(moveTarget.member.athlete_id, moveTarget.fromGroup.id, moveToGroupId, keepInOriginal);
+            // Refresh members list for both affected groups
+            setGroups(prev => prev.map(g => {
+                if (g.id === moveTarget.fromGroup.id && !keepInOriginal) {
+                    return { ...g, members: (g.members ?? []).filter(m => m.id !== moveTarget.member.id), membersLoaded: true };
+                }
+                if (g.id === moveToGroupId) {
+                    return { ...g, membersLoaded: false }; // reload next expand
+                }
+                return g;
+            }));
+        } catch (err) {
+            logError(err, { component: 'GroupsPage', action: 'handleMoveConfirm' });
+        } finally {
+            setMoving(false);
+            setMoveTarget(null);
+        }
+    }
+
+    // ── Phase 5: QR Code ────────────────────────────────────────────────────
+    async function handleShowQR(group: GroupInfo) {
+        if (!group.activeCode) return;
+        const url = `${window.location.origin}/${locale}/join?code=${group.activeCode.code}`;
+        setQrTarget({ name: group.name, code: group.activeCode.code, url });
+        setQrDataUrl(null);
+
+        const QRCode = await import('qrcode');
+        const isDark = typeof document !== 'undefined' &&
+            document.documentElement.getAttribute('data-theme') === 'dark';
+        const dataUrl = await QRCode.toDataURL(url, {
+            width: 256,
+            color: {
+                dark: isDark ? '#ffffff' : '#111111',
+                light: isDark ? '#1a1a1a' : '#ffffff',
+            },
+        });
+        setQrDataUrl(dataUrl);
+    }
+
+    function handleDownloadQR() {
+        if (!qrDataUrl || !qrTarget) return;
+        const a = document.createElement('a');
+        a.href = qrDataUrl;
+        a.download = `jumpedia-${qrTarget.name.replace(/\s+/g, '-').toLowerCase()}-invite.png`;
+        a.click();
+    }
+
     function formatExpiry(iso: string): string {
         const d = new Date(iso);
         const now = new Date();
@@ -299,14 +469,27 @@ export default function GroupsPage() {
                                                                 <span className={styles.memberName}>
                                                                     {m.expand?.athlete_id?.name ?? m.athlete_id}
                                                                 </span>
-                                                                <button
-                                                                    type="button"
-                                                                    className={`${styles.iconBtn} ${styles.removeBtn}`}
-                                                                    onClick={() => handleRemoveMember(g.id, m.id)}
-                                                                    aria-label="Remove member"
-                                                                >
-                                                                    <UserMinus size={14} />
-                                                                </button>
+                                                                <div className={styles.memberActions}>
+                                                                    {groups.filter(og => og.id !== g.id).length > 0 && (
+                                                                        <button
+                                                                            type="button"
+                                                                            className={styles.manageBtn}
+                                                                            disabled={moving}
+                                                                            onClick={() => handleOpenManageDialog(m, g)}
+                                                                        >
+                                                                            {t('manageMember')}
+                                                                        </button>
+                                                                    )}
+                                                                    {/* Remove member */}
+                                                                    <button
+                                                                        type="button"
+                                                                        className={`${styles.iconBtn} ${styles.removeBtn}`}
+                                                                        onClick={() => handleRemoveMember(g.id, m.id)}
+                                                                        aria-label="Remove member"
+                                                                    >
+                                                                        <UserMinus size={14} />
+                                                                    </button>
+                                                                </div>
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -314,7 +497,7 @@ export default function GroupsPage() {
                                             </div>
                                         )}
 
-                                        {/* Invite code */}
+                                        {/* Invite code block */}
                                         {g.activeCode ? (
                                             <div className={styles.codeBlock}>
                                                 <code className={styles.code}>{g.activeCode.code}</code>
@@ -322,6 +505,7 @@ export default function GroupsPage() {
                                                     <Clock size={12} />
                                                     {formatExpiry(g.activeCode.expires)}
                                                 </span>
+                                                {/* Copy code */}
                                                 <button
                                                     type="button"
                                                     className={styles.iconBtn}
@@ -330,6 +514,7 @@ export default function GroupsPage() {
                                                 >
                                                     {copiedId === g.id ? <Check size={14} /> : <Copy size={14} />}
                                                 </button>
+                                                {/* Regenerate */}
                                                 <button
                                                     type="button"
                                                     className={styles.iconBtn}
@@ -337,6 +522,26 @@ export default function GroupsPage() {
                                                     aria-label={t('regenerate')}
                                                 >
                                                     <RefreshCw size={14} />
+                                                </button>
+                                                {/* Phase 3: Share invite link */}
+                                                <button
+                                                    type="button"
+                                                    className={styles.iconBtn}
+                                                    onClick={() => handleShareLink(g.activeCode!.code, g.name, g.activeCode!.expires, g.id)}
+                                                    aria-label={t('shareLink')}
+                                                    title={linkCopiedId === g.id ? t('linkCopied') : t('shareLink')}
+                                                >
+                                                    {linkCopiedId === g.id ? <Check size={14} /> : <Share2 size={14} />}
+                                                </button>
+                                                {/* Phase 5: QR Code */}
+                                                <button
+                                                    type="button"
+                                                    className={styles.iconBtn}
+                                                    onClick={() => handleShowQR(g)}
+                                                    aria-label={t('showQR')}
+                                                    title={t('showQR')}
+                                                >
+                                                    <QrCode size={14} />
                                                 </button>
                                             </div>
                                         ) : (
@@ -348,6 +553,13 @@ export default function GroupsPage() {
                                                 {t('generateCode')}
                                             </button>
                                         )}
+                                        <button
+                                            type="button"
+                                            className={styles.planBtn}
+                                            onClick={() => router.push(`/${locale}/training?openWizard=1&groupId=${g.id}`)}
+                                        >
+                                            {t('createPlanForGroup')}
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -415,6 +627,122 @@ export default function GroupsPage() {
                     );
                 })()
             }
+
+            {/* Phase 4: ConfirmDialog for moving athletes */}
+            <ConfirmDialog
+                open={confirmMoveOpen}
+                title={keepInOriginal ? t('addTo') : t('moveTo')}
+                message={moveWarning || (keepInOriginal ? t('addTo') : t('moveTo'))}
+                confirmLabel={keepInOriginal ? t('addConfirm') : t('moveConfirm')}
+                cancelLabel={t('confirmCancel')}
+                variant="default"
+                onConfirm={handleMoveConfirm}
+                onCancel={() => { setConfirmMoveOpen(false); setMoveTarget(null); }}
+            />
+
+            {manageDialogOpen && manageTarget && (
+                <div
+                    className={styles.manageOverlay}
+                    onClick={() => setManageDialogOpen(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t('manageMemberTitle')}
+                >
+                    <div className={styles.manageModal} onClick={(e) => e.stopPropagation()}>
+                        <h3 className={styles.manageTitle}>{t('manageMemberTitle')}</h3>
+                        <p className={styles.manageSubtitle}>
+                            {manageTarget.member.expand?.athlete_id?.name ?? manageTarget.member.athlete_id}
+                        </p>
+
+                        <label className={styles.manageLabel} htmlFor="manage-target-group">
+                            {t('targetGroup')}
+                        </label>
+                        <select
+                            id="manage-target-group"
+                            className={styles.manageSelect}
+                            value={manageToGroupId}
+                            onChange={(e) => setManageToGroupId(e.target.value)}
+                        >
+                            {groups.filter(group => group.id !== manageTarget.fromGroup.id).map(group => (
+                                <option key={group.id} value={group.id}>{group.name}</option>
+                            ))}
+                        </select>
+
+                        <label className={styles.manageLabel}>{t('actionType')}</label>
+                        <div className={styles.manageModeRow}>
+                            <button
+                                type="button"
+                                className={`${styles.manageModeBtn} ${manageMode === 'add' ? styles.manageModeBtnActive : ''}`}
+                                onClick={() => setManageMode('add')}
+                            >
+                                {t('actionAdd')}
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.manageModeBtn} ${manageMode === 'move' ? styles.manageModeBtnActive : ''}`}
+                                onClick={() => setManageMode('move')}
+                            >
+                                {t('actionMove')}
+                            </button>
+                        </div>
+
+                        <div className={styles.manageActions}>
+                            <button type="button" className={styles.cancelBtn} onClick={() => setManageDialogOpen(false)}>
+                                {t('confirmCancel')}
+                            </button>
+                            <button type="button" className={styles.saveBtn} onClick={() => void handleManageSubmit()}>
+                                {t('manageSubmit')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Phase 5: QR Code Modal */}
+            {qrTarget && (
+                <div
+                    className={styles.qrOverlay}
+                    onClick={() => { setQrTarget(null); setQrDataUrl(null); }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t('showQR')}
+                >
+                    <div
+                        className={styles.qrModal}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <button
+                            className={styles.qrClose}
+                            onClick={() => { setQrTarget(null); setQrDataUrl(null); }}
+                            aria-label="close"
+                        >
+                            <X size={18} />
+                        </button>
+                        <h3 className={styles.qrGroupName}>{qrTarget.name}</h3>
+                        {qrDataUrl ? (
+                            <img
+                                ref={qrRef}
+                                src={qrDataUrl}
+                                alt="QR Code"
+                                width={256}
+                                height={256}
+                                className={styles.qrImage}
+                            />
+                        ) : (
+                            <div className={styles.qrSkeleton} />
+                        )}
+                        <code className={styles.qrCode}>{qrTarget.code}</code>
+                        <button
+                            type="button"
+                            className={styles.qrDownloadBtn}
+                            onClick={handleDownloadQR}
+                            disabled={!qrDataUrl}
+                        >
+                            {t('downloadQR')}
+                        </button>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

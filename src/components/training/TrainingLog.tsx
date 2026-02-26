@@ -336,8 +336,7 @@ interface CardProps {
     onAddSet: (exIdx: number) => void;
     onRemoveSet: (exIdx: number) => void;
     onUpdateRpe: (exIdx: number, value: number) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    t: any;
+    t: ReturnType<typeof useTranslations>;
 }
 
 function ExerciseCard({ ex, exIdx, onUpdateSet, onAddSet, onRemoveSet, onUpdateRpe, t }: CardProps) {
@@ -396,8 +395,7 @@ interface SetsProps {
     onUpdateSet: (exIdx: number, setIdx: number, field: keyof SetRow, value: string) => void;
     onAddSet: (exIdx: number) => void;
     onRemoveSet: (exIdx: number) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    t: any;
+    t: ReturnType<typeof useTranslations>;
 }
 
 function SetsInput({ ex, exIdx, unitType, onUpdateSet, onAddSet, onRemoveSet, t }: SetsProps) {

@@ -1,5 +1,6 @@
 import pb from './client';
 import type { UsersRecord } from './types';
+import type { RecordAuthResponse } from 'pocketbase';
 
 /**
  * Auth utility functions for PocketBase.
@@ -12,17 +13,30 @@ export async function loginWithEmail(email: string, password: string) {
 }
 
 /** Register a new user with email and password */
-export async function registerWithEmail(
-    email: string,
-    password: string,
-    name: string,
-    role: 'coach' | 'athlete' = 'athlete'
-) {
+export async function registerWithEmail(params: {
+    email: string;
+    password: string;
+    first_name: string;
+    last_name: string;
+    role?: 'coach' | 'athlete';
+    allowAthleteViaInvite?: boolean;
+}) {
+    const { email, password, first_name, last_name, role = 'coach', allowAthleteViaInvite = false } = params;
+
+    // Product rule: athlete role is allowed only when user comes via invite flow.
+    if (role === 'athlete' && !allowAthleteViaInvite) {
+        throw new Error('auth.athleteInviteOnly');
+    }
+
+    const name = `${first_name} ${last_name}`.trim();
+
     const user = await pb.collection('users').create({
         email,
         password,
         passwordConfirm: password,
         name,
+        first_name,
+        last_name,
         role,
         language: 'en',
         units: 'metric',
@@ -39,7 +53,7 @@ export async function registerWithEmail(
 }
 
 /** Login with Google OAuth2 */
-export async function loginWithGoogle() {
+export async function loginWithGoogle(): Promise<RecordAuthResponse<UsersRecord>> {
     return pb.collection('users').authWithOAuth2({ provider: 'google' });
 }
 
@@ -101,7 +115,15 @@ export async function changePassword(id: string, old: string, newPass: string, c
     });
 }
 
-/** Update user name */
-export async function updateUserName(id: string, name: string) {
-    return pb.collection('users').update(id, { name });
+/** Update user first/last name (computes legacy `name` field automatically) */
+export async function updateUserName(
+    id: string,
+    params: { first_name: string; last_name: string }
+) {
+    const name = `${params.first_name} ${params.last_name}`.trim();
+    return pb.collection('users').update(id, {
+        first_name: params.first_name,
+        last_name: params.last_name,
+        name,
+    });
 }

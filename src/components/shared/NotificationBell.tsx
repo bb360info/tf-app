@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { Bell, ClipboardList, Clock, Trophy, Info, ChevronRight } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Bell, ClipboardList, Clock, Trophy, Info, ChevronRight, AlertCircle, MessageSquare, UserCheck, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import type { NotificationsRecord } from '@/lib/pocketbase/types';
 import {
     markRead,
@@ -14,19 +15,11 @@ import { reportError } from '@/lib/telemetry';
 import pb from '@/lib/pocketbase/client';
 import styles from './NotificationBell.module.css';
 
-interface NotificationBellProps {
-    /** i18n labels */
-    labels?: {
-        title: string;
-        markAll: string;
-        empty: string;
-        showAll?: string;
-    };
-}
-
-export function NotificationBell({ labels }: NotificationBellProps) {
+export function NotificationBell() {
     const [open, setOpen] = useState(false);
     const locale = useLocale();
+    const router = useRouter();
+    const t = useTranslations('notifications');
 
     const userId = pb.authStore.record?.id ?? '';
 
@@ -37,19 +30,41 @@ export function NotificationBell({ labels }: NotificationBellProps) {
     const handleToggle = () => setOpen((prev) => !prev);
     const handleClose = () => setOpen(false);
 
-    const handleMarkRead = async (id: string) => {
+    /**
+     * Resolve notification message:
+     * 1. If message_key exists → translate via t() with message_params
+     * 2. Fallback: raw n.message string (backwards compat)
+     */
+    const renderMessage = useCallback((n: NotificationsRecord): string => {
+        if (!n.message_key) return n.message;
         try {
-            await markRead(id);
-            removeNotification(id); // обновляет state через useNotifications
+            // next-intl t() accepts ICU params as second arg
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return t(n.message_key as any, n.message_params as any ?? {});
+        } catch {
+            console.warn('[NotificationBell] missing i18n key:', n.message_key, '— fallback to message');
+            return n.message;
+        }
+    }, [t]);
+
+    const handleMarkRead = useCallback(async (n: NotificationsRecord) => {
+        try {
+            await markRead(n.id);
+            removeNotification(n.id);
+            // Navigate to notification link if present
+            if (n.link) {
+                router.push(n.link as never);
+                handleClose();
+            }
         } catch (err) {
             reportError(err instanceof Error ? err : new Error(String(err)));
         }
-    };
+    }, [removeNotification, router]);
 
     const handleMarkAll = async () => {
         try {
             await markAllRead();
-            clearAll(); // сбрасывает весь список и счётчик
+            clearAll();
             setOpen(false);
         } catch {
             /* non-critical: notification marking */
@@ -77,6 +92,10 @@ export function NotificationBell({ labels }: NotificationBellProps) {
             checkin_reminder: <Clock {...iconProps} />,
             achievement: <Trophy {...iconProps} />,
             system: <Info {...iconProps} />,
+            low_readiness: <AlertCircle {...iconProps} />,
+            coach_note: <MessageSquare {...iconProps} />,
+            invite_accepted: <UserCheck {...iconProps} />,
+            competition_upcoming: <Calendar {...iconProps} />,
         };
         return map[type] ?? null;
     };
@@ -87,7 +106,7 @@ export function NotificationBell({ labels }: NotificationBellProps) {
                 type="button"
                 className={styles.btn}
                 onClick={handleToggle}
-                aria-label={`Notifications${count > 0 ? ` (${count})` : ''}`}
+                aria-label={`${t('title')}${count > 0 ? ` (${count})` : ''}`}
                 aria-expanded={open}
                 aria-haspopup="dialog"
             >
@@ -107,13 +126,11 @@ export function NotificationBell({ labels }: NotificationBellProps) {
                     <div
                         className={styles.dropdown}
                         role="dialog"
-                        aria-label={labels?.title ?? 'Notifications'}
+                        aria-label={t('title')}
                     >
-                        <div
-                            className={styles.dropHeader}
-                        >
+                        <div className={styles.dropHeader}>
                             <p className={styles.dropTitle}>
-                                {labels?.title ?? 'Notifications'}
+                                {t('title')}
                             </p>
                             <div className={styles.headerActions}>
                                 {notifications.length > 0 && (
@@ -122,7 +139,7 @@ export function NotificationBell({ labels }: NotificationBellProps) {
                                         className={styles.markAllBtn}
                                         onClick={() => void handleMarkAll()}
                                     >
-                                        {labels?.markAll ?? 'Mark all read'}
+                                        {t('markAll')}
                                     </button>
                                 )}
                                 <Link
@@ -130,14 +147,14 @@ export function NotificationBell({ labels }: NotificationBellProps) {
                                     className={styles.showAllBtn}
                                     onClick={handleClose}
                                 >
-                                    {labels?.showAll ?? 'All'} <ChevronRight size={12} aria-hidden="true" />
+                                    {t('showAll')} <ChevronRight size={12} aria-hidden="true" />
                                 </Link>
                             </div>
                         </div>
 
                         {notifications.length === 0 ? (
                             <p className={styles.empty}>
-                                {labels?.empty ?? 'No new notifications'}
+                                {t('empty')}
                             </p>
                         ) : (
                             notifications.map((n) => (
@@ -146,17 +163,17 @@ export function NotificationBell({ labels }: NotificationBellProps) {
                                     className={styles.item}
                                     role="button"
                                     tabIndex={0}
-                                    onClick={() => void handleMarkRead(n.id)}
+                                    onClick={() => void handleMarkRead(n)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' || e.key === ' ') {
-                                            void handleMarkRead(n.id);
+                                            void handleMarkRead(n);
                                         }
                                     }}
                                 >
                                     <span className={styles.unreadDot} aria-hidden="true" />
                                     <div className={styles.itemText}>
                                         <p className={styles.itemMsg}>
-                                            {typeIcon(n.type)} {n.message}
+                                            {typeIcon(n.type)} {renderMessage(n)}
                                         </p>
                                         <p className={styles.itemTime}>
                                             {formatTime(n.created)}

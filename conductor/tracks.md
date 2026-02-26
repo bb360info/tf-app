@@ -21,13 +21,30 @@
 | ✅ Done | 4.16| DB Integrity — FK Fixes + API Rules | 1-2 | [Gate 4.16](tracks/track-4.16-db-integrity/gate.md) |
 | ✅ Done | 4.19 | Coach-Athlete Interaction & Notifications | 8-12 | [Gate 4.19](tracks/track-4.19-notifications-interaction/gate.md) |
 | ✅ Done | 4.20 | UX Audit & Coach-Athlete Fixes | 6-9 | [Gate 4.20](tracks/track-4.20-ux-audit-fixes/gate.md) |
+| ✅ Done | 4.21 | Athlete Specialization & PR | 4-6 | [Gate 4.21](tracks/track-4.21-athlete-specialization/gate.md) |
+| ✅ Done | 4.22 | Invite Links & Group Management | 3-5 | [Gate 4.22](tracks/track-4.22-invite-groups/gate.md) |
+| ✅ Done | 4.23 | Notification System & App Badge | 3-4 | [Gate 4.23](tracks/track-4.23-notification-system/gate.md) |
+| ✅ Done | 4.24 | Unified UX System Redesign & Plan Resolution | 17-20 | [Gate 4.24](tracks/track-4.24-training-planning-ux/gate.md) |
+| ~~⬜~~ | ~~4.25~~ | ~~Plan Resolution & Assignment Fixes~~ | — | _Absorbed into 4.24_ |
+| ✅ Done | 4.241 | Bug Fixes & Gap Closure (4.24 Audit) | 4-6 | [Gate 4.241](tracks/track-4.241-bug-fixes/gate.md) |
+| ⏸ Paused* | 4.242 | Polish, UX Gaps & Tech Debt Zero | 4-6 | [Gate 4.242](tracks/track-4.242-ux-gap-report/gate.md) |
+| 🟢 Done | 4.243 | Competitions Hub + History + Auto-PR | 5-7 | [Gate 4.243](tracks/track-4.243-competitions-history-pr/gate.md) |
+| ~~⬜~~ | ~~4.244~~ | ~~Historical PR Onboarding~~ | — | _Absorbed into 4.262_ |
+| ~~⬜~~ | ~~4.261~~ | ~~Athlete UX Overhaul + Tech Debt Closure~~ | — | _Absorbed into 4.262_ |
+| ✅ Done | 4.262 | Athlete UX Completion + Historical PR Onboarding | 6-8 | [Gate 4.262](tracks/track-4.262-athlete-ux-pr-onboarding/gate.md) |
+| 🔵 Active | 4.263 | Schema Decoupling — Polymorphic Ownership | 4-6 | [Gate 4.263](tracks/track-4.263-schema-decoupling/gate.md) |
+| ✅ Done | 4.26 | Invite Self-Profile Hotfix | 1 | [Gate 4.26](tracks/track-4.26-invite-self-profile-hotfix/gate.md) |
 | ⬜ | 5 | Video + Biomechanics | 3-4 | [Gate 5](tracks/track-5-video/gate.md) |
 | ⬜ | 6 | Polish + Launch | 2-3 | [Gate 6](tracks/track-6-polish/gate.md) |
 
+*Override on 2026-02-25: Track 4.243 was force-activated by user decision before full Gate 4.242 closure.
+
 ## Timeline
+
 ~33-40 working days (7-8 weeks) to MVP
 
 ## Status Legend
+
 - 🟢 Done — all gate checkboxes passed
 - 🔵 Active — currently in progress
 - 🟡 Next — next to start

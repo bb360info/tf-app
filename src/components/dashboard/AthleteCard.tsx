@@ -5,6 +5,7 @@ import { Calendar, Pencil, Trash2, Tag, TrendingUp, Bell, Check } from 'lucide-r
 import { useTranslations } from 'next-intl';
 import type { AthleteWithStats } from '@/lib/pocketbase/services/athletes';
 import { readinessLevel } from '@/lib/pocketbase/services/athletes';
+import { getInitials, getDisplayName } from '@/lib/utils/nameHelpers';
 import styles from './AthleteCard.module.css';
 
 interface AthleteCardProps {
@@ -18,14 +19,6 @@ interface AthleteCardProps {
     weekCompliance?: number;
 }
 
-function initials(name: string): string {
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0] ?? '')
-        .join('')
-        .toUpperCase();
-}
 
 function relativeDate(dateStr: string | undefined, t: ReturnType<typeof useTranslations>): string {
     if (!dateStr) return t('noLog');
@@ -39,6 +32,7 @@ function relativeDate(dateStr: string | undefined, t: ReturnType<typeof useTrans
 
 export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, weekCompliance }: AthleteCardProps) {
     const t = useTranslations('dashboard');
+    const tDisc = useTranslations('onboarding.specialization.disciplines');
     const [isDeleting, setIsDeleting] = useState(false);
     const [notifySent, setNotifySent] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -48,7 +42,7 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
         if (!onNotify || isSending) return;
         setIsSending(true);
         try {
-            await onNotify(athlete.user_id ?? athlete.id, athlete.name);
+            await onNotify(athlete.user_id ?? athlete.id, getDisplayName(athlete));
             setNotifySent(true);
             setTimeout(() => setNotifySent(false), 2000);
         } catch { /* non-critical */ }
@@ -71,7 +65,7 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
         if (!onDelete) return;
 
         const confirmed = window.confirm(
-            t('deleteConfirm', { name: athlete.name })
+            t('deleteConfirm', { name: getDisplayName(athlete) })
         );
         if (!confirmed) return;
 
@@ -90,16 +84,21 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
             role="button"
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(athlete.id); }}
-            aria-label={athlete.name}
+            aria-label={getDisplayName(athlete)}
         >
             {/* Avatar + Name */}
             <div className={styles.topRow}>
                 <div className={styles.avatar} aria-hidden="true">
-                    {initials(athlete.name)}
+                    {getInitials(athlete)}
                 </div>
                 <div className={styles.info}>
-                    <div className={styles.name}>{athlete.name}</div>
-                    {athlete.birth_date && (
+                    <div className={styles.name}>{getDisplayName(athlete)}</div>
+                    {athlete.primary_discipline && (
+                        <div className={styles.disciplineChip} aria-label="Primary discipline">
+                            {tDisc(athlete.primary_discipline as 'high_jump' | 'long_jump' | 'triple_jump') ?? athlete.primary_discipline.replace('_', ' ')}
+                        </div>
+                    )}
+                    {!athlete.primary_discipline && athlete.birth_date && (
                         <div className={styles.meta}>
                             {t('yearsOld', { age: new Date().getFullYear() - new Date(athlete.birth_date).getFullYear() })}
                         </div>
@@ -113,7 +112,7 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
                             className={styles.editBtn}
                             onClick={handleNotify}
                             disabled={isSending}
-                            aria-label={`Send notification to ${athlete.name}`}
+                            aria-label={`Send notification to ${getDisplayName(athlete)}`}
                             title="Send test notification"
                         >
                             {notifySent ? <Check size={14} aria-hidden="true" /> : <Bell size={14} aria-hidden="true" />}
@@ -124,7 +123,7 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
                             type="button"
                             className={styles.editBtn}
                             onClick={(e) => { e.stopPropagation(); onEdit(athlete); }}
-                            aria-label={`Edit ${athlete.name}`}
+                            aria-label={`Edit ${getDisplayName(athlete)}`}
                         >
                             <Pencil size={14} aria-hidden="true" />
                         </button>
@@ -135,7 +134,7 @@ export function AthleteCard({ athlete, onClick, onEdit, onDelete, onNotify, week
                             className={styles.deleteBtn}
                             onClick={handleDeleteClick}
                             disabled={isDeleting}
-                            aria-label={`Delete ${athlete.name}`}
+                            aria-label={`Delete ${getDisplayName(athlete)}`}
                         >
                             <Trash2 size={14} aria-hidden="true" />
                         </button>

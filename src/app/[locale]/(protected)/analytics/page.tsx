@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { BarChart2, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -154,7 +154,7 @@ export default function AnalyticsPage() {
                 <PageWrapper maxWidth="standard">
                     <PageHeader
                         title={t('title')}
-                        backHref="/dashboard"
+                        backHref={`/${locale}/dashboard`}
                         className={styles.stickyHeader}
                     />
                     <div className={styles.emptyState}>
@@ -185,13 +185,7 @@ export default function AnalyticsPage() {
                     className={styles.stickyHeader}
                     actions={(
                         <div className={styles.headerActions}>
-                            <NotificationBell
-                                labels={{
-                                    title: t('notifications.title'),
-                                    markAll: t('notifications.markAll'),
-                                    empty: t('notifications.empty'),
-                                }}
-                            />
+                            <NotificationBell />
                             <button
                                 type="button"
                                 className={styles.addTestBtn}

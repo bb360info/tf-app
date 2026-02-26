@@ -4,6 +4,7 @@
  */
 import pb from '@/lib/pocketbase/client';
 import { calculateReadiness } from '@/lib/readiness/calculator';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
 
 export interface ReadinessDay {
     date: string;       // YYYY-MM-DD
@@ -28,7 +29,7 @@ export async function getReadinessHistory(
     const startStr = startDate.toISOString().split('T')[0];
 
     const checkins = await pb.collection('daily_checkins').getFullList({
-        filter: `athlete_id = "${athleteId}" && date >= "${startStr}"`,
+        filter: pb.filter('athlete_id = {:athleteId} && date >= {:startStr}', { athleteId, startStr }),
         sort: 'date',
         fields: 'date,sleep_quality,sleep_hours,mood,pain_level',
     });
@@ -76,7 +77,7 @@ export interface AthleteReadiness {
 export async function getLatestReadinessForGroup(
     athleteIds: string[]
 ): Promise<AthleteReadiness[]> {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = toLocalISODate();
     return Promise.all(
         athleteIds.map(async (athleteId) => {
             try {

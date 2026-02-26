@@ -1,4 +1,31 @@
 
+### 2026-02-26 — Track 4.263 Phase 3: Frontend (Types + Services + Components)
+
+#### Added
+
+- `ExerciseAdjustmentsRecord` interface + `EXERCISE_ADJUSTMENTS` в `Collections` enum
+- `PlanType`, `CompetitionOwnerType`, `DiscriminatedOwner` types в `types.ts`
+- `services/exerciseAdjustments.ts` — CRUD сервис (`upsertAdjustment`, `removeAdjustment`, `listAdjustmentsForPlan`)
+- `validation/exerciseAdjustments.ts` — Zod схема для exercise_adjustments
+- Экспорты `PlanTypeSchema`, `CompetitionOwnerTypeSchema`, `ExerciseAdjustmentsSchema` в `validation/index.ts`
+
+#### Changed
+
+- `TrainingPlansRecord`: `phase_id?`, `week_number?` (optional), +`plan_type`, +`start_date`, +`end_date`
+- `CompetitionsRecord`: `season_id?` (optional), +`owner_type`, +`athlete_id`, +`group_id`
+- `services/competitions.ts`: OR-логика в `listCompetitions` (Kaizen fix), `CompetitionMutationInput` с `owner_type`
+- `services/planResolution.ts`: Step 0.5 guard для standalone планов, +`applyAdjustments()`
+- `CompetitionsHub.tsx`: `owner_type` auto-detect, empty state для нового атлета, `season_id` optional guard
+- `SeasonDetail.tsx`: типы state адаптированы под `week_number: number | undefined`
+- Zod схемы `content.ts` + `training.ts`: обновлены под новые поля + `.refine()` cross-field validation
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/)
+- `pnpm lint` ✅ (0 errors, 20 pre-existing warnings)
+
+---
+
 ### 2026-02-26 — Track 4.263 Phase 2A+2B: Schema Decoupling (Polymorphic Ownership)
 
 #### Added

@@ -33,27 +33,27 @@ export async function searchExercises(
     const filters: string[] = [];
 
     if (params.query && params.query.trim()) {
-        const q = params.query.trim().replace(/"/g, '\\"');
+        const q = params.query.trim();
         filters.push(
-            `(name_en ~ "${q}" || name_ru ~ "${q}" || name_cn ~ "${q}")`
+            pb.filter('(name_en ~ {:q} || name_ru ~ {:q} || name_cn ~ {:q})', { q })
         );
     }
 
     if (params.phase) {
         // phase_suitability is a JSON array; PocketBase ~ works for array contains
-        filters.push(`phase_suitability ~ "${params.phase}"`);
+        filters.push(pb.filter('phase_suitability ~ {:phase}', { phase: params.phase }));
     }
 
     if (params.category) {
-        filters.push(`training_category = "${params.category}"`);
+        filters.push(pb.filter('training_category = {:category}', { category: params.category }));
     }
 
     if (params.level) {
-        filters.push(`level = "${params.level}"`);
+        filters.push(pb.filter('level = {:level}', { level: params.level }));
     }
 
     if (params.equipment) {
-        filters.push(`equipment ~ "${params.equipment}"`);
+        filters.push(pb.filter('equipment ~ {:equipment}', { equipment: params.equipment }));
     }
 
     const filter = filters.length > 0 ? filters.join(' && ') : '';

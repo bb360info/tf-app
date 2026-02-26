@@ -40,7 +40,7 @@ export interface CategoryLoad {
 export async function getLoadByCategory(seasonId: string): Promise<CategoryLoad[]> {
     // 1) Get all training_phases for this season
     const phases = await pb.collection('training_phases').getFullList({
-        filter: `season_id = "${seasonId}"`,
+        filter: pb.filter('season_id = {:seasonId}', { seasonId }),
         fields: 'id',
     });
     if (phases.length === 0) return [];
@@ -49,7 +49,7 @@ export async function getLoadByCategory(seasonId: string): Promise<CategoryLoad[
 
     // 2) Get plans for those phases
     const plans = await pb.collection('training_plans').getFullList({
-        filter: phaseIds.map((id) => `phase_id = "${id}"`).join(' || '),
+        filter: phaseIds.map((id) => pb.filter('phase_id = {:id}', { id })).join(' || '),
         fields: 'id',
     });
     if (plans.length === 0) return [];
@@ -61,7 +61,7 @@ export async function getLoadByCategory(seasonId: string): Promise<CategoryLoad[
     const planExercises = await pb.collection('plan_exercises').getFullList<
         { id: string; expand?: { exercise_id?: ExercisesRecord } }
     >({
-        filter: planIds.map((id) => `plan_id = "${id}"`).join(' || '),
+        filter: planIds.map((id) => pb.filter('plan_id = {:id}', { id })).join(' || '),
         expand: 'exercise_id',
     });
 

@@ -16,7 +16,7 @@
 import { useMemo } from 'react';
 import { CheckCircle2, AlertCircle, XCircle, PlusCircle, TrendingUp, MessageSquare } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import type { PlanExercisesRecord, LogExercisesRecord, ExercisesRecord } from '@/lib/pocketbase/types';
+import type { PlanExercisesRecord, ExercisesRecord } from '@/lib/pocketbase/types';
 import { getExerciseComparison } from '@/lib/pocketbase/services/compliance';
 import type { ExerciseComparisonRow } from '@/lib/pocketbase/services/compliance';
 import styles from './CoachLogViewer.module.css';

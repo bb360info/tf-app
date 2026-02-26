@@ -37,6 +37,19 @@
     text-align: center;
 }
 
+/* Info banner — shown when user registers via invite link */
+.infoBanner {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-accent-light);
+    border: 1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-primary);
+    font-size: var(--text-sm);
+    text-align: center;
+    font-weight: var(--weight-medium);
+}
+
+
 .form {
     display: flex;
     flex-direction: column;
@@ -68,7 +81,7 @@
         box-shadow var(--duration-fast) var(--ease-default);
 }
 
-.input:focus {
+.input:focus-visible {
     outline: none;
     border-color: var(--color-accent-primary);
     box-shadow: 0 0 0 3px var(--color-focus-ring);
@@ -89,6 +102,12 @@
 
 .forgotLink:hover {
     color: var(--color-accent-hover);
+}
+
+.forgotLink:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
 .terms {
@@ -124,6 +143,11 @@
 .submitBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.submitBtn:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
 }
 
 .divider {
@@ -170,6 +194,11 @@
     cursor: not-allowed;
 }
 
+.googleBtn:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
 .googleIcon {
     width: 20px;
     height: 20px;
@@ -192,45 +221,22 @@
     color: var(--color-accent-hover);
 }
 
-/* ── Role selector ── */
-.roleRow {
+.switchLink a:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ── Name row (firstName + lastName side-by-side) ── */
+.nameRow {
     display: flex;
     gap: var(--space-3);
-    margin-top: var(--space-1);
 }
 
-.roleOption {
+.nameRow>.field {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: 44px;
-    padding: var(--space-2) var(--space-3);
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-medium);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-default);
-}
-
-.roleOption input[type='radio'] {
-    display: none;
-}
-
-.roleOption:hover {
-    border-color: var(--color-accent-primary);
-    color: var(--color-text-primary);
-}
-
-.roleActive {
-    border-color: var(--color-accent-primary);
-    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
-    color: var(--color-accent-primary);
-    font-weight: var(--weight-semibold);
+    min-width: 0;
+    /* prevent overflow */
 }
 
 /* ── Description text ── */
@@ -254,6 +260,12 @@
 
 .backLink:hover {
     color: var(--color-accent-primary);
+}
+
+.backLink:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
 /* ── Success block ── */
@@ -289,6 +301,11 @@
 
 .submitBtnBlock:hover {
     background: var(--color-accent-hover);
+}
+
+.submitBtnBlock:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
 }
 
 .iconLabel {

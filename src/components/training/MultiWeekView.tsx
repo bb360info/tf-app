@@ -53,9 +53,22 @@ export default function MultiWeekView({
             const existing = map.get(week);
             const newCount = p.expand?.['plan_exercises(plan_id)']?.length || 0;
 
-            // If duplicate exists, prefer the one with exercises
-            if (!existing || newCount > (existing.expand?.['plan_exercises(plan_id)']?.length || 0)) {
+            // If no existing plan, set it. Otherwise, prefer published plans.
+            // If both are published (or neither), prefer the one with more exercises.
+            if (!existing) {
                 map.set(week, p);
+            } else {
+                const existingIsPublished = existing.status === 'published';
+                const newIsPublished = p.status === 'published';
+
+                if (newIsPublished && !existingIsPublished) {
+                    map.set(week, p);
+                } else if (newIsPublished === existingIsPublished) {
+                    const existingCount = existing.expand?.['plan_exercises(plan_id)']?.length || 0;
+                    if (newCount > existingCount) {
+                        map.set(week, p);
+                    }
+                }
             }
         });
         return map;

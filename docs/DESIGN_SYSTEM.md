@@ -63,6 +63,19 @@
 
   /* Favorites */
   --color-fav:            #ffb800;
+
+  /* Score Colors (Readiness/Performance) */
+  --color-score-low:    #eb5757;   /* Red: readiness < 40 */
+  --color-score-mid:    #f2994a;   /* Orange: readiness 41-70 */
+  --color-score-high:   #00a86b;   /* Green: readiness 71+ */
+
+  /* Chart Palette (Recharts/graphs) */
+  --color-chart-1: #2383e2;   /* Primary blue */
+  --color-chart-2: #9b51e0;   /* Purple */
+  --color-chart-3: #00a86b;   /* Green */
+  --color-chart-4: #f2994a;   /* Orange */
+  --color-chart-5: #56ccf2;   /* Cyan */
+  --color-chart-6: #eb5757;   /* Red */
 }
 ```
 
@@ -116,6 +129,12 @@
   --space-12:  48px;
   --space-16:  64px;
   --space-20:  80px;
+
+  /* PWA Safe Areas */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
 }
 ```
 
@@ -375,6 +394,26 @@ All buttons:
 - Цвет фона: `var(--color-skeleton-bg)`
 - Анимация: бесконечный shimmer-эффект (блик) цвета `var(--color-skeleton-shimmer)`
 - Использование: `SkeletonCard`, `SkeletonText`, `SkeletonAvatar`.
+- Утилити-класс: `.skeleton-shimmer` (в `tokens.css`) — добавляет анимированный shimmer
+
+### BottomSheet (Phase 0+)
+
+Общий компонент для мобильных модалок, lazy-loaded через `next/dynamic`.
+
+```css
+:root {
+  --sheet-handle-width:   36px;
+  --sheet-handle-height:  4px;
+  --sheet-border-radius:  var(--radius-2xl);   /* 24px */
+}
+```
+
+| Элемент | Описание |
+|---------|----------|
+| Handle | pill `36×4px`, centered, `--color-border` bg |
+| Surface | glass-card (strong variant), `border-radius` top only on mobile |
+| Overlay | `rgba(0, 0, 0, 0.4)`, click-to-close |
+| Drag | swipe-down to dismiss (gesture в будущем) |
 
 ---
 
@@ -410,22 +449,27 @@ import { Play, Heart, Plus, Settings } from 'lucide-react';
 ```css
 :root {
   /* Durations */
-  --duration-fast:    100ms;
-  --duration-normal:  200ms;
-  --duration-slow:    300ms;
-  --duration-slower:  500ms;
+  --duration-fast:    150ms;
+  --duration-normal:  250ms;
+  --duration-slow:    350ms;
 
   /* Easings */
-  --ease-default:    ease;
-  --ease-in-out:     cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out:        cubic-bezier(0, 0, 0.2, 1);
+  --ease-default:    cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in:         cubic-bezier(0.4, 0, 1, 1);
-
-  /* Standard transition shorthand */
-  --transition:      var(--duration-normal) var(--ease-in-out);
+  --ease-out:        cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 ```
+
+### Athletic Pulse Aliases
+
+Семантические алиасы для анимаций в разных контекстах:
+
+| Alias | Token | Duration | Использование |
+|-------|-------|----------|---------------|
+| `--motion-pulse` | `var(--duration-normal)` | 250ms | Quick feedback (button press, toggle) |
+| `--motion-flow` | `var(--duration-slow)` | 350ms | Smooth transitions (page, modal) |
+| `--motion-burst` | — | 500ms | Celebrations, big events |
 
 ### Animation Rules
 

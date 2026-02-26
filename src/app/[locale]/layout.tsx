@@ -5,7 +5,9 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/lib/pocketbase/AuthProvider';
 import { ThemeProvider } from '@/lib/theme/ThemeProvider';
+import { FontScaleProvider } from '@/lib/theme/FontScaleProvider';
 import { ErrorBoundaryWrapper } from '@/components/shared/ErrorBoundaryWrapper';
+import { DynamicDocumentTitle } from '@/components/shared/DynamicDocumentTitle';
 import '../globals.css';
 
 type Props = {
@@ -27,13 +29,13 @@ export async function generateMetadata({
         .default;
 
     return {
-        title: messages.app?.title ?? 'Jumpedia',
+        title: 'Jumpedia',
         description: messages.app?.description ?? 'Training platform for high jump athletes',
         manifest: '/manifest.json',
         appleWebApp: {
             capable: true,
             statusBarStyle: 'default',
-            title: messages.app?.title ?? 'Jumpedia',
+            title: 'Jumpedia',
         },
     };
 }
@@ -68,13 +70,17 @@ export default async function LocaleLayout({ children, params }: Props) {
             </head>
             <body>
                 <NextIntlClientProvider messages={messages}>
-                    <ThemeProvider>
-                        <AuthProvider>
-                            <ErrorBoundaryWrapper>
-                                {children}
-                            </ErrorBoundaryWrapper>
-                        </AuthProvider>
-                    </ThemeProvider>
+                    <FontScaleProvider>
+                        <ThemeProvider>
+                            <AuthProvider>
+                                <ErrorBoundaryWrapper>
+                                    <DynamicDocumentTitle />
+                                    {children}
+                                    <div id="portal-root" />
+                                </ErrorBoundaryWrapper>
+                            </AuthProvider>
+                        </ThemeProvider>
+                    </FontScaleProvider>
                 </NextIntlClientProvider>
             </body>
         </html>

@@ -4,15 +4,17 @@
  * Extracted from logs.ts for Single Responsibility Principle (SRP).
  *
  * Resolution priority (highest first):
- *   0. Individual override: training_plans WHERE athlete_id + parent_plan_id set
- *   1. plan_assignments → athlete direct
- *   2. plan_assignments → group membership
- *   3. Fallback: season.athlete_id → active phase → published plan
+ *   0.   Individual override: training_plans WHERE plan_type='override' + athlete_id
+ *   0.5  Standalone plan: plan_type='standalone' + active date range [Track 4.263]
+ *   1.   plan_assignments → athlete direct
+ *   2.   plan_assignments → group membership
+ *   3.   Fallback: season.athlete_id → active phase → published plan
  */
 
 import pb from '../client';
 import { Collections } from '../collections';
 import type { RecordModel } from 'pocketbase';
+import type { ExerciseAdjustmentsRecord, PlanExercisesRecord } from '../types';
 import type { PlanWithExercises } from './plans';
 import { todayForUser } from '@/lib/utils/dateHelpers';
 
@@ -101,27 +103,54 @@ async function getPublishedPlanViaAssignments(
 // ─── Private: Step 0 — individual override ────────────────────────
 
 /**
- * Step 0: Check for individual override on training_plans.
- * Override = training_plans row WHERE athlete_id = X AND parent_plan_id != "".
- * This is the highest-priority resolution — overrides the group plan for one athlete.
+ * Step 0: Check for individual override plan.
+ * Override = plan_type='override', athlete_id = X, parent_plan_id != "".
+ * [Track 4.263 fix] Removed phase_id.start_date filter — override plans may have
+ * null phase_id, which caused the filter chain to break on NULL phase_id.
  */
 async function getPublishedOverrideForAthlete(
     athleteId: string
 ): Promise<PlanWithExercises | null> {
-    const today = todayForUser();
     try {
         const override = await pb
             .collection(Collections.TRAINING_PLANS)
             .getFirstListItem<PlanWithExercises>(
                 pb.filter(
-                    'athlete_id = {:aid} && parent_plan_id != "" && status = "published" && deleted_at = "" && phase_id.start_date <= {:today} && phase_id.end_date >= {:today}',
-                    { aid: athleteId, today }
+                    'athlete_id = {:aid} && plan_type = "override" && parent_plan_id != "" && status = "published" && deleted_at = ""',
+                    { aid: athleteId }
                 ),
                 { expand: PLAN_EXPAND }
             );
         return override ?? null;
     } catch {
-        return null; // 404 = no override or no active phase
+        return null; // 404 = no override
+    }
+}
+
+// ─── Private: Step 0.5 — standalone plan [Track 4.263] ───────────
+
+/**
+ * Step 0.5: Check for standalone ad-hoc plan active today.
+ * Standalone = plan_type='standalone', athlete_id=X, start_date <= today <= end_date.
+ * Guard: standalone plans have NULL phase_id — previous code crashed on phase_id.start_date.
+ */
+async function getStandalonePlanForToday(
+    athleteId: string,
+    today: string
+): Promise<PlanWithExercises | null> {
+    try {
+        const plan = await pb
+            .collection(Collections.TRAINING_PLANS)
+            .getFirstListItem<PlanWithExercises>(
+                pb.filter(
+                    'athlete_id = {:aid} && plan_type = "standalone" && status = "published" && deleted_at = "" && start_date <= {:today} && (end_date = "" || end_date >= {:today})',
+                    { aid: athleteId, today }
+                ),
+                { expand: PLAN_EXPAND }
+            );
+        return plan ?? null;
+    } catch {
+        return null; // 404 = no active standalone plan today
     }
 }
 
@@ -130,10 +159,11 @@ async function getPublishedOverrideForAthlete(
 /**
  * Find the published plan for an athlete based on the current date.
  * Resolution order (highest priority first):
- *   0. Individual override: training_plans WHERE athlete_id + parent_plan_id set
- *   1. plan_assignments → athlete direct
- *   2. plan_assignments → group membership
- *   3. Fallback: season.athlete_id → active phase → published plan
+ *   0.   Individual override: plan_type='override' + athlete_id + parent_plan_id
+ *   0.5  Standalone plan: plan_type='standalone' + active date range [Track 4.263]
+ *   1.   plan_assignments → athlete direct
+ *   2.   plan_assignments → group membership
+ *   3.   Fallback: season.athlete_id → active phase → published plan
  */
 export async function getPublishedPlanForToday(athleteId: string): Promise<PlanWithExercises | null> {
     const today = todayForUser();
@@ -141,6 +171,10 @@ export async function getPublishedPlanForToday(athleteId: string): Promise<PlanW
     // Step 0: individual override (highest priority)
     const override = await getPublishedOverrideForAthlete(athleteId);
     if (override) return override;
+
+    // Step 0.5: standalone plan (ad-hoc training without season/phase) [Track 4.263]
+    const standalone = await getStandalonePlanForToday(athleteId, today);
+    if (standalone) return standalone;
 
     // Steps 1 + 2: via plan_assignments
     const viaAssignment = await getPublishedPlanViaAssignments(athleteId);
@@ -174,7 +208,7 @@ export async function getPublishedPlanForToday(athleteId: string): Promise<PlanW
 
         const plans = await pb.collection(Collections.TRAINING_PLANS).getFullList<PlanWithExercises>({
             filter: pb.filter(
-                'phase_id = {:pid} && status = "published" && deleted_at = "" && parent_plan_id = "" && week_number = {:week}',
+                'phase_id = {:pid} && plan_type = "phase_based" && status = "published" && deleted_at = "" && parent_plan_id = "" && week_number = {:week}',
                 { pid: phase.id, week: currentWeek }
             ),
             expand: PLAN_EXPAND,
@@ -184,4 +218,66 @@ export async function getPublishedPlanForToday(athleteId: string): Promise<PlanW
         /* expected: season fallback — no active phase, published plan, or matching week */
         return null;
     }
+}
+
+// ─── Public: applyAdjustments [Track 4.263] ───────────────────────
+
+type PlanExerciseWithAdjustment = PlanExercisesRecord & { _adjusted?: boolean };
+
+/**
+ * Merge exercise_adjustments into plan exercises for a specific athlete.
+ * - Exercises with skip=true are filtered out
+ * - Non-skipped exercises get their fields overridden by adjustment values
+ * - `_adjusted: true` flag added for badge rendering
+ *
+ * NOTE: Individual per-exercise requests are used for UNIQUE lookup.
+ * Optimization (batch fetch) is a future backlog item.
+ */
+export async function applyAdjustments(
+    exercises: PlanExercisesRecord[],
+    athleteId: string
+): Promise<PlanExerciseWithAdjustment[]> {
+    if (!exercises.length) return exercises;
+
+    const adjustments: (ExerciseAdjustmentsRecord & RecordModel)[] = [];
+
+    for (const ex of exercises) {
+        try {
+            const adj = await pb
+                .collection(Collections.EXERCISE_ADJUSTMENTS)
+                .getFirstListItem<ExerciseAdjustmentsRecord & RecordModel>(
+                    pb.filter(
+                        'plan_exercise_id = {:eid} && athlete_id = {:aid} && deleted_at = ""',
+                        { eid: ex.id, aid: athleteId }
+                    )
+                );
+            adjustments.push(adj);
+        } catch { /* no adjustment for this exercise */ }
+    }
+
+    if (!adjustments.length) return exercises;
+
+    const adjMap = new Map(adjustments.map((a) => [a.plan_exercise_id, a]));
+
+    return exercises
+        .filter((ex) => {
+            const adj = adjMap.get(ex.id);
+            return !adj?.skip; // remove skipped exercises
+        })
+        .map((ex): PlanExerciseWithAdjustment => {
+            const adj = adjMap.get(ex.id);
+            if (!adj) return ex;
+            return {
+                ...ex,
+                sets: adj.sets ?? ex.sets,
+                reps: adj.reps ?? ex.reps,
+                intensity: adj.intensity ?? ex.intensity,
+                weight: adj.weight ?? ex.weight,
+                duration: adj.duration ?? ex.duration,
+                distance: adj.distance ?? ex.distance,
+                rest_seconds: adj.rest_seconds ?? ex.rest_seconds,
+                notes: adj.notes ?? ex.notes,
+                _adjusted: true, // signal for ⚡ badge in UI
+            };
+        });
 }

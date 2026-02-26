@@ -15,10 +15,10 @@ import { logError } from '@/lib/utils/errors';
 import type { PhaseType } from '@/lib/pocketbase/types';
 
 import type { AthleteRecord } from '@/lib/pocketbase/services/athletes';
-import { Dumbbell, ChevronUp, Diamond, Minus, Settings, Users, Plus, Trash2 } from 'lucide-react';
+import { Dumbbell, ChevronUp, Diamond, Minus, Settings, Users, Plus, Trash2, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { AthleteTrainingView } from '@/components/training/AthleteTrainingView';
-import { AthleteSeasonsList } from '@/components/training/AthleteSeasonsList';
+
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageWrapper } from '@/components/shared/PageWrapper';
 import { Skeleton } from '@/components/shared/Skeleton';
@@ -39,8 +39,7 @@ export default function TrainingPage() {
     const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
     const [confirmDeleteSeasonId, setConfirmDeleteSeasonId] = useState<string | null>(null);
     const [deletingSeason, setDeletingSeason] = useState(false);
-    // Athlete-only: store resolved athleteId from AthleteTrainingView
-    const [resolvedAthleteId, setResolvedAthleteId] = useState<string | null>(null);
+
 
     useEffect(() => {
         const shouldOpenWizard = searchParams.get('openWizard') === '1';
@@ -110,18 +109,14 @@ export default function TrainingPage() {
         }
     };
 
+
     // Athletes see their own training view (read-only plan + RPE logging)
     if (isAthlete) {
         return (
             <div className={styles.page}>
                 <PageWrapper maxWidth="standard">
                     <PageHeader title={t('training.title')} />
-                    <AthleteTrainingView
-                        onAthleteIdResolved={(id) => setResolvedAthleteId(id)}
-                    />
-                    {resolvedAthleteId && (
-                        <AthleteSeasonsList athleteId={resolvedAthleteId} />
-                    )}
+                    <AthleteTrainingView />
                 </PageWrapper>
             </div>
         );
@@ -197,6 +192,14 @@ export default function TrainingPage() {
                                 onClick={() => setShowWizard(true)}
                             >
                                 <Plus size={18} /> <span className="hidden-mobile">{t('training.newSeason')}</span>
+                            </button>
+
+                            <button
+                                className={`${styles.createBtn} ${styles.competitionsBtn}`}
+                                onClick={() => router.push(`/${locale}/competitions`)}
+                                aria-label={t('nav.competitions')}
+                            >
+                                <Trophy size={18} />
                             </button>
 
                             <button

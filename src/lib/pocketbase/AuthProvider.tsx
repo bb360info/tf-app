@@ -10,6 +10,7 @@ import {
 } from 'react';
 import pb from '@/lib/pocketbase/client';
 import type { UsersRecord } from '@/lib/pocketbase/types';
+import type { RecordAuthResponse } from 'pocketbase';
 import {
     loginWithEmail,
     registerWithEmail,
@@ -28,8 +29,15 @@ interface AuthState {
 
 interface AuthContextValue extends AuthState {
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, name: string, role?: 'coach' | 'athlete') => Promise<void>;
-    loginGoogle: () => Promise<void>;
+    register: (params: {
+        email: string;
+        password: string;
+        first_name: string;
+        last_name: string;
+        role?: 'coach' | 'athlete';
+        allowAthleteViaInvite?: boolean;
+    }) => Promise<void>;
+    loginGoogle: () => Promise<RecordAuthResponse<UsersRecord>>;
     logout: () => void;
     resetPassword: (email: string) => Promise<void>;
 }
@@ -71,14 +79,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const register = useCallback(
-        async (email: string, password: string, name: string, role: 'coach' | 'athlete' = 'athlete') => {
-            await registerWithEmail(email, password, name, role);
+        async (params: {
+            email: string;
+            password: string;
+            first_name: string;
+            last_name: string;
+            role?: 'coach' | 'athlete';
+            allowAthleteViaInvite?: boolean;
+        }) => {
+            await registerWithEmail(params);
         },
         []
     );
 
     const loginGoogle = useCallback(async () => {
-        await loginWithGoogle();
+        return loginWithGoogle();
     }, []);
 
     const logout = useCallback(() => {

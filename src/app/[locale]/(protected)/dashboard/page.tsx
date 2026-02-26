@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, Link } from '@/i18n/navigation';
-import { UserPlus, Users, Zap } from 'lucide-react';
+import { useRouter } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
+import { UserPlus, Users, Zap, Trophy } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { AthleteDashboard } from '@/components/dashboard/AthleteDashboard';
 import { NotificationBell } from '@/components/shared/NotificationBell';
@@ -24,10 +25,17 @@ import { listMyGroups, type GroupWithRelations } from '@/lib/pocketbase/services
 import { sendCoachNote } from '@/lib/pocketbase/services/notifications';
 import pb from '@/lib/pocketbase/client';
 import { Collections } from '@/lib/pocketbase/collections';
+import { toLocalISODate } from '@/lib/utils/dateHelpers';
 import { AthleteCard } from '@/components/dashboard/AthleteCard';
 import { AddAthleteModal } from '@/components/dashboard/AddAthleteModal';
 import { EditAthleteModal } from '@/components/dashboard/EditAthleteModal';
 import { Skeleton } from '@/components/shared/Skeleton';
+import { DashboardErrorBoundary } from '@/components/shared/DashboardErrorBoundary';
+import { TeamAlerts } from '@/components/dashboard/coach/TeamAlerts';
+
+import { PendingReviews } from '@/components/dashboard/coach/PendingReviews';
+import { WeekSummaryBar } from '@/components/dashboard/coach/WeekSummaryBar';
+import { QuickWorkout } from '@/components/training/QuickWorkout';
 import styles from './dashboard.module.css';
 
 export default function DashboardPage() {
@@ -43,6 +51,7 @@ export default function DashboardPage() {
     const [editTarget, setEditTarget] = useState<AthleteWithStats | null>(null);
     const [groups, setGroups] = useState<GroupWithRelations[]>([]);
     const [selectedGroup, setSelectedGroup] = useState<string | null>(null);  // null = All
+    const [showQuickWorkout, setShowQuickWorkout] = useState(false);
 
     // Load athletes + their latest checkins
     const loadAthletes = useCallback(async () => {
@@ -129,7 +138,7 @@ export default function DashboardPage() {
                 withCheckin.length
             )
             : null;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = toLocalISODate();
         const activeToday = athletes.filter((a) => a.latestCheckinDate === today).length;
         return { total, activeToday, avgReadiness };
     }, [athletes]);
@@ -144,7 +153,7 @@ export default function DashboardPage() {
 
     const handleAthleteClick = useCallback(
         (id: string) => {
-            router.push(`/dashboard/athlete/${id}` as never);
+            router.push(`/dashboard/athlete?id=${id}` as never);
         },
         [router]
     );
@@ -177,15 +186,12 @@ export default function DashboardPage() {
 
     const handleNotify = useCallback(async (athleteId: string, _athleteName: string) => {
         try {
-            // athleteId here is actually the user_id from users collection
-            await sendCoachNote(
-                athleteId,
-                `📋 Тестовое уведомление от тренера — проверка связи! (${new Date().toLocaleTimeString()})`
-            );
+            // sendCoachNote resolves athlete.user_id internally — strict no fallback
+            await sendCoachNote(athleteId, tNotif('coachNoteDefault'));
         } catch (err) {
             logError(err, { component: 'DashboardPage', action: 'handleNotify' });
         }
-    }, []);
+    }, [tNotif]);
 
     // Role-switch: athlete sees their own dashboard
     // ⚠️ MUST be AFTER all hooks — Rules of Hooks
@@ -248,8 +254,31 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                {/* Athletes section */}
                 <section className={styles.section}>
+                    <Link href="/competitions" className={styles.competitionsEntry}>
+                        <div>
+                            <h2 className={styles.competitionsTitle}>{t('competitionsCtaTitle')}</h2>
+                            <p className={styles.competitionsDesc}>{t('competitionsCtaDesc')}</p>
+                        </div>
+                        <span className={styles.competitionsAction}>
+                            <Trophy size={16} aria-hidden="true" />
+                            {t('competitionsCtaAction')}
+                        </span>
+                    </Link>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+                        <DashboardErrorBoundary>
+                            <TeamAlerts athletes={athletes} />
+                        </DashboardErrorBoundary>
+
+                        <DashboardErrorBoundary>
+                            <PendingReviews />
+                        </DashboardErrorBoundary>
+                        <DashboardErrorBoundary>
+                            <WeekSummaryBar checkinRatio={stats.total > 0 ? stats.activeToday / stats.total : 0} />
+                        </DashboardErrorBoundary>
+                    </div>
+
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>{t('athletes')}</h2>
                         <button
@@ -261,13 +290,14 @@ export default function DashboardPage() {
                             <UserPlus size={16} aria-hidden="true" />
                             {t('addAthlete')}
                         </button>
-                        <Link
-                            href="/training"
+                        <button
+                            type="button"
                             className={styles.quickPlanBtn}
+                            onClick={() => setShowQuickWorkout(true)}
                         >
                             <Zap size={16} aria-hidden="true" />
                             {t('quickPlan')}
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Group Filter Chips */}
@@ -358,6 +388,11 @@ export default function DashboardPage() {
                         onClose={() => setEditTarget(null)}
                         onUpdated={handleUpdated}
                     />
+                )}
+
+                {/* Quick Workout Modal */}
+                {showQuickWorkout && (
+                    <QuickWorkout onClose={() => setShowQuickWorkout(false)} />
                 )}
             </PageWrapper>
         </main>

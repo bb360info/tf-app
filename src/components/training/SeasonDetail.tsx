@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, Calendar, AlertTriangle, AlertCircle, Users, UserCog } from 'lucide-react';
+import { ArrowLeft, Calendar, AlertTriangle, AlertCircle, Users, UserCog, ChevronUp, Diamond, Minus, MapPin } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import {
     getSeason,
     PHASE_COLORS,
@@ -33,6 +34,7 @@ interface SelectedPhase {
     phaseType: PhaseType;
     name: string;
     maxWeeks: number;
+    startDate?: string;
 }
 
 export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props) {
@@ -78,12 +80,29 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
         }
     };
 
-    // Calculate weeks in a phase
+    // Calculate calendar weeks spanned by a phase
     const getPhaseWeeks = (phase: TrainingPhasesRecord & RecordModel) => {
         if (!phase.start_date || !phase.end_date) return 4; // default
-        const start = new Date(phase.start_date).getTime();
-        const end = new Date(phase.end_date).getTime();
-        return Math.max(1, Math.ceil((end - start) / (7 * 24 * 60 * 60 * 1000)));
+
+        const start = new Date(phase.start_date);
+        const end = new Date(phase.end_date);
+
+        // Find Monday on or before start
+        const startDay = start.getDay();
+        const startDistance = startDay === 0 ? -6 : 1 - startDay;
+        const startMon = new Date(start);
+        startMon.setDate(start.getDate() + startDistance);
+        startMon.setHours(0, 0, 0, 0);
+
+        // Find Monday on or before end
+        const endDay = end.getDay();
+        const endDistance = endDay === 0 ? -6 : 1 - endDay;
+        const endMon = new Date(end);
+        endMon.setDate(end.getDate() + endDistance);
+        endMon.setHours(0, 0, 0, 0);
+
+        const diffWeeks = Math.round((endMon.getTime() - startMon.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        return Math.max(1, diffWeeks + 1);
     };
 
     const handleManagePlans = (phase: TrainingPhasesRecord & RecordModel) => {
@@ -93,6 +112,7 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
             phaseType: phase.phase_type,
             name: PHASE_LABELS[phase.phase_type][locale],
             maxWeeks: getPhaseWeeks(phase),
+            startDate: phase.start_date,
         });
     };
 
@@ -103,7 +123,7 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 phaseId={selectedPhase.id}
                 phaseName={selectedPhase.name}
                 maxWeeks={selectedPhase.maxWeeks}
-                startDate={season?.start_date}
+                startDate={selectedPhase.startDate} // Use phase start date, not season!
                 onSelectWeek={(_weekNum: number) => {
                     // Note: WeekConstructor maintains its own week state.
                     // We should ideally pass initialWeek, but for now just switching view
@@ -125,7 +145,7 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 phaseType={selectedPhase.phaseType}
                 phaseName={selectedPhase.name}
                 maxWeeks={selectedPhase.maxWeeks}
-                startDate={season?.start_date}
+                startDate={selectedPhase.startDate} // Use phase start date
                 readinessScore={readinessScore}
                 onBack={() => {
                     setViewMode('week');
@@ -231,7 +251,9 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                                         style={{ left: `${pos}%` }}
                                         title={`${comp.name} (${comp.priority}) — ${formatDate(comp.date)}`}
                                     >
-                                        <span className={styles.priorityDot} data-priority={comp.priority} />
+                                        <span className={styles.competitionChip} data-priority={comp.priority}>
+                                            {comp.priority === 'A' ? <ChevronUp size={12} /> : comp.priority === 'B' ? <Diamond size={11} /> : <Minus size={12} />}
+                                        </span>
                                     </div>
                                 );
                             })}
@@ -271,15 +293,20 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                             <div key={comp.id} className={styles.card}>
                                 <div className={styles.compHeader}>
                                     <span className={`${styles.priorityBadge} ${styles[`priority${comp.priority}`]}`}>
-                                        <span className={styles.priorityDot} data-priority={comp.priority} />
+                                        <span className={styles.competitionChip} data-priority={comp.priority}>
+                                            {comp.priority === 'A' ? <ChevronUp size={12} /> : comp.priority === 'B' ? <Diamond size={11} /> : <Minus size={12} />}
+                                        </span>
                                         {comp.priority}
                                     </span>
                                     <h3 className={styles.cardTitle}>{comp.name}</h3>
                                 </div>
                                 <p className={styles.cardDates}>{formatDate(comp.date)}</p>
                                 {comp.location && (
-                                    <p className={styles.cardMeta}>📍 {comp.location}</p>
+                                    <p className={styles.cardMeta}><MapPin size={14} aria-hidden="true" /> {comp.location}</p>
                                 )}
+                                <Link href={`/competitions?seasonId=${season.id}&competitionId=${comp.id}`} className={styles.competitionLink}>
+                                    {t('training.competitionsOpen')}
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -346,8 +373,7 @@ function PhaseCard({
     formatDate: (d: string) => string;
     onManagePlans: () => void;
     weeksCount: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    t: any;
+    t: ReturnType<typeof useTranslations>;
 }) {
     const [showAssign, setShowAssign] = useState(false);
     const [assignType, setAssignType] = useState<'group' | 'athlete'>('group');
@@ -358,6 +384,58 @@ function PhaseCard({
     const [assignOk, setAssignOk] = useState(false);
     const [assignError, setAssignError] = useState<string | null>(null);
     const [overrideCount, setOverrideCount] = useState(0);
+
+    const [publishedPlans, setPublishedPlans] = useState<Array<{ id: string; week_number: number | undefined }>>([]);
+    const [allWeekPlans, setAllWeekPlans] = useState<Array<{ week_number: number | undefined; status: 'published' | 'draft' }>>([]);
+    const [selectedPlanId, setSelectedPlanId] = useState('');
+    const [assignments, setAssignments] = useState<RecordModel[]>([]);
+    const [loadingAssignments, setLoadingAssignments] = useState(false);
+
+    // Initial load of published plans and their assignments
+    const loadAssignments = useCallback(async () => {
+        setLoadingAssignments(true);
+        try {
+            const { listPlansForPhase } = await import('@/lib/pocketbase/services/plans');
+            const plans = await listPlansForPhase(phase.id);
+            const pubs = plans.filter((p) => p.status === 'published').map(p => ({
+                id: p.id,
+                week_number: p.week_number
+            }));
+
+            setPublishedPlans(pubs);
+
+            // For Weekly Status Map: track all plans (published + draft)
+            setAllWeekPlans(plans.map(p => ({ week_number: p.week_number, status: p.status as 'published' | 'draft' })));
+
+            if (pubs.length > 0) {
+                const { listActivePlanAssignments } = await import('@/lib/pocketbase/services/planAssignments');
+                let allAssigns: RecordModel[] = [];
+                for (const p of pubs) {
+                    const assigns = await listActivePlanAssignments(p.id);
+                    const enriched = assigns.map(a => ({ ...a, _planWeek: p.week_number }));
+                    allAssigns = [...allAssigns, ...enriched];
+                }
+                setAssignments(allAssigns);
+
+                // If previously selected plan is no longer valid or nothing selected, select the first one
+                setSelectedPlanId(prev => {
+                    if (!prev || !pubs.find(p => p.id === prev)) return pubs[0].id;
+                    return prev;
+                });
+            } else {
+                setAssignments([]);
+                setSelectedPlanId('');
+            }
+        } catch {
+            /* non-critical */
+        } finally {
+            setLoadingAssignments(false);
+        }
+    }, [phase.id]);
+
+    useEffect(() => {
+        loadAssignments();
+    }, [loadAssignments]);
 
     // Load override count for badge (non-blocking)
     useEffect(() => {
@@ -404,13 +482,13 @@ function PhaseCard({
     };
 
     const handleAssign = async () => {
-        if (!selectedId || assigning) return;
+        if (!selectedId || !selectedPlanId || assigning) return;
         setAssigning(true);
         setAssignError(null);
         try {
             const { listPlansForPhase } = await import('@/lib/pocketbase/services/plans');
             const plans = await listPlansForPhase(phase.id);
-            const published = plans.find((p) => p.status === 'published');
+            const published = plans.find((p) => p.id === selectedPlanId && p.status === 'published');
             if (!published) {
                 setAssignError(t('training.noPublishedPlan'));
                 setAssigning(false);
@@ -429,11 +507,22 @@ function PhaseCard({
                 setAssignOk(false);
                 setSelectedId('');
                 setAssignError(null);
-            }, 1500);
+                loadAssignments();
+            }, 1000);
         } catch (err) {
             setAssignError(err instanceof Error ? err.message : t('errors.assignFailed'));
         } finally {
             setAssigning(false);
+        }
+    };
+
+    const handleUnassign = async (assignId: string) => {
+        try {
+            const { unassignPlan } = await import('@/lib/pocketbase/services/planAssignments');
+            await unassignPlan(assignId);
+            loadAssignments();
+        } catch (e) {
+            console.error('Failed to unassign', e);
         }
     };
 
@@ -459,6 +548,27 @@ function PhaseCard({
             {phase.focus && (
                 <p className={styles.cardMeta}>{phase.focus}</p>
             )}
+
+            {/* Weekly Status Map */}
+            {weeksCount > 0 && (
+                <div className={styles.weekStatusMap} aria-label={t('training.weeklyStatus')}>
+                    {Array.from({ length: weeksCount }, (_, i) => {
+                        const weekNum = i + 1;
+                        const plan = allWeekPlans.find(p => p.week_number != null && p.week_number === weekNum);
+                        const status = plan ? plan.status : 'empty';
+                        return (
+                            <button
+                                key={weekNum}
+                                className={`${styles.weekDot} ${styles[`weekDot_${status}`]}`}
+                                onClick={onManagePlans}
+                                title={`${t('training.week', { n: weekNum })}: ${status === 'published' ? t('training.weekStatusPublished') : status === 'draft' ? t('training.weekStatusDraft') : t('training.weekStatusEmpty')}`}
+                                aria-label={`${t('training.week', { n: weekNum })}: ${status}`}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+
             <div className={styles.phaseActions}>
                 <button className={styles.managePlansBtn} onClick={onManagePlans}>
                     <Calendar size={14} />
@@ -480,6 +590,31 @@ function PhaseCard({
                 </button>
             </div>
 
+            {/* Active Assignments */}
+            {!loadingAssignments && assignments.length > 0 && (
+                <div className={styles.assignmentsList}>
+                    {assignments.map(a => (
+                        <div key={a.id} className={styles.assignmentBadge}>
+                            <span>
+                                {a._planWeek ? `[${t('training.week', { n: a._planWeek })}] ` : ''}
+                                {a.group_id
+                                    ? t('training.assignedToGroup', { name: a.expand?.group_id?.name || 'Unknown' })
+                                    : t('training.assignedToAthlete', { name: a.expand?.athlete_id?.name || 'Unknown' })
+                                }
+                            </span>
+                            <button
+                                className={styles.unassignBtn}
+                                onClick={() => handleUnassign(a.id)}
+                                title={t('training.unassign')}
+                                aria-label={t('training.unassign')}
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {showAssign && (
                 <div className={styles.assignPanel}>
                     {/* Radio: Group vs Athlete */}
@@ -499,7 +634,26 @@ function PhaseCard({
                         </button>
                     </div>
 
-                    {/* Dropdown */}
+                    <div className={styles.assignRow} style={{ marginBottom: 16 }}>
+                        <select
+                            className={styles.assignSelect}
+                            value={selectedPlanId}
+                            onChange={(e) => setSelectedPlanId(e.target.value)}
+                            disabled={publishedPlans.length === 0}
+                        >
+                            {publishedPlans.length === 0 ? (
+                                <option value="">{t('training.noPublishedPlan')}</option>
+                            ) : (
+                                publishedPlans.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {t('training.week', { n: p.week_number ?? '?' })}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+                    </div>
+
+                    {/* Dropdown for athlete/group */}
                     <div className={styles.assignRow}>
                         <select
                             className={styles.assignSelect}
@@ -511,7 +665,7 @@ function PhaseCard({
                                 {loadingOptions
                                     ? '...'
                                     : options.length === 0
-                                        ? t('training.noGroups')
+                                        ? (assignType === 'group' ? t('training.noGroups') : t('training.noAthletes'))
                                         : assignType === 'group'
                                             ? t('training.selectGroup')
                                             : t('training.selectAthlete')
@@ -524,11 +678,16 @@ function PhaseCard({
                         <button
                             className={styles.assignConfirmBtn}
                             onClick={handleAssign}
-                            disabled={!selectedId || assigning}
+                            disabled={!selectedId || !selectedPlanId || assigning}
                         >
                             {assignOk ? '✓' : assigning ? '...' : t('training.assign')}
                         </button>
                     </div>
+                    {selectedPlanId && selectedId && (
+                        <p className={styles.assignPreview}>
+                            {t('training.assigningPreview', { plan: t('training.week', { n: publishedPlans.find(p => p.id === selectedPlanId)?.week_number ?? '?' }) })}
+                        </p>
+                    )}
                     {assignError && (
                         <p className={styles.assignError}>{assignError}</p>
                     )}

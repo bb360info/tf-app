@@ -19,13 +19,13 @@ interface PrefsPayload {
 
 /** Get preferences for current authenticated user */
 export async function getMyPreferences(): Promise<CoachPrefsRecord | null> {
-    const user = pb.authStore.model;
+    const user = pb.authStore.record;
     if (!user?.id) return null;
 
     try {
         return await pb
             .collection(Collections.COACH_PREFERENCES)
-            .getFirstListItem<CoachPrefsRecord>(`coach_id = "${user.id}"`);
+            .getFirstListItem<CoachPrefsRecord>(pb.filter('coach_id = {:userId}', { userId: user.id }));
     } catch {
         /* expected: 404 — no preferences record yet */
         return null;
@@ -34,7 +34,7 @@ export async function getMyPreferences(): Promise<CoachPrefsRecord | null> {
 
 /** Create or update preferences for current user */
 export async function saveMyPreferences(payload: PrefsPayload): Promise<CoachPrefsRecord> {
-    const user = pb.authStore.model;
+    const user = pb.authStore.record;
     if (!user?.id) throw new Error('Not authenticated');
 
     const existing = await getMyPreferences();

@@ -1,0 +1,240 @@
+# Ревью Трека 4.263 — Schema Decoupling (Polymorphic Ownership)
+
+> **Дата:** 2026-02-26 | **Скиллы:** architect-review, architecture, kaizen
+
+---
+
+## TL;DR
+
+Трек в целом **правильно спроектирован** — проблема реальная, ADR-решения обоснованы. Однако есть **3 критических пробела** в архитектуре и **4 UX-проблемы**, которые нужно решить до написания `implementation_plan.md`.
+
+---
+
+## 🔴 Критические Архитектурные Проблемы
+
+### 1. Отсутствует Validation Rule: минимум 1 FK обязателен
+
+**Проблема:** Если `season_id`, `athlete_id`, и `group_id` все три nullable — ничто не мешает создать "orphan" запись `competition` без привязки вообще. PocketBase не поддерживает `CHECK (season_id IS NOT NULL OR athlete_id IS NOT NULL OR group_id IS NOT NULL)` на уровне схемы.
+
+**Риск:** Данные без владельца → утечки через API Rules, записи-призраки в БД.
+
+**Решение:**
+```javascript
+// pb_hooks/competition-validate.pb.js
+onRecordCreate("competitions", (e) => {
+  const r = e.record;
+  if (!r.get("season_id") && !r.get("athlete_id") && !r.get("group_id")) {
+    throw new BadRequestError("Competition must have at least one owner: season_id, athlete_id, or group_id");
+  }
+});
+// Аналогично для training_plans: phase_id OR athlete_id/group_id обязателен
+```
+→ **Добавить gate-задачу:** `pb_hooks` hook для validation.
+
+---
+
+### 2. API Rules не покрывают новые сценарии Owner-доступа
+
+**Проблема:** Текущий паттерн API Rules (из [docs/ARCHITECTURE.md](file:///Users/bogdan/antigravity/skills%20master/tf/docs/ARCHITECTURE.md)):
+```
+// Athlete sees own training data:
+phase_id.season_id.coach_id = @request.auth.id || athlete_id.user_id = @request.auth.id
+```
+
+После decoupling нужны **3 дополнительных ветки**:
+1. `athlete_id.user_id = @request.auth.id` — прямое владение без season
+2. `group_id.coach_id = @request.auth.id` — тренер видит групповой старт без season
+3. `group_id` → `group_members` → `athlete_id.user_id = @request.auth.id` — участник группы видит групповой старт
+
+**Риск:** Group competition (ADR-1) не будет видна участникам группы без явного правила. Acceptance Criteria #3 (`competition с group_id, все участники её видят`) провалится.
+
+> [!IMPORTANT]
+> PocketBase не поддерживает подзапросы через junction-таблицы в filter-строках. Group membership придётся проверять через `expand` или денормализацию. Нужно исследовать этот limitation до Phase 2.
+
+**Решение:** Добавить в gate явную задачу: `[ ] Исследовать PocketBase API Rules для group_members JOIN-доступа`.
+
+---
+
+### 3. Скрипт-мигратор: неполная спецификация
+
+**Проблема:** Gate описывает: *"заполняет athlete_id из season.athlete_id, group_id из season.group_id"*. Но:
+
+- `seasons.athlete_id` → ОК для индивидуальных сезонов
+- `seasons.group_id` → ОК для групповых сезонов
+- Что делать, если у сезона **нет ni athlete_id, ни group_id** (редкий кейс: "orphan season")?
+- Что делать с `training_plans` у которых `phase_id` указывает на фазу без athlete/group в сезоне?
+
+**Риск:** Неполная миграция → данные пропадают тихо (нет ошибки, просто не видны).
+
+**Решение:** Спецификация миграции должна включать:
+```
+1. Fill athlete_id from season.athlete_id WHERE season_id IS NOT NULL AND season.athlete_id != ''
+2. Fill group_id from season.group_id WHERE season_id IS NOT NULL AND season.group_id != ''
+3. LOG: competitions/plans where BOTH new fields remain empty (for manual review)
+4. DRY RUN mode: run without changes, only log what would change
+```
+
+---
+
+## 🟡 Важные Архитектурные Улучшения
+
+### 4. `training_plans`: почему нет `group_id`?
+
+**Контекст:**  В gate Phase 3 добавляется только `athlete_id` к `training_plans`, но не `group_id`. Однако ADR-1 говорит, что сущности могут принадлежать **группе**.
+
+**Вопрос:** Если тренер создаёт ad-hoc тренировку для группы ("тренируемся в субботу") — это:
+- `training_plan` с `group_id` → `plan_assignments` с `group_id`? (текущий подход)
+- `training_plan` с `group_id` напрямую?
+
+По текущему контексту `plan_assignments` уже умеет `group_id`. Значит план создаётся "от тренера" (phase-less), а через `plan_assignments.group_id` назначается группе. **Это правильно**, но нужно явно зафиксировать это решение в ADR-4.
+
+→ **Добавить ADR-4:** "Ad-hoc групповые тренировки: training_plan без phase_id, назначение через plan_assignments.group_id"
+
+---
+
+### 5. Индексы для новых полей
+
+**Gate не содержит** задачу по созданию индексов для новых полей `athlete_id` и `group_id` в `competitions`.
+
+Без индексов запросы типа "все соревнования атлета без сезона" будут full table scan.
+
+```sql
+CREATE INDEX idx_competitions_athlete ON competitions(athlete_id);
+CREATE INDEX idx_competitions_group ON competitions(group_id);
+CREATE INDEX idx_competitions_season ON competitions(season_id); -- уже должен быть
+```
+
+→ **Добавить gate-задачу:** `[ ] Созданы индексы для competitions.athlete_id и competitions.group_id`
+
+---
+
+### 6. Zod-схема: discriminated union vs. просто optional
+
+**Текущий план (gate Phase 3):** Просто сделать поля optional в Zod.
+
+**Лучший подход:** Discriminated union для safety на фронтенде:
+```typescript
+// Вместо:
+type CompetitionOwner = {
+  season_id?: string;
+  athlete_id?: string;
+  group_id?: string;
+}
+
+// Рассмотреть:
+type CompetitionOwner =
+  | { ownerType: 'season'; season_id: string }
+  | { ownerType: 'athlete'; athlete_id: string }
+  | { ownerType: 'group'; group_id: string };
+```
+
+**Trade-off:** Discriminated union более type-safe, но требует `ownerType` поля в БД или вычисления на фронте. Для PocketBase без computed fields — сложнее. **Рекомендация:** Оставить optional fields в DB/API layer, но на уровне форм использовать UI-state enum `'season' | 'athlete' | 'group'` для выбора режима.
+
+---
+
+## 🟢 UX Проблемы и Улучшения
+
+### 7. 🔴 UX: Форма "Add Past Start" — отсутствует UX-флоу для выбора Owner Type
+
+**Gate Phase 3:** `CompetitionsHub.tsx` — форма "Add Past Start" работает без season_id.
+
+**Но**: Как пользователь выбирает тип привязки? Нужна явная UX-логика:
+
+```
+Если новый атлет (нет сезонов):
+  → автоматически owner = athlete_id (текущий атлет)
+  → поле season_id скрыто
+  
+Если опытный атлет (есть сезоны):
+  → показать выбор: "Привязать к сезону?" (Yes/No)
+  → Yes → dropdown сезонов
+  → No → owner = athlete_id
+```
+
+**Риск:** Без этой логики UX будет запутанным — для чего тогда форма, если поля просто стали optional?
+
+→ **Добавить в gate:** `[ ] UX-флоу для CompetitionsHub.tsx: автоопределение owner type`
+
+---
+
+### 8. 🟡 UX: Пустые состояния для group competitions
+
+**ADR-2:** Фазы/сезоны как "цветовые слои поверх временной шкалы" — это красиво на бумаге, но **в gate нет ни одной задачи** по обновлению UI компонентов для отображения group competitions без season context.
+
+**Конкретно:** Если атлет входит в группу с групповым стартом → где он его видит? В `CompetitionsHub`? В личном профиле? Отдельная вкладка "Group Events"?
+
+→ **Рекомендация:** Добавить в Phase 3 задачу: `[ ] Проверить что group competitions видны в CompetitionsHub под фильтром "Все старты"`
+
+---
+
+### 9. 🟡 UX: Empty State для нового атлета без сезонов
+
+**Acceptance Criteria #1:** "Атлет без единого сезона может добавить Прошлый Старт"
+
+Но что видит новый атлет в CompetitionsHub сейчас? Скорее всего — пустой экран с кнопкой "Нет соревнований". После трека он должен видеть:
+- Кнопку "Добавить прошлый старт" prominently
+- Онбординг-подсказку "Добавьте ваши достижения до начала работы с тренером"
+
+→ **Добавить в gate:** `[ ] Empty state для CompetitionsHub (новый атлет без сезонов)`
+
+---
+
+### 10. 🟢 UX: ListCompetitions фильтр — есть ли pagination для group competitions?
+
+**Gate Phase 3:** `listCompetitions` обновляется с поддержкой `athleteId, groupId, seasonId`. Нужно убедиться что:
+- Все 3 типа поддерживают pagination
+- Sort по дате работает cross-owner (атлетские + групповые соревнования в одном списке)
+
+---
+
+## 📋 Предлагаемые Дополнения к Gate
+
+### Новые задачи в Phase 2:
+
+```markdown
+- [ ] Исследовать ограничения PocketBase для group_members JOIN в API Rules
+- [ ] pb_hooks validation: competition/training_plan обязан иметь хотя бы 1 owner FK
+- [ ] Скрипт-мигратор: DRY RUN mode + логирование orphan records
+- [ ] Индексы: competitions.athlete_id, competitions.group_id
+```
+
+### Новые задачи в Phase 3:
+
+```markdown
+- [ ] UX-флоу в CompetitionsHub: автоопределение owner type (новый vs опытный атлет)
+- [ ] Empty state для CompetitionsHub (новый атлет без сезонов)
+- [ ] Проверить видимость group competitions в CompetitionsHub (фильтр "Все")
+- [ ] ADR-4 в context.md: зафиксировать решение про ad-hoc групповые тренировки
+```
+
+### Обновить context.md:
+
+Добавить секцию **"Известные Ограничения PocketBase"**:
+```markdown
+- PocketBase не поддерживает CHECK constraints → validation через pb_hooks
+- PocketBase API Rules не поддерживают подзапросы через junction-таблицы
+  → group membership access требует исследования workaround
+```
+
+---
+
+## ✅ Что Сделано Правильно
+
+| Решение | Оценка |
+|---------|--------|
+| ADR-1: Polymorphic ownership (не фейковый Archive сезон) | ✅ Правильно |
+| ADR-2: Временная шкала вместо "папок" | ✅ Концептуально верно |
+| ADR-3: Migration-first | ✅ Критически важно, молодцы |
+| `plan_assignments` без изменений | ✅ JIT — не трогаем то, что работает |
+| `training_phases` без изменений | ✅ YAGNI |
+| Backward compatibility явно в Acceptance Criteria (п.4) | ✅ Хорошо |
+
+---
+
+## 🎯 Приоритеты Перед Написанием `implementation_plan.md`
+
+1. **CRITICAL:** Решить вопрос PocketBase API Rules для group_members (исследовать limitation)
+2. **CRITICAL:** Добавить pb_hooks validation в scope трека
+3. **IMPORTANT:** Уточнить UX-флоу выбора owner type в CompetitionsHub форме
+4. **IMPORTANT:** Добавить индексы в scope
+5. **NICE:** Зафиксировать ADR-4 про ad-hoc групповые тренировки

@@ -398,6 +398,13 @@
     padding: 0 var(--space-3);
 }
 
+.competitionsBtn {
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-accent-primary);
+    min-width: 44px;
+    padding: 0 var(--space-3);
+}
+
 /* ── Lazy-load Fallbacks ──────────────────────────────────────────── */
 
 .wizardLoadingOverlay {

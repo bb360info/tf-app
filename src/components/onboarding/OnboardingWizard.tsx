@@ -2,24 +2,28 @@
 
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
+import { Link, useRouter, usePathname } from '@/i18n/navigation';
 import {
     Globe,
-    User,
-    Dumbbell,
     Settings,
     ChevronRight,
     Calendar,
+    Dumbbell,
     BarChart2,
     Zap,
     Activity,
     Loader,
+    Target,
+    Check,
 } from 'lucide-react';
 import { saveMyPreferences, completeOnboarding } from '@/lib/pocketbase/services/preferences';
-import { updateUserRole, updateUserName } from '@/lib/pocketbase/auth';
+import { updateUserRole } from '@/lib/pocketbase/auth';
+import { getSelfAthleteProfile, updateAthlete } from '@/lib/pocketbase/services/athletes';
 import pb from '@/lib/pocketbase/client';
-import type { Language } from '@/lib/pocketbase/types';
+import type { Language, Discipline } from '@/lib/pocketbase/types';
 import { detectBrowserLocale } from '@/lib/i18n/detectLocale';
+import type { PendingInviteJoinStatus } from '@/lib/utils/pendingInvite';
+import { DisciplineSelector } from './DisciplineSelector';
 import styles from './onboarding.module.css';
 
 type Role = 'coach' | 'athlete';
@@ -29,27 +33,29 @@ const TOTAL_STEPS = 4;
 
 export default function OnboardingWizard() {
     const t = useTranslations('onboarding');
+    const tc = useTranslations();
     const router = useRouter();
     const pathname = usePathname();
 
     const [step, setStep] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [joinedGroupName, setJoinedGroupName] = useState<string | null>(null);
+    const [inviteJoinStatus, setInviteJoinStatus] = useState<PendingInviteJoinStatus | null>(null);
 
-    // Form state — language defaults to browser detection, not hardcoded 'ru'
+    // Form state — language defaults to browser detection
     const [language, setLanguage] = useState<Language>(() => detectBrowserLocale());
-    const [name, setName] = useState('');
-    const [role, setRole] = useState<Role>('athlete');
     const [units, setUnits] = useState<Units>('metric');
     const [autoAdapt, setAutoAdapt] = useState(true);
+
+    // Specialization state (athletes only)
+    const [primaryDiscipline, setPrimaryDiscipline] = useState<Discipline | ''>('');
+    const [secondaryDisciplines, setSecondaryDisciplines] = useState<Discipline[]>([]);
 
     // When user picks a language — update state AND switch the app locale immediately
     const handleLanguageChange = useCallback((lang: Language) => {
         setLanguage(lang);
-        // Replace current path with same path but new locale prefix
         router.replace(pathname, { locale: lang });
     }, [pathname, router]);
-
-    const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
     const handleNext = useCallback(() => {
         if (step < TOTAL_STEPS - 1) {
@@ -61,15 +67,50 @@ export default function OnboardingWizard() {
         setStep(TOTAL_STEPS - 1);
     }, []);
 
+    // Determine current user role from authStore
+    const currentRole = (pb.authStore.record?.role as Role) ?? 'athlete';
+
     const handleFinish = useCallback(async () => {
+        setInviteJoinStatus(null);
         setIsLoading(true);
+        let redirectPath: string | null = '/training';
         try {
             const userId = pb.authStore.record?.id;
-            await updateUserRole(role);
-            // BUG-2 fix: save the name entered during onboarding
-            if (userId && name.trim()) {
-                await updateUserName(userId, name.trim());
+
+            // Phase 2: FIRST — try to join pending invite (set by /join page before registration)
+            // Must happen BEFORE specialization save (athlete record may not exist yet)
+            const { joinWithPendingInvite, getJoinedGroupName } = await import('@/lib/utils/pendingInvite');
+            const inviteResult = await joinWithPendingInvite();
+            // LoginForm may have already consumed the code — getJoinedGroupName() as fallback
+            const groupName = inviteResult.groupName ?? getJoinedGroupName();
+            if (inviteResult.status === 'invalidOrExpired' || inviteResult.status === 'coachCannotJoin' || inviteResult.status === 'error') {
+                setInviteJoinStatus(inviteResult.status);
+                redirectPath = null;
+                return;
             }
+            if (inviteResult.status === 'joined' || inviteResult.status === 'alreadyMember' || groupName) {
+                setJoinedGroupName(groupName);
+                redirectPath = '/dashboard'; // Joined group → go to dashboard, not /training
+            }
+            // Role already set during registration — ensure it's saved
+            await updateUserRole(currentRole);
+
+            // Save athlete specialization (athletes only)
+            if (currentRole === 'athlete' && userId && primaryDiscipline) {
+                try {
+                    const myAthlete = await getSelfAthleteProfile();
+                    if (myAthlete) {
+                        await updateAthlete(myAthlete.id, {
+                            primary_discipline: primaryDiscipline as Discipline,
+                            secondary_disciplines: secondaryDisciplines,
+                        });
+                    }
+                } catch (e) {
+                    // Non-blocking: athlete record may not exist yet, that's OK
+                    console.error('Failed to save athlete specialization/PB:', e);
+                }
+            }
+
             await saveMyPreferences({
                 language,
                 units,
@@ -77,16 +118,26 @@ export default function OnboardingWizard() {
                 onboarding_complete: true,
             });
             await completeOnboarding();
-        } catch {
-            /* non-blocking: still route to training */
+        } catch (e) {
+            // non-blocking: still route to training
+            console.error('Onboarding wrap-up failed:', e);
         } finally {
             setIsLoading(false);
-            router.replace('/training');
+            if (redirectPath) {
+                router.replace(redirectPath);
+            }
         }
-    }, [language, units, autoAdapt, role, name, router]);
+    }, [language, units, autoAdapt, currentRole, primaryDiscipline, secondaryDisciplines, router]);
 
     const isLastStep = step === TOTAL_STEPS - 1;
-    const canProceed = step === 1 ? name.trim().length > 0 : true;
+    const inviteJoinErrorText =
+        inviteJoinStatus === 'invalidOrExpired'
+            ? tc('auth.inviteExpiredLogin')
+            : inviteJoinStatus === 'coachCannotJoin'
+                ? tc('auth.inviteCoachBlocked')
+                : inviteJoinStatus === 'error'
+                    ? tc('auth.inviteJoinFailed')
+                    : '';
 
     return (
         <div className={styles.overlay}>
@@ -94,8 +145,7 @@ export default function OnboardingWizard() {
                 {/* Progress bar */}
                 <div className={styles.progressBar}>
                     <div
-                        className={styles.progressFill}
-                        style={{ width: `${progress}%` }}
+                        className={`${styles.progressFill} ${styles[`progressStep${step + 1}`]}`}
                         role="progressbar"
                         aria-valuenow={step + 1}
                         aria-valuemin={1}
@@ -105,21 +155,19 @@ export default function OnboardingWizard() {
 
                 {/* Steps */}
                 <div className={styles.stepsViewport}>
-                    <div
-                        className={styles.stepsTrack}
-                        style={{ transform: `translateX(-${step * 100}%)` }}
-                    >
+                    <div className={`${styles.stepsTrack} ${styles[`stepsTrackStep${step}`]}`}>
                         <StepWelcome
                             t={t}
                             language={language}
                             onLanguage={handleLanguageChange}
                         />
-                        <StepProfile
+                        <StepSpecialization
                             t={t}
-                            name={name}
-                            onName={setName}
-                            role={role}
-                            onRole={setRole}
+                            role={currentRole}
+                            primaryDiscipline={primaryDiscipline}
+                            onPrimaryChange={setPrimaryDiscipline}
+                            secondaryDisciplines={secondaryDisciplines}
+                            onSecondaryChange={setSecondaryDisciplines}
                         />
                         <StepPreferences
                             t={t}
@@ -128,7 +176,7 @@ export default function OnboardingWizard() {
                             autoAdapt={autoAdapt}
                             onAutoAdapt={setAutoAdapt}
                         />
-                        <StepDone t={t} name={name} role={role} />
+                        <StepDone t={t} role={currentRole} joinedGroupName={joinedGroupName} />
                     </div>
                 </div>
 
@@ -143,6 +191,20 @@ export default function OnboardingWizard() {
                             />
                         ))}
                     </div>
+
+                    {inviteJoinStatus && (
+                        <div className={styles.inviteError} role="alert">
+                            <p className={styles.inviteErrorText}>{inviteJoinErrorText}</p>
+                            <div className={styles.inviteErrorActions}>
+                                <Link href="/join" className={styles.inviteErrorLink}>
+                                    {tc('auth.openJoinPage')}
+                                </Link>
+                                <Link href="/settings/groups" className={styles.inviteErrorLink}>
+                                    {tc('athleteDashboard.profileMissingGroupsCta')}
+                                </Link>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Buttons */}
                     <div className={styles.btnRow}>
@@ -160,7 +222,7 @@ export default function OnboardingWizard() {
                             type="button"
                             className={styles.btnNext}
                             onClick={isLastStep ? handleFinish : handleNext}
-                            disabled={!canProceed || isLoading}
+                            disabled={isLoading}
                             aria-label={isLastStep ? t('finish') : t('next')}
                         >
                             {isLoading ? (
@@ -225,81 +287,77 @@ function StepWelcome({ t, language, onLanguage }: WelcomeProps) {
     );
 }
 
-// ─── Step 2: Profile ───────────────────────────────────────────────────────
+// ─── Step 2: Specialization ────────────────────────────────────────────────
 
-interface ProfileProps {
+interface SpecializationProps {
     t: ReturnType<typeof useTranslations<'onboarding'>>;
-    name: string;
-    onName: (n: string) => void;
     role: Role;
-    onRole: (r: Role) => void;
+    primaryDiscipline: Discipline | '';
+    onPrimaryChange: (d: Discipline) => void;
+    secondaryDisciplines: Discipline[];
+    onSecondaryChange: (d: Discipline[]) => void;
 }
 
-function StepProfile({ t, name, onName, role, onRole }: ProfileProps) {
-    const roles: { value: Role; icon: React.ReactNode; label: string; desc: string }[] = [
-        {
-            value: 'coach',
-            icon: <Dumbbell size={20} />,
-            label: t('profile.roleCoach'),
-            desc: t('profile.roleCoachDesc'),
-        },
-        {
-            value: 'athlete',
-            icon: <User size={20} />,
-            label: t('profile.roleAthlete'),
-            desc: t('profile.roleAthleteDesc'),
-        },
-    ];
+function StepSpecialization({
+    t,
+    role,
+    primaryDiscipline,
+    onPrimaryChange,
+    secondaryDisciplines,
+    onSecondaryChange,
+}: SpecializationProps) {
+    // Coaches skip discipline picker — show generic step
+    if (role === 'coach') {
+        return (
+            <div className={styles.step}>
+                <div className={styles.stepIcon}>
+                    <Target size={28} />
+                </div>
+                <div>
+                    <h2 className={styles.stepTitle}>{t('specialization.title')}</h2>
+                    <p className={styles.stepSubtitle}>{t('specialization.subtitle')}</p>
+                </div>
+                {/* Coaches see a simplified message — discipline is athlete-specific */}
+                <div className={styles.roleGroup}>
+                    <div className={`${styles.roleCard} ${styles.roleCardStatic}`}>
+                        <div className={`${styles.roleCardIcon} ${styles.roleCardCoachIcon}`}>
+                            <Target size={20} />
+                        </div>
+                        <div>
+                            <p className={styles.roleCardName}>{t('specialization.disciplines.high_jump')}</p>
+                            <p className={styles.roleCardDesc}>{t('specialization.disciplines.long_jump')} · {t('specialization.disciplines.triple_jump')}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Athletes see DisciplineSelector
+    const tSpec = (key: string) => {
+        // Map specialization keys through t with namespace prefix
+        type SpecKey = 'title' | 'subtitle' | 'primary' | 'secondary'
+            | 'disciplines.high_jump' | 'disciplines.long_jump' | 'disciplines.triple_jump';
+        return t(`specialization.${key}` as SpecKey);
+    };
 
     return (
         <div className={styles.step}>
             <div className={styles.stepIcon}>
-                <User size={28} />
+                <Target size={28} />
             </div>
             <div>
-                <h2 className={styles.stepTitle}>{t('profile.title')}</h2>
-                <p className={styles.stepSubtitle}>{t('profile.subtitle')}</p>
+                <h2 className={styles.stepTitle}>{t('specialization.title')}</h2>
+                <p className={styles.stepSubtitle}>{t('specialization.subtitle')}</p>
             </div>
-            <div>
-                <label htmlFor="onboarding-name" className={styles.fieldLabel}>
-                    {t('profile.yourName')}
-                </label>
-                <input
-                    id="onboarding-name"
-                    type="text"
-                    className={styles.input}
-                    value={name}
-                    onChange={(e) => onName(e.target.value)}
-                    placeholder={t('profile.namePlaceholder')}
-                    autoComplete="name"
-                    autoCapitalize="words"
-                />
-            </div>
-            <div>
-                <p className={styles.fieldLabel}>{t('profile.role')}</p>
-                <div className={styles.roleGroup}>
-                    {roles.map(({ value, icon, label, desc }) => {
-                        const isActive = role === value;
-                        return (
-                            <button
-                                key={value}
-                                type="button"
-                                className={`${styles.roleCard} ${isActive ? styles.roleCardActive : ''}`}
-                                onClick={() => onRole(value)}
-                                aria-pressed={isActive}
-                            >
-                                <div className={`${styles.roleCardIcon} ${isActive ? styles.roleCardActiveIcon : ''}`}>
-                                    {icon}
-                                </div>
-                                <div>
-                                    <p className={styles.roleCardName}>{label}</p>
-                                    <p className={styles.roleCardDesc}>{desc}</p>
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
+            <DisciplineSelector
+                t={tSpec}
+                primary={primaryDiscipline}
+                onPrimaryChange={onPrimaryChange}
+                secondary={secondaryDisciplines}
+                onSecondaryChange={onSecondaryChange}
+                showSecondary
+            />
         </div>
     );
 }
@@ -366,12 +424,11 @@ function StepPreferences({ t, units, onUnits, autoAdapt, onAutoAdapt }: PrefsPro
 
 interface DoneProps {
     t: ReturnType<typeof useTranslations<'onboarding'>>;
-    name: string;
     role: Role;
+    joinedGroupName?: string | null;
 }
 
-function StepDone({ t, name, role }: DoneProps) {
-    // Coach sees planning features; athlete sees their own workflow
+function StepDone({ t, role, joinedGroupName }: DoneProps) {
     const coachFeatures = [
         { icon: <Calendar size={18} />, key: 'feature1' },
         { icon: <Dumbbell size={18} />, key: 'feature2' },
@@ -394,11 +451,16 @@ function StepDone({ t, name, role }: DoneProps) {
                 <BarChart2 size={28} />
             </div>
             <div>
-                <h2 className={styles.stepTitle}>
-                    {name ? `${name}, ` : ''}{t('done.title')}
-                </h2>
+                <h2 className={styles.stepTitle}>{t('done.title')}</h2>
                 <p className={styles.stepSubtitle}>{t('done.subtitle')}</p>
             </div>
+            {/* Invite success banner — shown when athlete joined a group during onboarding */}
+            {joinedGroupName && (
+                <div className={styles.inviteSuccess}>
+                    <Check size={16} aria-hidden />
+                    {t('done.joinedGroup', { name: joinedGroupName })}
+                </div>
+            )}
             <div className={styles.featureList}>
                 {features.map(({ icon, key }) => (
                     <div key={key} className={styles.featureItem}>

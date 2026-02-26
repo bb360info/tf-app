@@ -1,0 +1,385 @@
+# Архитектурный анализ схемы — Трек 4.263 (Schema Decoupling)
+
+> Дата: 2026-02-26 | Агент: G3H | Основан на реальной схеме PocketBase v0.36.3
+
+---
+
+## 1. Текущая схема (as-is)
+
+### 1.1 Иерархия зависимостей
+
+```
+users (Coach)
+  └── seasons  [coach_id required, athlete_id?, group_id?]
+        └── training_phases  [season_id required]
+              └── training_plans  [phase_id required ⚠️]
+                    └── plan_exercises
+                    └── plan_snapshots
+                    └── plan_assignments  [plan_id, athlete_id?, group_id?]
+                    └── training_logs
+
+users (Coach)
+  └── seasons
+        └── competitions  [season_id required ⚠️]
+              └── competition_participants
+              └── competition_proposals
+              └── competition_media
+```
+
+### 1.2 Реальные поля из PocketBase (конкретные данные)
+
+#### `competitions`
+| Поле | Тип | Required | Примечание |
+|------|-----|----------|------------|
+| [id](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/types.ts#321-327) | text(15) | ✅ system | PK |
+| `name` | text(255) | ✅ | |
+| [date](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/competitions.ts#86-92) | date | ✅ | |
+| `priority` | select | ✅ | A/B/C |
+| `season_id` | relation→seasons | ✅ **required=true** | **⚠️ Блокирует онбординг** |
+| `discipline` | select | ❌ | high_jump/long_jump/triple_jump |
+| `season_type` | select | ❌ | indoor/outdoor |
+| `website` | text(1000) | ❌ | |
+| `status` | select | ❌ | planned/confirmed/completed/cancelled |
+| `official_result` | number | ❌ | метры |
+| `official_updated_by` | relation→users | ❌ | |
+| `official_updated_at` | date | ❌ | |
+| `location` | text(500) | ❌ | |
+| `notes` | text(2000) | ❌ | |
+| `deleted_at` | date | ❌ | SoftDelete |
+
+**Индексы на competitions:**
+```sql
+CREATE INDEX idx_comp_season ON competitions (season_id);
+CREATE INDEX idx_comp_filters ON competitions (season_id, date, discipline, season_type, status);
+```
+
+**API Rules (competitions):**
+```
+listRule:   season_id.coach_id = authId || season_id.athlete_id.user_id = authId || season_id.group_id.group_members...
+createRule: season_id.coach_id = authId || season_id.athlete_id.user_id = authId
+```
+> **Критический изъян:** весь доступ завязан на `season_id` — без сезона правило вернёт false.
+
+---
+
+#### `training_plans`
+| Поле | Тип | Required | Примечание |
+|------|-----|----------|------------|
+| `phase_id` | relation→training_phases | ✅ **required=true** | **⚠️ Цепочка 4 JOIN** |
+| `week_number` | number(1-52) | ✅ | |
+| `status` | select | ✅ | draft/published/archived |
+| `notes` | text(5000) | ❌ | |
+| `sync_id` | text(36) | ❌ | UUID для offline sync |
+| `deleted_at` | date | ❌ | SoftDelete |
+| `athlete_id` | relation→athletes | ❌ | **Уже есть — для overrides!** |
+| `parent_plan_id` | relation→training_plans | ❌ | Self-ref для overrides |
+| `day_notes` | json | ❌ | {"1": "Mon note", ...} |
+
+**Индекс:**
+```sql
+CREATE INDEX idx_plans_phase ON training_plans (phase_id);
+```
+
+**API Rules (training_plans):**
+```
+listRule:   phase_id.season_id.coach_id = authId || athlete_id.user_id = authId
+createRule: phase_id.season_id.coach_id = authId  ← только тренер через фазу!
+viewRule:   + plan_assignments_via_plan_id.athlete_id.user_id ?= authId
+```
+> **Проблема:** атлет не может создать свой план, даже ad-hoc.
+
+---
+
+#### `plan_assignments` (уже полиморфный — хорошее решение!)
+| Поле | Тип | Required |
+|------|-----|----------|
+| `plan_id` | relation→training_plans (cascadeDelete=true) | ✅ |
+| `athlete_id` | relation→athletes | ❌ |
+| `group_id` | relation→groups | ❌ |
+| `status` | select(active/inactive) | ❌ |
+
+**6 индексов включая UNIQUE partial:**
+```sql
+UNIQUE (plan_id, athlete_id) WHERE status='active' AND athlete_id != ''
+UNIQUE (plan_id, group_id) WHERE status='active' AND group_id != ''
+```
+> ✅ `plan_assignments` уже умеет полиморфное владение — это можно переиспользовать!
+
+---
+
+#### `seasons` (для справки)
+| Поле | Тип | Required |
+|------|-----|----------|
+| `coach_id` | relation→users | ✅ |
+| `athlete_id` | relation→athletes | ❌ |
+| `group_id` | relation→groups | ❌ |
+| `name` | text | ✅ |
+| `start_date` | date | ✅ |
+| `end_date` | date | ✅ |
+| `deleted_at` | date | ❌ |
+
+> Seasons уже поддерживает athlete_id и group_id — но сезон как контейнер всё равно обязателен.
+
+---
+
+## 2. Выявленные проблемы (диагностика)
+
+### 🔴 P1 — Онбординг сломан
+Атлет без сезона не может добавить "Прошлый старт" (Competition). PocketBase отклоняет запрос: `season_id required=true`.
+
+### 🔴 P2 — API Rules завязаны на season_id
+Если `season_id = null`, **все** проверки вернут `false`. Нет fallback-пути для orphan-записей.
+
+### 🟠 P3 — Цепочка JOIN в plan_assignments
+```
+plan_assignments.createRule = plan_id.phase_id.season_id.coach_id = @request.auth.id
+```
+**4 JOIN** для одной проверки. Если любое звено null — провал всей цепочки.
+
+### 🟠 P4 — training_plans.athlete_id семантически двусмысленный
+Поле `athlete_id` в `training_plans` сейчас означает "override для индивидуального плана на базе group-плана". После изменения оно будет означать ещё и "прямое владение". Это конфликт семантики.
+
+### 🟡 P5 — Нет constraint "хотя бы одно владение"
+После сделки у competition может быть `season_id=null, athlete_id=null, group_id=null` — orphan-запись. Нет механизма предотвращения на уровне БД.
+
+### 🟡 P6 — Индекс `idx_comp_filters` устареет
+```sql
+CREATE INDEX idx_comp_filters ON competitions (season_id, date, discipline, season_type, status);
+```
+После добавления `athlete_id` и `group_id` — этот составной индекс перестанет покрывать новые паттерны запросов.
+
+---
+
+## 3. Предлагаемые изменения (из gate.md) — Анализ плюсов и минусов
+
+### Изменение A: `competitions.season_id → required=false`
+
+**✅ Плюсы:**
+- Немедленно фиксит онбординг — атлет добавляет прошлый старт без сезона
+- Обратная совместимость: все существующие записи с `season_id` работают без изменений
+- Минимальный риск миграции (только изменение constraint, не структуры)
+
+**❌ Минусы:**
+- API Rules полностью сломаются — без patch-а они вернут `false` для всех новых записей
+- Orphan-проблема: никто не мешает создать competition без любого владельца
+- Существующий индекс `idx_comp_filters` (season_id, ...) станет менее эффективным
+
+**⚠️ Риск:**
+Если сначала сделать `required=false`, а потом запустить мигратор — будет окно, когда старые данные работают, а новые создать нельзя (API Rules сломаны). Нужно делать атомарно: schema + rules + мигратор.
+
+---
+
+### Изменение B: Добавить `competitions.athlete_id` и `competitions.group_id`
+
+**✅ Плюсы:**
+- Прямое владение — не нужна цепочка через season
+- Группой владеет competition без привязки к сезонам разных атлетов
+- Позволяет фильтровать [listCompetitions({athleteId})](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/competitions.ts#39-77) без JOIN через participants
+
+**❌ Минусы / Неочевидные риски:**
+1. **Дублирование данные о владельце:**  
+   У competition через `season_id` уже есть атлет/группа (season.athlete_id, season.group_id). Добавление новых полей создаёт два источника истины.
+
+2. **Конфликт с `competition_participants`:**  
+   Участники соревнования уже хранятся в `competition_participants`. Если атлет = owner через `athlete_id` — он и participant, или нет? Нет явных правил.
+
+3. **API Rules станут сложнее, не проще:**
+   ```
+   # Было:
+   season_id.coach_id = authId || season_id.athlete_id.user_id = authId
+   
+   # Станет (нужны все ветки):
+   (season_id != "" && season_id.coach_id = authId)
+   || (athlete_id != "" && athlete_id.coach_id = authId)
+   || (group_id != "" && group_id.coach_id = authId)
+   || (athlete_id != "" && athlete_id.user_id = authId)
+   || (season_id != "" && season_id.athlete_id.user_id = authId)
+   ...
+   ```
+   PocketBase не поддерживает IS NULL — используем `!= ""`. Правила вырастут в 5-7 раз.
+
+4. **Нет CHECK constraint:**  
+   SQLite в PocketBase не позволит добавить CHECK [(season_id != '' OR athlete_id != '' OR group_id != '')](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/types.ts#50-51) через UI — нужен hook.
+
+---
+
+### Изменение C: `training_plans.phase_id → required=false` + Прямое владение
+
+**✅ Плюсы:**
+- Тренер создаёт ad-hoc план без создания полной иерархии
+- Атлет-самотренирующийся получает свои планы
+
+**❌ Минусы / Риски:**
+1. **Семантический конфликт `athlete_id`:**
+   - Сейчас: `athlete_id` в `training_plans` = "этот план — override для конкретного атлета в рамках group-плана"
+   - После: `athlete_id` = "этому атлету принадлежит план" (прямое владение)
+   - **Решение:** Нужно разграничить через `parent_plan_id`. Если `parent_plan_id != null` → override. Если `parent_plan_id = null` → прямое владение.
+
+2. **week_number теряет смысл без phase:**
+   `week_number: required=true, range 1-52`. Для ad-hoc плана в какой неделе? Нет контекста.
+   - **Решение:** Сделать `week_number optional` или добавить `start_date` для прямых планов.
+
+3. **`plan_assignments` уже решает задачу назначения:**
+   Ad-hoc план без фазы → нужен `plan_assignment` → но `plan_assignment.createRule` требует `plan_id.phase_id.season_id.coach_id` — цепочка опять сломается.
+
+---
+
+## 4. Неочевидные проблемы, которые не упомянуты в gate.md
+
+### 🔴 CRITICAL: `plan_assignments` API Rules зависят от phase_id цепочки
+```
+createRule: plan_id.phase_id.season_id.coach_id = @request.auth.id
+```
+Если `phase_id = null` — assignment создать **нельзя**. Это значит: даже если починить `training_plans`, назначить этот план атлету через assignments не получится без отдельного фикса.
+
+**В gate.md Phase 2 это не упомянуто!**
+
+### 🟠 IMPORTANT: `personal_records` — отдельный флоу, но связанный семантически
+`personal_records` не привязан к `competitions` вообще (нет FK). Атлет добавляет `personal_records.source='competition'` + `competition_name: string`. Это хроническое нарушение нормализации, которое усиливается при отвязке competitions. Нужна связь `personal_records.competition_id` (optional).
+
+### 🟡 MEDIUM: `training_logs.plan_id` — required, нет fallback
+```typescript
+plan_id: string; // FK → training_plans (required!)
+```
+Если атлет тренируется без плана (ad-hoc workout) — он не может залогировать. Логи всегда требуют план. Это следующая боль после текущего трека.
+
+### 🟡 MEDIUM: Скрипт-мигратор может создать дубли
+При заполнении `athlete_id` из `season.athlete_id` — если у одного атлета несколько сезонов с competitions, все competitions получат одного `athlete_id`. Правильно. Но если сезон групповой (`season.group_id != null`), то заполнять нужно `group_id`, не `athlete_id`. Логика ветвления должна быть в мигараторе.
+
+---
+
+## 5. Улучшенные рекомендации
+
+### Рек-1: Разделить `athlete_id` в `training_plans` на два поля
+
+| Поле | Смысл |
+|------|-------|
+| `athlete_id` | Override-owner (существующее, оставить как есть) |
+| `direct_athlete_id` | Прямое владение (NEW — только когда `phase_id = null`) |
+
+**Альтернатива (проще):** добавить флаг `is_direct: bool` + оставить `athlete_id`. Если `is_direct=true` → прямое владение, если `false` → override.
+
+> Рекомендую: **оставить `athlete_id` as-is**, добавить поле `owner_type: 'phase' | 'athlete' | 'group'` как discriminator.
+
+### Рек-2: Добавить `owner_type` discriminator в competitions
+
+```
+owner_type: select ['season', 'athlete', 'group'] — required
+```
+
+Преимущества:
+- API Rules упрощаются: `if owner_type='season'` → проверяем season_id, иначе athlete_id/group_id
+- Явная семантика, нет двусмысленности
+- Индекс по `owner_type` + `athlete_id` покрывает новые запросы
+
+### Рек-3: `plan_assignments` — отдельный фикс API Rules (обязательно!)
+
+В gate.md нет задачи на правило:
+```
+# Текущее (сломается):
+createRule: plan_id.phase_id.season_id.coach_id = authId
+
+# Нужно:
+createRule: authId != "" && (
+  plan_id.phase_id.season_id.coach_id = authId
+  || plan_id.athlete_id.coach_id = authId
+  || plan_id.group_id.coach_id = authId
+)
+```
+
+### Рек-4: Новые индексы
+
+```sql
+-- После добавления полей в competitions:
+CREATE INDEX idx_comp_athlete ON competitions (athlete_id) WHERE athlete_id != '';
+CREATE INDEX idx_comp_group ON competitions (group_id) WHERE group_id != '';
+CREATE INDEX idx_comp_owner ON competitions (owner_type, date);  -- если добавляем owner_type
+
+-- После изменения training_plans:
+CREATE INDEX idx_plans_direct_athlete ON training_plans (athlete_id) WHERE phase_id = '';
+```
+
+### Рек-5: PB Hook для целостности (orphan prevention)
+
+```javascript
+// pb_hooks/ownership_integrity.pb.js
+onRecordCreate((e) => {
+  if (e.collection.name === 'competitions') {
+    const r = e.record;
+    if (!r.get('season_id') && !r.get('athlete_id') && !r.get('group_id')) {
+      throw new BadRequestError('Competition must have at least one owner: season_id, athlete_id or group_id');
+    }
+  }
+})
+```
+
+### Рек-6: `week_number` — сделать optional для прямых планов
+
+Если `phase_id = null`, `week_number` теряет смысл. Сделать `required=false` + добавить `start_date?: date` как альтернативный anchor.
+
+---
+
+## 6. Оценка рисков предлагаемого подхода
+
+| Риск | Вероятность | Impact | Митигация |
+|------|-------------|--------|-----------|
+| Orphan competition без владельца | Высокая | 🔴 | PB Hook проверки |
+| API Rules ломаются при null season | Высокая | 🔴 | Атомарное применение: schema + rules одновременно |
+| plan_assignments не работает для direct plans | Высокая | 🔴 | **Добавить в gate.md Phase 2!** |
+| Семантический конфликт athlete_id в plans | Средняя | 🟠 | owner_type discriminator |
+| Индексы не покрывают новые запросы | Средняя | 🟠 | Новые partial indexes |
+| Мигратор создаёт неверный athlete/group | Низкая | 🟠 | Unit-тесты для мигратора |
+| week_number orphan в direct plans | Средняя | 🟡 | Сделать optional + добавить start_date |
+
+---
+
+## 7. Предлагаемый финальный вид схемы
+
+### `competitions` (после трека 4.263)
+```diff
+ competitions:
+   id, name, date, priority, discipline, season_type, ...
+-  season_id: relation→seasons, required=TRUE
++  season_id: relation→seasons, required=FALSE
++  athlete_id: relation→athletes, required=FALSE   [NEW]
++  group_id: relation→groups, required=FALSE       [NEW]
++  owner_type: select('season'|'athlete'|'group'), required=TRUE  [NEW — Рек-2]
+```
+
+### `training_plans` (после трека 4.263)
+```diff
+ training_plans:
+   id, week_number, status, notes, ...
+-  phase_id: relation→training_phases, required=TRUE
++  phase_id: relation→training_phases, required=FALSE
++  week_number: required=FALSE (было required=TRUE)  [Рек-6]
++  start_date: date, required=FALSE                   [NEW — для direct plans]
+   athlete_id: relation→athletes (уже есть — override семантика, оставить)
+   parent_plan_id: relation→self (уже есть)
+```
+
+### `plan_assignments` (обязательный фикс, не упомянутый в gate.md)
+```diff
+ plan_assignments:
+   // Только правила, не поля
+-  createRule: plan_id.phase_id.season_id.coach_id = authId
++  createRule: authId != "" && (
++    plan_id.phase_id.season_id.coach_id = authId
++    || plan_id.athlete_id.coach_id = authId
++    || plan_id.group_id.coach_id = authId
++  )
+```
+
+---
+
+## 8. Итоговый вывод
+
+Предложенный в gate.md подход **правильный** и решает реальную боль. Основные уязвимости:
+
+1. 🔴 **Пропущен фикс `plan_assignments` API Rules** — без него назначить прямой план атлету невозможно
+2. 🟠 **`athlete_id` в `training_plans` семантически двойной** — нужен discriminator или явное разделение
+3. 🟠 **`week_number` теряет смысл** для прямых планов — нужно сделать optional
+4. 🟡 **Нет orphan prevention** — нужен PB Hook
+5. 🟡 **Индексы нужно обновить** — idx_comp_filters устареет
+
+Общая оценка сложности: **Medium-High**. Миграция безопасная при правильном порядке: backup → schema → hook → rules → мигратор → verify.

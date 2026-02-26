@@ -104,12 +104,18 @@ export interface TrainingPhasesRecord extends BaseRecord, SoftDeletable {
 
 export type PlanStatus = 'draft' | 'published' | 'archived';
 
+/** Discriminates plan ownership and structure */
+export type PlanType = 'phase_based' | 'standalone' | 'override';
+
 export interface TrainingPlansRecord extends BaseRecord, SoftDeletable, Syncable {
-    phase_id: string; // FK → training_phases
-    week_number: number;
+    plan_type: PlanType;     // [Track 4.263] required discriminator
+    phase_id?: string;       // FK → training_phases [CHANGED: required→optional]
+    week_number?: number;    // [CHANGED: required→optional, meaningless without phase]
+    start_date?: string;     // ISO date — for standalone/ad-hoc plans [NEW]
+    end_date?: string;       // ISO date — end of standalone plan window [NEW]
     status: PlanStatus;
     notes?: string;
-    athlete_id?: string; // FK → athletes (individual override)
+    athlete_id?: string;     // FK → athletes (individual override or standalone)
     parent_plan_id?: string; // FK → training_plans (base plan reference)
     day_notes?: Record<string, string>; // JSON: { "1": "coach note for Mon", "3": "note for Wed" }
 }
@@ -257,14 +263,80 @@ export interface TestResultsRecord extends BaseRecord {
 // ─── Content & Media ───────────────────────────────────────────────
 
 export type CompetitionPriority = 'A' | 'B' | 'C';
+export type CompetitionStatus = 'planned' | 'confirmed' | 'completed' | 'cancelled';
+export type ParticipantStatus = 'planned' | 'confirmed' | 'withdrawn' | 'dns' | 'dnf' | 'finished';
+export type ProposalStatus = 'pending' | 'approved' | 'rejected' | 'superseded';
+export type ProposalKind = 'result' | 'metadata' | 'pre_event_info' | 'media_meta';
+export type MediaVisibility = 'team' | 'participants' | 'private' | 'public';
+export type MediaModerationStatus = 'visible' | 'hidden';
+export type CompetitionMediaKind = 'photo' | 'video' | 'document';
+
+/** Polymorphic ownership discriminator for competitions [Track 4.263] */
+export type CompetitionOwnerType = 'season' | 'athlete' | 'group';
+
+/**
+ * Discriminated union: ensures the correct FK is set per owner_type.
+ * Use this type to narrow competition records in type-safe user code.
+ */
+export type DiscriminatedOwner =
+    | { owner_type: 'season'; season_id: string; athlete_id?: undefined; group_id?: undefined }
+    | { owner_type: 'athlete'; athlete_id: string; season_id?: undefined; group_id?: undefined }
+    | { owner_type: 'group'; group_id: string; season_id?: undefined; athlete_id?: undefined };
 
 export interface CompetitionsRecord extends BaseRecord, SoftDeletable {
-    season_id: string; // FK → seasons
+    owner_type: CompetitionOwnerType; // [Track 4.263] required discriminator
+    season_id?: string;  // FK → seasons  [CHANGED: required→optional]
+    athlete_id?: string; // FK → athletes [NEW — for owner_type='athlete']
+    group_id?: string;   // FK → groups   [NEW — for owner_type='group']
     name: string;
     date: string;
     priority: CompetitionPriority;
+    discipline?: Discipline;
+    season_type?: SeasonType;
+    website?: string;
+    status?: CompetitionStatus;
+    official_result?: number;
+    official_updated_by?: string; // FK → users
+    official_updated_at?: string;
     location?: string;
     notes?: string;
+}
+
+export interface CompetitionParticipantsRecord extends BaseRecord, SoftDeletable {
+    competition_id: string; // FK → competitions
+    athlete_id: string; // FK → athletes
+    status: ParticipantStatus;
+    lane_or_order?: string;
+    bib_number?: string;
+    result_note?: string;
+}
+
+export interface CompetitionProposalsRecord extends BaseRecord, SoftDeletable {
+    competition_id: string; // FK → competitions
+    athlete_id: string; // FK → athletes
+    kind: ProposalKind;
+    payload: Record<string, unknown>;
+    status: ProposalStatus;
+    proposed_at?: string;
+    athlete_comment?: string;
+    review_comment?: string;
+    reviewed_fields?: Record<string, unknown>;
+    reviewed_by?: string; // FK → users
+    reviewed_at?: string;
+}
+
+export interface CompetitionMediaRecord extends BaseRecord, SoftDeletable {
+    competition_id: string; // FK → competitions
+    uploader_athlete_id: string; // FK → athletes
+    subject_athlete_id?: string; // FK → athletes
+    file: string;
+    kind?: CompetitionMediaKind;
+    visibility: MediaVisibility;
+    moderation_status: MediaModerationStatus;
+    caption?: string;
+    moderated_by?: string; // FK → users
+    moderation_reason?: string;
+    moderated_at?: string;
 }
 
 export interface ExerciseVideosRecord extends BaseRecord {
@@ -415,4 +487,26 @@ export interface PersonalRecordsRecord extends BaseRecord {
     source: PRSource;
     is_current: boolean;
     notes?: string;              // max 500
+    competition_id?: string;     // FK → competitions [Track 4.263 — optional normalization]
+}
+
+// ─── Exercise Adjustments [Track 4.263] ─────────────────────────────
+
+/**
+ * Per-athlete overrides for a specific plan exercise.
+ * Replaces full-copy override for small tweaks (sets/reps/skip).
+ * UNIQUE index on (plan_exercise_id, athlete_id).
+ */
+export interface ExerciseAdjustmentsRecord extends BaseRecord, SoftDeletable {
+    plan_exercise_id: string; // FK → plan_exercises
+    athlete_id: string;       // FK → athletes
+    sets?: number;
+    reps?: string;
+    intensity?: string;
+    weight?: number;
+    duration?: number;
+    distance?: number;
+    rest_seconds?: number;
+    notes?: string;
+    skip?: boolean;           // true = athlete skips this exercise entirely
 }

@@ -185,7 +185,7 @@ export const ACHIEVEMENTS_BY_CATEGORY: Record<AchievementCategory, AchievementTy
 
 export async function listAchievements(athleteId: string): Promise<AchievementsRecord[]> {
     return pb.collection('achievements').getFullList<AchievementsRecord>({
-        filter: `athlete_id = "${athleteId}"`,
+        filter: pb.filter('athlete_id = {:athleteId}', { athleteId }),
         sort: '-earned_at',
     });
 }
@@ -198,20 +198,21 @@ async function getProgress(
     // 4 batched API calls instead of N+1
     const [checkins, logsResult, testResults, competitionsResult] = await Promise.all([
         pb.collection('daily_checkins').getFullList<{ date: string }>({
-            filter: `athlete_id = "${athleteId}"`,
+            filter: pb.filter('athlete_id = {:athleteId}', { athleteId }),
             fields: 'date',
             sort: '-date',
         }),
         pb.collection('training_logs').getList(1, 1, {
-            filter: `athlete_id = "${athleteId}"`,
+            filter: pb.filter('athlete_id = {:athleteId}', { athleteId }),
             skipTotal: false,
         }),
         pb.collection('test_results').getFullList<{ test_type: TestType; value: number; date: string }>({
-            filter: `athlete_id = "${athleteId}"`,
+            filter: pb.filter('athlete_id = {:athleteId}', { athleteId }),
             fields: 'test_type,value,date',
             sort: 'test_type,date',
         }),
-        pb.collection('competitions').getList(1, 1, {
+        pb.collection('competition_participants').getList(1, 1, {
+            filter: pb.filter('athlete_id = {:athleteId} && deleted_at = ""', { athleteId }),
             skipTotal: false,
         }),
     ]);

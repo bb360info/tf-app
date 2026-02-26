@@ -8,8 +8,7 @@
  *  2. getExerciseComparison()     — planned vs actual exercise diff
  */
 
-import type { PlanExercisesRecord, LogExercisesRecord, ExercisesRecord, SetData } from '../types';
-import type { RecordModel } from 'pocketbase';
+import type { PlanExercisesRecord, ExercisesRecord, SetData } from '../types';
 
 // ─── Input Types ──────────────────────────────────────────────────
 

@@ -43,6 +43,13 @@ export default function LoginForm() {
         ? new URLSearchParams(window.location.search).get('returnTo')
         : null;
 
+    const oauthRoleHref = returnTo
+        ? `/auth/oauth-role?returnTo=${encodeURIComponent(returnTo)}`
+        : '/auth/oauth-role';
+    const registerHref = returnTo
+        ? `/auth/register?returnTo=${encodeURIComponent(returnTo)}`
+        : '/auth/register';
+
     async function handleSubmit(e: FormEvent) {
         e.preventDefault();
         setError('');
@@ -66,6 +73,22 @@ export default function LoginForm() {
         setIsLoading(true);
         try {
             await login(finalEmail, finalPassword);
+            // Resolve pending invite explicitly to avoid silent failures.
+            const { joinWithPendingInvite } = await import('@/lib/utils/pendingInvite');
+            const joinResult = await joinWithPendingInvite();
+            if (joinResult.status === 'invalidOrExpired') {
+                setError(t('auth.inviteExpiredLogin'));
+                return;
+            }
+            if (joinResult.status === 'coachCannotJoin') {
+                setError(t('auth.inviteCoachBlocked'));
+                return;
+            }
+            if (joinResult.status === 'error') {
+                setError(t('auth.inviteJoinFailed'));
+                return;
+            }
+
             if (returnTo) {
                 // Redirect back to the page user was trying to access
                 window.location.href = decodeURIComponent(returnTo);
@@ -86,7 +109,32 @@ export default function LoginForm() {
         setError('');
         setIsLoading(true);
         try {
-            await loginGoogle();
+            const authData = await loginGoogle();
+            const role = (authData.record?.role as string | undefined) ?? '';
+            const isNewOAuthUser = Boolean((authData as { meta?: { isNew?: boolean } }).meta?.isNew);
+            const invalidRole = role !== 'coach' && role !== 'athlete';
+            if (isNewOAuthUser || invalidRole) {
+                router.push(oauthRoleHref);
+                return;
+            }
+
+            const { joinWithPendingInvite } = await import('@/lib/utils/pendingInvite');
+            if (role === 'athlete') {
+                const joinResult = await joinWithPendingInvite();
+                if (joinResult.status === 'invalidOrExpired') {
+                    setError(t('auth.inviteExpiredLogin'));
+                    return;
+                }
+                if (joinResult.status === 'coachCannotJoin') {
+                    setError(t('auth.inviteCoachBlocked'));
+                    return;
+                }
+                if (joinResult.status === 'error') {
+                    setError(t('auth.inviteJoinFailed'));
+                    return;
+                }
+            }
+
             // Redirect after successful Google OAuth
             if (returnTo) {
                 window.location.href = decodeURIComponent(returnTo);
@@ -194,7 +242,7 @@ export default function LoginForm() {
 
             <p className={styles.switchLink}>
                 {t('auth.noAccount')}{' '}
-                <Link href="/auth/register">{t('auth.signUp')}</Link>
+                <Link href={registerHref}>{t('auth.signUp')}</Link>
             </p>
         </div>
     );

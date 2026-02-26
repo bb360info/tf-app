@@ -10,7 +10,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import {
     ListX,
-    CheckCircle,
     ChevronDown,
     ChevronUp,
     Sun,
@@ -26,7 +25,7 @@ import {
     listTodayLogs,
     listWeekLogs,
 } from '@/lib/pocketbase/services/logs';
-import { getPublishedPlanForToday } from '@/lib/pocketbase/services/planResolution';
+import { getPublishedPlanForToday, applyAdjustments } from '@/lib/pocketbase/services/planResolution';
 import type { TrainingLogWithRelations } from '@/lib/pocketbase/services/logs';
 import type { PlanWithExercises, PlanExerciseWithExpand } from '@/lib/pocketbase/services/plans';
 import type { Language } from '@/lib/pocketbase/types';
@@ -34,6 +33,9 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { groupByDayAndSession } from '@/lib/pocketbase/services/plans';
 import { toLocalISODate } from '@/lib/utils/dateHelpers';
 import { ExerciseItem } from './cards/ExerciseItem';
+import { AthleteContextBanner } from './AthleteContextBanner';
+import type { SeasonWithRelations } from '@/lib/pocketbase/services/seasons';
+import { getActiveSeasonForAthlete } from '@/lib/pocketbase/services/seasons';
 import styles from './AthleteTrainingView.module.css';
 
 
@@ -168,6 +170,41 @@ function WarmupBadge({
 }
 
 
+// ─── Rest Day Card ───────────────────────────────────────────────
+
+function RestDayCard({
+    dayOfWeek,
+    date,
+    isToday,
+    isPast,
+    locale,
+    t,
+}: {
+    dayOfWeek: number;
+    date: Date;
+    isToday: boolean;
+    isPast: boolean;
+    locale: Language;
+    t: ReturnType<typeof useTranslations>;
+}) {
+    const formattedDate = date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', {
+        day: 'numeric', month: 'short',
+    });
+    return (
+        <div className={`${styles.dayCard} ${styles.dayCardRest} ${isToday ? styles.dayCardToday : ''} ${isPast ? styles.dayCardPast : ''}`}>
+            <div className={styles.dayCardHeader}>
+                <span className={styles.dayCardName}>{t(DAY_KEYS[dayOfWeek])}</span>
+                <span className={styles.dayCardDate}>{formattedDate}</span>
+                {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
+            </div>
+            <div className={styles.restDayBody}>
+                <Moon size={20} className={styles.restDayIcon} aria-hidden="true" />
+                <span className={styles.restDayLabel}>{t('restDay' as Parameters<typeof t>[0])}</span>
+            </div>
+        </div>
+    );
+}
+
 // ─── Day Card ─────────────────────────────────────────────────────
 
 function DayCard({
@@ -179,6 +216,8 @@ function DayCard({
     athleteId,
     locale,
     isToday,
+    isPast,
+    loggedCount,
     t,
     dayNote,
     readinessScore,
@@ -191,6 +230,8 @@ function DayCard({
     athleteId: string;
     locale: Language;
     isToday: boolean;
+    isPast: boolean;
+    loggedCount: number;
     t: ReturnType<typeof useTranslations>;
     dayNote?: string;
     readinessScore?: number;
@@ -213,11 +254,16 @@ function DayCard({
     };
 
     return (
-        <div className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''}`}>
+        <div className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''} ${isPast ? styles.dayCardPast : ''}`}>
             <div className={styles.dayCardHeader}>
                 <span className={styles.dayCardName}>{t(DAY_KEYS[dayOfWeek])}</span>
                 <span className={styles.dayCardDate}>{formattedDate}</span>
-                {isToday && <span className={styles.todayBadge}>{t('log.record')}</span>}
+                {loggedCount > 0 && (
+                    <span className={styles.progressChip}>
+                        {Math.min(loggedCount, sessions.length)}/{sessions.length}
+                    </span>
+                )}
+                {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
             </div>
 
             {/* Coach day note banner */}
@@ -376,12 +422,10 @@ function LoggableSession({
 
 // ─── Main Component ───────────────────────────────────────────────
 
-interface AthleteTrainingViewProps {
-    /** Optional callback fired once the athlete's own ID is resolved. */
-    onAthleteIdResolved?: (id: string) => void;
-}
+ 
+type AthleteTrainingViewProps = Record<string, never>;
 
-export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingViewProps = {}) {
+export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
     const t = useTranslations('training');
     const locale = useLocale() as Language;
     const { user } = useAuth();
@@ -394,6 +438,7 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
     const [weekOffset, setWeekOffset] = useState(0);
     const [athleteId, setAthleteId] = useState<string | null>(null);
     const [todayReadiness, setTodayReadiness] = useState<number | undefined>(undefined);
+    const [activeSeason, setActiveSeason] = useState<SeasonWithRelations | null>(null);
 
 
     const todayIdx = todayDayIndex();
@@ -414,7 +459,6 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
                     aid = await getSelfAthleteId();
                     if (!cancelled) {
                         setAthleteId(aid);
-                        onAthleteIdResolved?.(aid);
                     }
                 } catch (err) {
                     const { logError } = await import('@/lib/utils/errors');
@@ -423,14 +467,31 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
                     return;
                 }
 
-                const [fetchedPlan, fetchedTodayLogs] = await Promise.all([
+                const [fetchedPlan, fetchedTodayLogs, season] = await Promise.all([
                     getPublishedPlanForToday(aid),
                     listTodayLogs(aid),
+                    getActiveSeasonForAthlete(aid),
                 ]);
 
                 if (cancelled) return;
-                setPlan(fetchedPlan);
+
+                // [Track 4.263] Apply exercise_adjustments: skip filtered + fields overridden
+                if (fetchedPlan) {
+                    const rawExercises = (fetchedPlan.expand?.['plan_exercises(plan_id)'] ?? []) as PlanExerciseWithExpand[];
+                    const adjusted = await applyAdjustments(rawExercises, aid);
+                    const planWithAdjusted: PlanWithExercises = {
+                        ...fetchedPlan,
+                        expand: {
+                            ...fetchedPlan.expand,
+                            'plan_exercises(plan_id)': adjusted,
+                        },
+                    };
+                    setPlan(planWithAdjusted);
+                } else {
+                    setPlan(null);
+                }
                 setTodayLogs(fetchedTodayLogs);
+                setActiveSeason(season);
             } catch (e: unknown) {
                 if (cancelled) return;
                 const status = (e as { status?: number })?.status;
@@ -497,7 +558,7 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
             <div className={styles.emptyState}>
                 <ListX size={48} strokeWidth={1.5} className={styles.emptyIcon} aria-hidden="true" />
                 <p className={styles.emptyTitle}>{t('noPublishedPlan' as Parameters<typeof t>[0])}</p>
-                <p className={styles.emptyHint}>{t('searchExercises')}</p>
+                <p className={styles.emptyHint}>{t('coachIsPreparingPlan' as Parameters<typeof t>[0])}</p>
             </div>
         );
     }
@@ -505,10 +566,9 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
     const allExercises = plan.expand?.['plan_exercises(plan_id)'] ?? [];
     const byDayAndSession = groupByDayAndSession(allExercises);
 
-    // Check which days have exercises
-    const activeDays = Array.from({ length: 7 }, (_, d) => d).filter((d) =>
-        Object.values(byDayAndSession[d] ?? {}).some((s) => s.length > 0)
-    );
+    // All 7 days — always render, rest days show RestDayCard
+    const allDays = Array.from({ length: 7 }, (_, d) => d);
+    const hasAnyExercises = allExercises.length > 0;
 
     // Week-level log map: date+session → log
     const logKey = (date: Date, session: number) =>
@@ -530,6 +590,14 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
 
     return (
         <div className={styles.root}>
+            {/* Athlete Context Banner — season timeline, phase, nearest competition */}
+            {activeSeason && !isLoading && (
+                <AthleteContextBanner
+                    season={activeSeason}
+                    today={new Date()}
+                />
+            )}
+
             {/* Week navigation */}
             <div className={styles.weekNav}>
                 <button
@@ -550,37 +618,52 @@ export function AthleteTrainingView({ onAthleteIdResolved }: AthleteTrainingView
                 </button>
             </div>
 
-            {/* 7-day scroll */}
+            {/* 7-day scroll — always render all 7 days */}
             <div className={styles.weekScroll} ref={scrollRef}>
-                {activeDays.length === 0 ? (
+                {!hasAnyExercises ? (
                     <div className={styles.emptyState}>
                         <ListX size={36} strokeWidth={1.5} className={styles.emptyIcon} />
                         <p className={styles.emptyTitle}>{t('noExercises')}</p>
                     </div>
                 ) : (
-                    activeDays.map((day) => {
+                    allDays.map((day) => {
                         const date = getDayDate(weekStart, day);
                         const isThisWeekToday = weekOffset === 0 && day === todayIdx;
+                        const isPastDay = weekOffset < 0 || (weekOffset === 0 && day < todayIdx);
                         const sessionsMap = byDayAndSession[day] ?? {};
+                        const hasSessions = Object.values(sessionsMap).some((s) => s.length > 0);
                         const logsForDay: TrainingLogWithRelations[] = Object.keys(sessionsMap).map((s) =>
                             weekLogMap.get(logKey(date, Number(s)))
                         ).filter(Boolean) as TrainingLogWithRelations[];
 
                         return (
                             <div key={day} data-today={isThisWeekToday || undefined}>
-                                {athleteId && plan && (
-                                    <DayCard
+                                {hasSessions ? (
+                                    athleteId && plan && (
+                                        <DayCard
+                                            dayOfWeek={day}
+                                            date={date}
+                                            exercisesBySession={sessionsMap}
+                                            logs={logsForDay}
+                                            plan={plan}
+                                            athleteId={athleteId}
+                                            locale={locale}
+                                            isToday={isThisWeekToday}
+                                            isPast={isPastDay}
+                                            loggedCount={logsForDay.length}
+                                            t={t}
+                                            dayNote={(plan.day_notes as Record<string, string> | undefined)?.[String(day)] || undefined}
+                                            readinessScore={isThisWeekToday ? todayReadiness : undefined}
+                                        />
+                                    )
+                                ) : (
+                                    <RestDayCard
                                         dayOfWeek={day}
                                         date={date}
-                                        exercisesBySession={sessionsMap}
-                                        logs={logsForDay}
-                                        plan={plan}
-                                        athleteId={athleteId}
-                                        locale={locale}
                                         isToday={isThisWeekToday}
+                                        isPast={isPastDay}
+                                        locale={locale}
                                         t={t}
-                                        dayNote={(plan.day_notes as Record<string, string> | undefined)?.[String(day)] || undefined}
-                                        readinessScore={isThisWeekToday ? todayReadiness : undefined}
                                     />
                                 )}
                             </div>

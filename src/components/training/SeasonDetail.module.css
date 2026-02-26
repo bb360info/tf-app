@@ -214,6 +214,20 @@
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
     font-style: italic;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.competitionLink {
+    margin-top: var(--space-2);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-accent-primary);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
 }
 
 .managePlansBtn {
@@ -364,27 +378,26 @@
     color: var(--color-priority-c-text);
 }
 
-/* ── Priority Dot ─────────────────────────────────────────────── */
+/* ── Competition Chip ─────────────────────────────────────────────── */
 
-.priorityDot {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: var(--radius-full);
+.competitionChip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    vertical-align: middle;
+    color: var(--color-text-secondary);
 }
 
-.priorityDot[data-priority="A"] {
-    background: var(--color-danger);
+.competitionChip[data-priority="A"] {
+    color: var(--color-danger);
 }
 
-.priorityDot[data-priority="B"] {
-    background: var(--color-warning);
+.competitionChip[data-priority="B"] {
+    color: var(--color-warning);
 }
 
-.priorityDot[data-priority="C"] {
-    background: var(--color-accent-primary);
+.competitionChip[data-priority="C"] {
+    color: var(--color-accent-primary);
 }
 
 /* ── States ───────────────────────────────────────────────────── */
@@ -445,6 +458,7 @@
 .retryBtn:hover {
     background: var(--color-accent-hover);
 }
+
 /* ── Assign Panel ────────────────────────────────────────────────── */
 
 .assignPanel {
@@ -574,4 +588,94 @@
     padding: 2px 8px;
     cursor: default;
     white-space: nowrap;
+}
+
+/* ── Active Assignments ───────────────────────────────────────── */
+
+.assignmentsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px dashed var(--color-border);
+}
+
+.assignmentBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-xs);
+    color: var(--color-text-primary);
+}
+
+.unassignBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    line-height: 1;
+    padding: 0 4px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: color var(--duration-fast), background var(--duration-fast);
+}
+
+.unassignBtn:hover {
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+}
+
+.assignPreview {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-2);
+    font-style: italic;
+}
+
+/* ── Weekly Status Map ────────────────────────────────────────── */
+
+.weekStatusMap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-1);
+}
+
+.weekDot {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: transform var(--duration-fast) var(--ease-default), opacity var(--duration-fast) var(--ease-default);
+    background: var(--color-border);
+}
+
+.weekDot:hover {
+    transform: scale(1.2);
+    opacity: 0.85;
+}
+
+.weekDot_published {
+    background: var(--color-success);
+}
+
+.weekDot_draft {
+    background: var(--color-warning);
+}
+
+.weekDot_empty {
+    background: var(--color-border);
 }

@@ -82,8 +82,9 @@ export function usePushSubscription(userId: string) {
                 const perm = getPushPermission();
                 setStatus(perm === 'denied' ? 'denied' : 'unsubscribed');
             }
-        } catch {
-            /* non-critical: push status check */
+        } catch (err) {
+            console.error('[usePushSubscription] Subscribe error:', err);
+            throw err;
         } finally {
             setLoading(false);
         }

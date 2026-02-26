@@ -7,7 +7,7 @@
  */
 
 import { useTranslations } from 'next-intl';
-import { Copy, Pencil, Trash2, Clock } from 'lucide-react';
+import { Copy, Pencil, Trash2, Clock, Play } from 'lucide-react';
 import type { TrainingTemplateRecord } from '@/lib/pocketbase/types';
 import styles from './TemplateList.module.css';
 
@@ -17,6 +17,7 @@ interface Props {
     templates: TrainingTemplateRecord[];
     isSystem: boolean;
     defaultLocale: Language;
+    onApply?: (template: TrainingTemplateRecord) => void;
     onCopy?: (template: TrainingTemplateRecord) => void;
     onEdit?: (template: TrainingTemplateRecord) => void;
     onDelete?: (template: TrainingTemplateRecord) => void;
@@ -30,7 +31,7 @@ function getLocalizedName(template: TrainingTemplateRecord, locale: Language): s
     }
 }
 
-export default function TemplateList({ templates, isSystem, defaultLocale, onCopy, onEdit, onDelete }: Props) {
+export default function TemplateList({ templates, isSystem, defaultLocale, onApply, onCopy, onEdit, onDelete }: Props) {
     const t = useTranslations('templates');
 
     if (templates.length === 0) return null;
@@ -52,6 +53,16 @@ export default function TemplateList({ templates, isSystem, defaultLocale, onCop
 
                     {/* Right: actions */}
                     <div className={styles.actions}>
+                        {onApply && (
+                            <button
+                                className={styles.actionBtn}
+                                onClick={() => onApply(template)}
+                                title={t('apply')}
+                                aria-label={`${t('apply')}: ${getLocalizedName(template, defaultLocale)}`}
+                            >
+                                <Play size={16} aria-hidden="true" />
+                            </button>
+                        )}
                         {isSystem && onCopy && (
                             <button
                                 className={styles.actionBtn}

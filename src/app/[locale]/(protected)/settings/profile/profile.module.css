@@ -1,0 +1,177 @@
+.page {
+    min-height: 100dvh;
+    background: var(--color-bg-primary);
+    padding-bottom: var(--space-16);
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    min-height: 64px;
+    gap: var(--space-4);
+}
+
+.row:first-of-type {
+    border-top: none;
+}
+
+.rowLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+}
+
+.rowIconWrap {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent-primary);
+    flex-shrink: 0;
+}
+
+.rowInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.rowName {
+    font-size: var(--text-base);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+}
+
+.rowDesc {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.iconButton:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.block {
+    display: block;
+    padding: var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.nameRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.input {
+    height: 44px;
+    width: 100%;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-size: var(--text-base);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.saveButton {
+    width: 100%;
+    min-height: 52px;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.saveButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid var(--color-border);
+}
+
+.infoLabel {
+    font-size: var(--text-sm);
+    color: var(--color-text-tertiary);
+}
+
+.infoValue {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    text-align: right;
+    word-break: break-word;
+}
+
+@media (min-width: 768px) {
+    .nameRow {
+        grid-template-columns: 1fr 1fr;
+    }
+}

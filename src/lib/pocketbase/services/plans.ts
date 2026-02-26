@@ -34,12 +34,11 @@ export type PlanWithExercises = TrainingPlansRecord &
 /** List plans for a phase, sorted by week_number */
 export async function listPlansForPhase(phaseId: string): Promise<PlanWithExercises[]> {
     const result = await pb.collection(Collections.TRAINING_PLANS).getFullList<PlanWithExercises>({
-        filter: `phase_id = "${phaseId}" && deleted_at = ""`,
+        filter: pb.filter('phase_id = {:phaseId} && deleted_at = ""', { phaseId }),
         sort: 'week_number',
         // Debug: Try simple expand first
         expand: 'plan_exercises(plan_id).exercise_id',
     });
-    console.log('[listPlansForPhase] Result:', result.length, result);
     return result;
 }
 
@@ -87,7 +86,7 @@ export async function getOrCreatePlan(
         const existing = await pb
             .collection(Collections.TRAINING_PLANS)
             .getFirstListItem<PlanWithExercises>(
-                `phase_id = "${phaseId}" && week_number = ${weekNumber} && deleted_at = ""`,
+                pb.filter('phase_id = {:phaseId} && week_number = {:weekNumber} && deleted_at = ""', { phaseId, weekNumber }),
                 { expand: 'plan_exercises(plan_id).exercise_id' }
             );
         return existing;
@@ -103,7 +102,7 @@ export async function getOrCreatePlan(
 /** List exercises for a plan, sorted by day then order */
 export async function listPlanExercises(planId: string): Promise<PlanExerciseWithExpand[]> {
     return pb.collection(Collections.PLAN_EXERCISES).getFullList<PlanExerciseWithExpand>({
-        filter: `plan_id = "${planId}" && deleted_at = ""`,
+        filter: pb.filter('plan_id = {:planId} && deleted_at = ""', { planId }),
         sort: 'day_of_week,order',
         expand: 'exercise_id',
     });
@@ -260,9 +259,79 @@ export async function publishPlan(planId: string): Promise<PlanWithExercises> {
     }
 
     // 3. Update plan status to published
-    return pb.collection(Collections.TRAINING_PLANS).update<PlanWithExercises>(planId, {
+    const published = await pb.collection(Collections.TRAINING_PLANS).update<PlanWithExercises>(planId, {
         status: 'published' as PlanStatus,
     });
+
+    // Step 3.5: auto-deactivate assignments from other plans in the same phase (non-blocking)
+    void (async () => {
+        try {
+            const { unassignPlan, listPlanAssignments } = await import('./planAssignments');
+            const siblingPlans = await pb.collection(Collections.TRAINING_PLANS).getFullList({
+                filter: pb.filter(
+                    'phase_id = {:phaseId} && id != {:planId} && deleted_at = ""',
+                    { phaseId: published.phase_id, planId }
+                ),
+                fields: 'id',
+            });
+            for (const sibling of siblingPlans) {
+                const assignments = await listPlanAssignments(sibling.id);
+                for (const a of assignments) {
+                    await unassignPlan(a.id);
+                }
+            }
+        } catch (deactivateErr) {
+            console.warn('Auto-deactivate sibling assignments failed (non-blocking):', deactivateErr);
+        }
+    })();
+
+    // 4. Notify assigned athletes (fire-and-forget, non-blocking)
+    void (async () => {
+        try {
+            const { listActivePlanAssignments } = await import('./planAssignments');
+            const { sendNotification, batchCheckPreferences } = await import('./notifications');
+            const { listGroupMembers } = await import('./groups');
+
+            const assignments = await listActivePlanAssignments(planId);
+            const userIds: string[] = [];
+
+            for (const assignment of assignments) {
+                if (assignment.athlete_id) {
+                    // Direct athlete assignment: resolve user_id
+                    const athlete = assignment.expand?.athlete_id as (typeof assignment.expand extends { athlete_id?: infer A } ? A : never) | undefined;
+                    const userId = (athlete as unknown as { user_id?: string } | undefined)?.user_id ?? '';
+                    if (userId) userIds.push(userId);
+                } else if (assignment.group_id) {
+                    // Group assignment: resolve all group members' user_ids
+                    const members = await listGroupMembers(assignment.group_id);
+                    for (const m of members) {
+                        const userId = m.expand?.athlete_id?.user_id ?? '';
+                        if (userId) userIds.push(userId);
+                    }
+                }
+            }
+
+            if (userIds.length === 0) return;
+
+            // Batch check preferences — 1 HTTP call instead of N
+            const allowed = await batchCheckPreferences(userIds, 'plan_published');
+
+            await Promise.all(
+                [...allowed].map((userId) =>
+                    sendNotification({
+                        userId,
+                        type: 'plan_published',
+                        messageKey: 'planPublished',
+                        messageParams: { week: published.week_number ?? '' },
+                    })
+                )
+            );
+        } catch (notifErr) {
+            console.warn('Notification send failed (non-blocking):', notifErr);
+        }
+    })();
+
+    return published;
 }
 
 
@@ -308,6 +377,11 @@ export async function createIndividualOverride(
         throw new Error(
             'Cannot create override from an existing override. Use the original plan.'
         );
+    }
+
+    // Guard: only published plans can be overridden
+    if (originalPlan.status !== 'published') {
+        throw new Error('Can only create overrides from published plans.');
     }
 
     // 2. Fetch all exercises from the original plan

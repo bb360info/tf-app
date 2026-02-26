@@ -18,6 +18,43 @@
     padding: var(--space-6) 0 var(--space-2);
 }
 
+.competitionsEntry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    background: var(--glass-bg);
+    text-decoration: none;
+}
+
+.competitionsTitle {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--color-text-primary);
+    font-weight: var(--weight-semibold);
+}
+
+.competitionsDesc {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.competitionsAction {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-accent-primary);
+    color: var(--color-accent-primary);
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+}
+
 .welcome {
     font-family: var(--font-display);
     font-size: var(--text-3xl);
@@ -280,6 +317,71 @@
     margin: 0;
 }
 
+/* ── Missing Profile State ──────────────────────────────────────── */
+
+.profileMissingCard {
+    margin-top: var(--space-8);
+    padding: var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.profileMissingTitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+}
+
+.profileMissingText {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+}
+
+.profileMissingActions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.profileMissingBtnPrimary,
+.profileMissingBtnSecondary {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+}
+
+.profileMissingBtnPrimary {
+    background: var(--color-accent-primary);
+    color: var(--color-text-inverse);
+}
+
+.profileMissingBtnSecondary {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.profileMissingBtnPrimary:focus-visible,
+.profileMissingBtnSecondary:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
 /* ── Fade-in Animation ──────────────────────────────────────────── */
 
 @keyframes fadeIn {
@@ -378,6 +480,7 @@
     /* Unwrapped — AchievementsGrid has its own glass card styles */
     margin: 0;
 }
+
 /* ── Today's Plan card ────────────────────────────────────────────── */
 
 .todayPlanContent {
@@ -395,4 +498,19 @@
 .todayPlanMeta {
     font-size: var(--text-sm);
     color: var(--color-text-secondary);
+}
+
+/* ── Discipline badge (hero) ─────────────────────────────────────── */
+
+.disciplineBadge {
+    display: inline-block;
+    margin-bottom: var(--space-2);
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+    color: var(--color-accent-primary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.04em;
+    text-transform: capitalize;
 }

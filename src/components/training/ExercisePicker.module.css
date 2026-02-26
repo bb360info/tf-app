@@ -336,6 +336,7 @@
     width: 100%;
     padding: var(--space-3, 12px) var(--space-4, 16px);
     border: none;
+    border-left: 4px solid transparent;
     background: none;
     cursor: pointer;
     text-align: left;

@@ -1,0 +1,291 @@
+# Design Questions — Трек 4.263
+
+> Prod PocketBase: jumpedia.app | Актуализировано: 2026-02-26
+
+---
+
+## ❓ Вопрос А: owner_type в `competitions`
+
+**Проблема:** после `season_id → optional` + добавления `athlete_id` + `group_id`
+непонятно "чей это старт" без просмотра всех трёх полей.
+
+---
+
+### Вариант A1 — Только 3 nullable поля, без discriminator
+
+```diff
+ competitions:
+-  season_id: required=true
++  season_id: required=false
++  athlete_id: nullable   [NEW]
++  group_id:   nullable   [NEW]
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| +2 поля, минимальные изменения схемы | API Rules превращаются в 8-10 условий — нечитаемо |
+| Нет breaking change для существующих форм | Нет DB-level constraint «хотя бы одно поле» |
+| Competition может одновременно быть в сезоне И атлета | Если все три null → orphan-запись попадёт в БД |
+| | На фронте нет явного «тип старта» — UX форма усложняется |
+| | При `season_id != "" && athlete_id != ""` — непонятна приоритетность |
+
+---
+
+### Вариант A2 — Добавить `owner_type: select` ⭐ Рекомендация
+
+```diff
+ competitions:
+-  season_id: required=true
++  season_id: required=false
++  athlete_id: nullable                                      [NEW]
++  group_id:   nullable                                      [NEW]
++  owner_type: select('season','athlete','group'), required  [NEW]
+```
+
+**Как меняются API Rules:**
+```
+# Было (всё через season_id, 2 условия):
+season_id.coach_id = authId || season_id.athlete_id.user_id = authId
+
+# Станет (ветвление по типу):
+(owner_type = "season"  && season_id.coach_id = authId || season_id.athlete_id.user_id = authId)
+|| (owner_type = "athlete" && (athlete_id.user_id = authId || athlete_id.coach_id = authId))
+|| (owner_type = "group"   && group_id.group_members_via_group_id.athlete_id.user_id ?= authId)
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| `owner_type required` = физически невозможно создать orphan | +3 поля вместо +2 |
+| API Rules читаются как документация — легко дебажить | Форма создания требует выбора типа владельца |
+| Индекс по `(owner_type, date)` покрывает все запросы | Нельзя чтобы старт был «и в сезоне, и личный» одновременно |
+| Фронт рендерит иконку «личный / командный / сезонный» — UX чистый | При переносе атлета между тренерами нужно обновить ownership |
+| Мигратор тривиален: `season_id != "" → owner_type = 'season'` | |
+
+---
+
+### Вариант A3 — `is_direct: bool` флаг
+
+```diff
+ competitions:
++  athlete_id: nullable   [NEW]
++  group_id:   nullable   [NEW]
++  is_direct:  bool       [NEW] — true если без сезона
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Простая логика: `is_direct = false` для всех старых записей | Не решает проблему «athlete vs group» — флаг бинарный |
+| Мигратор: `SET is_direct = false WHERE season_id != ''` | API Rules всё равно раздуваются |
+| | Два флага для двух смыслов — будущий технический долг |
+| | Нет contract «какое именно поле заполнено» |
+
+---
+
+## ❓ Вопрос Б: `athlete_id` конфликт в `training_plans`
+
+**Проблема:** `athlete_id` уже есть в prod со смыслом «override атлета в group-плане».
+После изменений он должен также означать «прямое владение».
+
+---
+
+### Вариант Б1 — Оставить одно поле, двойная семантика (неявно)
+
+```
+ПРАВИЛО:
+  parent_plan_id != null → athlete_id = "для кого override"
+  parent_plan_id = null  → athlete_id = "прямой владелец"
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| 0 изменений схемы БД | Скрытый контракт: не виден из схемы, только из документации |
+| `athlete_id.user_id = authId` в listRule уже работает для обоих случаев | Следующий розработчик/агент с высокой вероятностью создаст баг |
+| Мигратор не нужен совсем | Запрос «все прямые планы атлета» выглядит так: `athlete_id=X && parent_plan_id=''` — неочевидно |
+| | Нет DB constraint подтверждающего контракт |
+
+---
+
+### Вариант Б2 — `plan_type: select('phase_based','direct')` ⭐ Рекомендация
+
+```diff
+ training_plans:
++  plan_type: select('phase_based','direct'), required  [NEW]
+```
+
+```
+ПРАВИЛО:
+  plan_type = 'phase_based' → phase_id обязателен, athlete_id = override (если есть)
+  plan_type = 'direct'      → phase_id = null, athlete_id = прямой владелец плана
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Явный контракт виден прямо из схемы | Нужна миграция: все существующие планы → `plan_type = 'phase_based'` |
+| Запросы читаются: `plan_type='direct' && athlete_id=X` | +1 обязательное поле в форме создания плана |
+| API Rules ветвятся по типу — как A2 для competitions | |
+| Симметрично с `owner_type` в competitions — единая концепция | |
+| Индекс по `(plan_type, athlete_id)` для быстрых прямых планов | |
+
+---
+
+### Вариант Б3 — Добавить отдельное поле `direct_owner_id`
+
+```diff
+ training_plans:
++  direct_owner_id: relation→athletes, nullable  [NEW]
+   athlete_id: relation→athletes, nullable  ← остаётся для override
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Кристально чистое разделение: `athlete_id` = override, `direct_owner_id` = владелец | Два похожих поля с отношениями на одну таблицу — путаница |
+| Нет конфликта семантики | Нет миграции (оба nullable) |
+| | API Rules: два параллельных пути для одного смысла |
+| | Нарушает DRY в схеме |
+
+---
+
+## ❓ Вопрос В: `week_number` для прямых планов
+
+**Проблема:** `week_number: required=true` — для ad-hoc плана без `phase_id` это бессмысленно.
+Сейчас создание plan без phase_id упрётся в этот required constraint.
+
+---
+
+### Вариант В1 — Только `week_number: required=false`
+
+```diff
+ training_plans:
+-  week_number: required=true
++  week_number: required=false
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Минимальное изменение | Прямые планы нечем сортировать в списке |
+| Нет новых полей | В UI будет «Неделя: —» или пустое место |
+| | Нет temporal anchor для прямого плана |
+
+---
+
+### Вариант В2 — `week_number: optional` + `start_date?: date` ⭐ Рекомендация
+
+```diff
+ training_plans:
+-  week_number: required=true
++  week_number: required=false
++  start_date: date, required=false   [NEW]
+```
+
+```
+ПРАВИЛО:
+  plan_type = 'phase_based'  → week_number (как сейчас)
+  plan_type = 'direct'       → start_date (дата начала плана)
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Прямые планы сортируются по `start_date` — UX понятный | +1 поле |
+| Первый шаг к ADR-3 (calendar-first архитектура) | Форма рендерит разные поля по типу плана |
+| Нет breaking change — `week_number` остаётся для фазовых планов | |
+| Мигратор не нужен (optional) | |
+
+---
+
+### Вариант В3 — `week_number = 0` как convention
+
+```
+Прямые планы создаются с week_number = 0, это означает «без фазы»
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| 0 изменений схемы | Magic number — антипаттерн |
+| | В UI отображается «Неделя 0» — некрасиво |
+| | Фильтр `week_number = 0` как прокси типа плана — хрупко |
+| | Нельзя отличить «неделя 0» от «не указано» |
+
+---
+
+## ❓ Вопрос Г: `personal_records → competition_id` FK
+
+**Проблема:** `personal_records` хранит `competition_name: string` (текст) вместо FK.
+Атлет добавит старт через новый flow, но его personal record никак не будет связан.
+
+---
+
+### Вариант Г1 — Добавить опциональный `competition_id` FK (без UI в этом треке)
+
+```diff
+ personal_records:
++  competition_id: relation→competitions, required=false   [NEW]
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Нормализация решена на уровне схемы | Без фронтенда поле бесполезно |
+| Обратная совместимость: поле optional | Нужна дополнительная задача в Phase 3 (или отдельный трек) |
+| Можно постепенно мигрировать данные | Форма personal records нужна обновлённая |
+
+---
+
+### Вариант Г2 — Добавить FK + обновить UI в Phase 3 этого трека
+
+```diff
+ personal_records:
++  competition_id: relation→competitions, required=false   [NEW]
+```
++ Обновить форму создания/редактирования personal record: выбор соревнования из списка.
++ Автосвязь: если атлет финишировал на соревновании → suggect linkage.
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| Полное решение нормализации | Значительно увеличивает scope трека |
+| Атлет сразу видит связь старта с результатом | Нужен UI компонент linkage (не тривиально) |
+| Данные консистентны с момента запуска | Риск: затянет Phase 3 и деплой |
+
+---
+
+### Вариант Г3 — Только UI-связь без FK (через текст)
+
+```
+Оставить competition_name: string, но автозаполнять из competitions.name при создании
+```
+
+| ✅ Плюсы | ❌ Минусы |
+|----------|-----------|
+| 0 изменений схемы | Не решает нормализацию |
+| | Имена рассинхронизируются если соревнование переименуют |
+| | При удалении соревнования — запись «висит» с именем |
+
+---
+
+## 📊 Сводная таблица
+
+| Вопрос | A1 | A2 ⭐ | A3 |
+|--------|:--:|:-----:|:--:|
+| owner_type | 3 nullable поля | + select discriminator | + is_direct bool |
+| Новых полей | +2 | +3 | +3 |
+| Orphan protection | ❌ | ✅ | ❌ |
+| Rules complexity | Высокая | Низкая | Средняя |
+| UI clarity | Низкая | Высокая | Средняя |
+
+| Вопрос | Б1 | Б2 ⭐ | Б3 |
+|--------|:--:|:-----:|:--:|
+| athlete_id | двойная семантика | + plan_type select | + direct_owner_id |
+| Новых полей | 0 | +1 | +1 |
+| Ясность контракта | ❌ | ✅ | ✅ |
+| Требует миграции | ❌ | ✅ всех планов | ❌ |
+
+| Вопрос | В1 | В2 ⭐ | В3 |
+|--------|:--:|:-----:|:--:|
+| week_number | only optional | + start_date | = 0 convention |
+| Новых полей | 0 | +1 | 0 |
+| Sortable | ❌ | ✅ | ❌ |
+| ADR-3 alignment | ❌ | ✅ | ❌ |
+
+| Вопрос | Г1 | Г2 ⭐ | Г3 |
+|--------|:--:|:-----:|:--:|
+| personal_records | FK без UI | FK + UI | UI без FK |
+| Нормализация | Частично | ✅ | ❌ |
+| Scope трека | +малый | +средний | минимальный |

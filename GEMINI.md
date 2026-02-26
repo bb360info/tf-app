@@ -1,6 +1,7 @@
 # Энциклопедия Прыгуна v2 — Agent Rules
 
 ## Architecture (DO NOT DEVIATE)
+
 - **Frontend**: Next.js 15 App Router, Static Export (`output: 'export'`), TypeScript
 - **Backend**: PocketBase (self-hosted, Hong Kong VPS)
 - **Storage**: Cloudflare R2 via PocketBase S3 adapter
@@ -11,22 +12,26 @@
 - **Video**: FFmpeg WASM (client-side compression) + MediaPipe Pose
 
 ## Language Policy
+
 - **Communication**: All agents MUST communicate with the USER in **Russian**.
 - **Artifacts**: All `implementation_plan.md` and `walkthrough.md` artifacts MUST be written in **Russian**.
 - **Documentation**: Technical documentation, code comments, and architecture docs REMAIN in **English**.
 
 ## Key Constraints
+
 - 🇨🇳 **China access required**: NO external CDN, NO Google Fonts via CDN, NO analytics scripts. Self-host everything.
 - Google OAuth2 works only with VPN in China — Email auth is primary for CN users
 - All fonts must be self-hosted in `/public/fonts/`
-- PocketBase has 21 collections — see `docs/ARCHITECTURE.md` for full schema
+- PocketBase has 26 collections — see `docs/ARCHITECTURE.md` for full schema
 - Static Export means NO server-side rendering, NO API routes in Next.js
 
 ## PocketBase Admin Access
+
 - **Admin Panel URL:** `https://jumpedia.app/_/`
 - **Credentials:** stored in `.env.local` as `PB_ADMIN_EMAIL` / `PB_ADMIN_PASSWORD`
 - **When needed:** schema changes (add fields, collections), cascade delete rules, index creation
 - **How to authenticate via API** (for scripts/agents):
+
   ```bash
   # Get admin token (PocketBase v0.23+ uses _superusers, not /api/admins/)
   TOKEN=$(curl -s -X POST https://jumpedia.app/api/collections/_superusers/auth-with-password \
@@ -39,11 +44,13 @@
     -H "Content-Type: application/json" \
     -d '{...schema patch...}'
   ```
+
 - **Browser:** agents can use `browser_subagent` to open `https://jumpedia.app/_/` and log in with above credentials when API is insufficient
 
 ## Design System (MANDATORY — violation = defect)
+
 - **Iron Law**: EVERY visual decision comes from `docs/DESIGN_SYSTEM.md` → `src/styles/tokens.css`
-- **Auto-loaded**: `jumpedia-design-system` + `verification-before-completion` discipline skills (via `always` group)
+- **Auto-loaded**: `jumpedia-design-system` loads via `/ui-work` workflow (NOT in always group). `verification-before-completion` loads before final delivery only.
 - **Source of truth**: `src/styles/tokens.css` for CSS var names, `docs/DESIGN_SYSTEM.md` for guidelines
 - **CSS**: Vanilla CSS with CSS Modules (`.module.css`) — **NO Tailwind, NEVER**
 - **Style**: Athletic Minimal + Glassmorphism — `var(--glass-bg)`, `var(--glass-blur)` etc.
@@ -55,33 +62,49 @@
 - **Pre-delivery**: Pass all checklist items from `jumpedia-design-system` SKILL.md
 
 ## Project Structure
+
 ```
 src/
   app/[locale]/        ← next-intl routing (ru/en/cn)
   components/          ← React components
   lib/
-    pocketbase/        ← PocketBase SDK + collections types
+    pocketbase/        ← PocketBase SDK + collections types + services/
     validation/        ← Zod schemas (every collection)
+    utils/             ← nameHelpers, errors, date helpers
+    hooks/             ← useAuth, usePushSubscription, useNotifications
     readiness/         ← Readiness score (0-100)
     autofill/          ← Phase-Aware Auto-Fill + CNS checker
     mediapipe/         ← Pose Landmarker wrapper
     video/             ← FFmpeg WASM compression
     telemetry/         ← Error reporter → error_logs
     i18n/              ← Translation files
+  styles/              ← tokens.css (design system)
+cloudflare-worker/     ← Push service worker (push.jumpedia.app)
 conductor/             ← Track-based task management
 ```
 
 ## Execution Rules
+
 1. **Follow Conductor tracks** — see `conductor/tracks.md` for current status
 2. **Never start Track N+1** until Gate N is passed (all checkboxes in `conductor/tracks/track-N/gate.md`)
 3. **New feature ideas** → add to `conductor/backlog.md`, do NOT implement mid-track
 4. **1 commit = 1 task** — don't mix unrelated changes
 5. **Update `CHANGELOG.md`** after completing a task — use Added/Changed/Fixed/Removed format
 6. **Verification Iron Law**: NEVER claim "done", "fixed", "works" without running `pnpm test` / `pnpm build` / `pnpm type-check` and showing output
-7. **Model self-identification**: When running `/switch-agent`, the FIRST line of the report MUST start with your model code in brackets: `[G1H]`, `[G1L]`, `[G3H]`, `[G3L]`, `[GF]`, `[CS]`, `[CO]`, or `[??]`. See model code table in `switch-agent.md` step 0.
+7. **Model self-identification (The Iron Title Rule)**: The VERY FIRST line of the VERY FIRST agent response in any new chat session MUST start with your model code in brackets: `[G1H]`, `[G1L]`, `[G3H]`, `[G3L]`, `[GF]`, `[CS]`, `[CO]`, or `[??]`. This ensures the code is visible in the chat title. See model code table in `switch-agent.md` step 0. When running `/switch-agent`, this remains mandatory.
+8. **Skill Loading Iron Law**: Перед ЛЮБОЙ задачей (код, планирование, дебаг, ревью, деплой — без исключений):
+   - Прочитать `.agent/skills/project_skills.json`
+   - Сопоставить задачу с группами по триггерам
+   - Загрузить `SKILL.md` для каждого выбранного скилла через `view_file`
+   - **Первая строка ответа** должна включать: `🛠 Скиллы: [список загруженных]`
+   - ⛔ Если ни один скилл не загружен — НЕ НАЧИНАТЬ работу. Нет скилла = нет контекста = низкое качество.
+   - ⚠️ Проверить `_blocklist` — заблокированные скиллы НИКОГДА не грузить.
+   - Лимит: **2-7 скиллов** на задачу (больше → потеря фокуса).
 
 ## Track Artifacts (Обязательные)
+
 Для каждого активного трека в `conductor/tracks/track-N-<slug>/` должны быть:
+
 1. `gate.md` — чеклист задач (source of truth для статуса).
 2. `context.md` — контекст задачи (что делаем, зачем, какие файлы затрагивает).
 3. `implementation_plan.md` — технический план (пишет агент-планировщик/Thinking модель).
@@ -89,6 +112,7 @@ conductor/             ← Track-based task management
 **Rule:** Следующий трек НЕ НАЧИНАЕТСЯ, пока все 4 файла не будут завершены.
 
 ## Commands
+
 ```bash
 pnpm dev          # Local dev server
 pnpm build        # Static export to out/
@@ -98,7 +122,8 @@ pnpm lint         # ESLint
 ```
 
 ## Detailed Docs (read when relevant)
-- `docs/ARCHITECTURE.md` — Full PocketBase schema (21 collections), indexes, API rules, sync protocol
+
+- `docs/ARCHITECTURE.md` — Full PocketBase schema (26 collections), indexes, API rules, sync protocol
 - `docs/DESIGN_SYSTEM.md` — **READ BEFORE ANY UI WORK.** Design tokens, glassmorphism, mobile-first, accessibility, China rules
 - `docs/SECURITY.md` — Auth flow, security headers, CORS, rate limiting
 - `docs/PERIODIZATION.md` — Training system: seasons, phases, plans, readiness
@@ -106,7 +131,9 @@ pnpm lint         # ESLint
 - `conductor/backlog.md` — Feature ideas waiting for future tracks
 
 ## Available Workflows
+
 - `/switch-agent` — **Run when starting new chat / switching agents** — reads current track gate, reports status and next task
+- `/phase` — **Phase Kickoff** — full start for a gate phase block (skills + dependencies + conflicts + plan + go)
 - `/auto-skills` — Select skills for any task from project_skills.json
 - `/ui-work` — Mandatory before any UI/CSS/component work
 - `/qa` — Browser smoke test with `browser_subagent` before deploy
