@@ -1,5 +1,19 @@
 
-### 2026-02-27 — Track 4.263 Phase 4: Code Changes + Deploy
+### 2026-02-27 — Hotfix: Manage Plans button regression (Track 4.263 Schema Decoupling)
+
+#### Fixed
+
+- `plans.ts` `createPlan()`: добавлен обязательный параметр `plan_type` (дефолт `'phase_based'`) — отсутствовал после Track 4.263 Schema Decoupling, где `plan_type` стал required в PB. Кнопка «Manage Plans» падала с 422 при попытке создать новый план для недели.
+- `plans.ts` `createIndividualOverride()`: добавлен `plan_type: 'override'` при создании override-плана (та же причина — required field).
+- `WeekConstructor.tsx`: guard для `phase.season_id` — после Track 4.263 `season_id` стал optional в `training_phases`. `pb.getOne(undefined/empty)` бросал 400 ошибку, что ломало `loadPlan()` полностью.
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/)
+- `pnpm build` ✅ Exit code: 0
+- Deploy `https://jumpedia.app` → HTTP 200 ✅
+
+---
 
 #### Changed
 

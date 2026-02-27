@@ -55,10 +55,13 @@ export async function createPlan(data: {
     week_number: number;
     status?: PlanStatus;
     notes?: string;
+    plan_type?: 'phase_based' | 'standalone' | 'override';
 }): Promise<PlanWithExercises> {
     return pb.collection(Collections.TRAINING_PLANS).create<PlanWithExercises>({
         ...data,
         status: data.status ?? 'draft',
+        // [Track 4.263] plan_type is required — phase-based plans always use 'phase_based'
+        plan_type: data.plan_type ?? 'phase_based',
     });
 }
 
@@ -394,6 +397,8 @@ export async function createIndividualOverride(
             phase_id: originalPlan.phase_id,
             week_number: originalPlan.week_number,
             status: 'published' as PlanStatus,
+            // [Track 4.263] plan_type is required — override plans use 'override'
+            plan_type: 'override' as import('../types').PlanType,
             notes: originalPlan.notes ?? '',
             day_notes: originalPlan.day_notes ?? {},
             parent_plan_id: planId,   // link to master

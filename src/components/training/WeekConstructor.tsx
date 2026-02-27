@@ -153,11 +153,15 @@ export default function WeekConstructor({
                 const athleteSet = new Set<string>();
 
                 // 1. Check if season belongs to a specific athlete
+                // [Track 4.263] phase.season_id is now optional (Schema Decoupling)
                 const phase = await pb.collection('training_phases').getOne(phaseId);
-                const season = await pb.collection('seasons').getOne(phase.season_id);
-                if (season.athlete_id) {
-                    athleteSet.add(season.athlete_id as string);
-                } else {
+                if (phase.season_id) {
+                    const season = await pb.collection('seasons').getOne(phase.season_id);
+                    if (season.athlete_id) {
+                        athleteSet.add(season.athlete_id as string);
+                    }
+                }
+                if (athleteSet.size === 0) {
                     // 2. Fetch assignments
                     const assignments = await listActivePlanAssignments(p.id);
                     for (const a of assignments) {
