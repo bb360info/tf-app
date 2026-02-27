@@ -1,11 +1,10 @@
 /* ExerciseItem.module.css */
 
 .exerciseItem {
-    background: var(--glass-bg);
+    background: var(--surface-1, var(--color-bg-secondary));
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    backdrop-filter: var(--glass-blur);
     transition: border-color var(--duration-fast);
 }
 
@@ -58,6 +57,11 @@
 
 .doneIcon {
     color: var(--color-success);
+    flex-shrink: 0;
+}
+
+.adjustedIcon {
+    color: var(--color-warning, #f59e0b);
     flex-shrink: 0;
 }
 

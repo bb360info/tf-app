@@ -258,18 +258,17 @@ function DayCard({
             <div className={styles.dayCardHeader}>
                 <span className={styles.dayCardName}>{t(DAY_KEYS[dayOfWeek])}</span>
                 <span className={styles.dayCardDate}>{formattedDate}</span>
-                {loggedCount > 0 && (
-                    <span className={styles.progressChip}>
-                        {Math.min(loggedCount, sessions.length)}/{sessions.length}
-                    </span>
-                )}
+                {<span className={styles.progressChip}>
+                    {Math.min(loggedCount, sessions.length)}/{sessions.length}
+                </span>
+                }
                 {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
             </div>
 
             {/* Coach day note banner */}
             {dayNote && (
                 <div className={styles.coachNote}>
-                    <MessageSquare size={11} className={styles.coachNoteIcon} aria-hidden="true" />
+                    <MessageSquare size={16} className={styles.coachNoteIcon} aria-hidden="true" />
                     <p className={styles.coachNoteText}>{dayNote}</p>
                 </div>
             )}
@@ -422,7 +421,7 @@ function LoggableSession({
 
 // ─── Main Component ───────────────────────────────────────────────
 
- 
+
 type AthleteTrainingViewProps = Record<string, never>;
 
 export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {

@@ -133,8 +133,10 @@ training_logs
 
 ## Что НЕ трогать
 
-- Структуру PocketBase (кроме `log_mode` в Фазе 4)
+- Структуру PocketBase коллекций `exercise_adjustments`, `competitions`, `training_plans` — уже изменены в Track 4.263, схема стабильна
+- Допустимые изменения PocketBase: добавить `training_logs.log_mode` в Фазе 4
 - Логику `ensureLog`, `createLog`, `updateSessionResult`
 - `SetLogger` компонент (реиспользуем внутри `FocusCard`)
 - `WeekSummary` компонент
 - Глобальный Conductor (`conductor/tracks.md`)
+- `planResolution.ts` — `applyAdjustments()` и приоритет планов уже реализованы в Track 4.263

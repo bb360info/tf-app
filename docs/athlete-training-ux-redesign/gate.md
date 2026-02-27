@@ -6,17 +6,18 @@
 
 ## Фаза 1 — CSS P0-фиксы (~2-3ч)
 
-- [ ] `stepBtn` → `width: 44px; height: 44px`
-- [ ] `weekNavBtn` → `min-width: 44px; min-height: 44px`
-- [ ] `skipChip` → `min-height: 44px`
-- [ ] `rpeInput` — обёртка `44px` с `touch-action: none`
-- [ ] `dayCardPast { opacity: 0.7 }` (было 0.5)
-- [ ] Прогресс-чип `0/N` показывать всегда (убрать `loggedCount > 0`)
-- [ ] `coachNoteIcon` → `size={16}` (было 11)
-- [ ] `ExerciseRow`: убрать `backdrop-filter: blur` → `background: var(--surface-1)`
-- [ ] Sticky `DayCardHeader`: `position: sticky; top: 0; z-index: var(--z-raised)`
+- [x] `stepBtn` → `width: 44px; height: 44px`
+- [x] `weekNavBtn` → `min-width: 44px; min-height: 44px`
+- [x] `skipChip` → `min-height: 44px`
+- [x] `rpeInput` — обёртка `44px` с `touch-action: none`
+- [x] `dayCardPast { opacity: 0.7 }` (было 0.5)
+- [x] Прогресс-чип `0/N` показывать всегда (убрать `loggedCount > 0`)
+- [x] `coachNoteIcon` → `size={16}` (было 11)
+- [x] `ExerciseRow`: убрать `backdrop-filter: blur` → `background: var(--surface-1)`
+- [x] Sticky `DayCardHeader`: `position: sticky; top: 0; z-index: var(--z-raised)`
+- [x] **[GAP-2]** `ExerciseRow`: ⚡ бейдж если `planEx._adjusted === true` (Zap icon size={12}, `var(--accent-warning)`)
 
-**Gate 1:** `pnpm type-check && pnpm build && pnpm lint` — зелёный
+**Gate 1:** `pnpm type-check && pnpm build && pnpm lint` — ✅ зелёный
 
 ---
 
@@ -34,6 +35,8 @@
 - [ ] FAB «▶ Начать тренировку»
 - [ ] Кнопка «✓ Залогировать пост-фактум» (скрыта если уже есть live-лог)
 - [ ] Кнопка «✏️ Редактировать» для залогированных дней
+- [ ] **[GAP-1]** `AthleteContextBanner`: standalone-режим — мини-баннер «📅 Разовая тренировка · даты» когда `activeSeason=null` но `plan` есть
+- [ ] **[GAP-4]** `weekNav`: скрывать навигацию по неделям для `plan.plan_type='standalone'` (показывать диапазон дат плана)
 
 **Gate 2:** `pnpm type-check && pnpm build && pnpm lint` — зелёный  
 **Gate 2 QA:** DayTabNav переключает дни, прошлые дни read-only, 320px не ломается

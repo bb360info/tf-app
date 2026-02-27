@@ -360,6 +360,14 @@
 // НОВОЕ: training_logs.log_mode
 type LogMode = 'live' | 'post_express' | 'post_quick' | 'post_detailed';
 
+// НОВОЕ (Track 4.263): training_plans.plan_type
+type PlanType = 'phase_based' | 'standalone' | 'override';
+// training_plans.start_date / end_date — для standalone планов
+
+// НОВОЕ (Track 4.263): exercise_adjustments
+// plan_exercise_id FK, athlete_id FK, sets/reps/weight/intensity/duration/distance/rest_seconds/notes, skip
+// _adjusted: true флаг проставляется через applyAdjustments() в planResolution.ts
+
 // УЖЕ ЕСТЬ — используем:
 // exercises.coach_cues_ru/en/cn        ← техника в Focus Mode
 // exercises.illustration               ← fallback медиа
@@ -380,6 +388,7 @@ type LogMode = 'live' | 'post_express' | 'post_quick' | 'post_detailed';
 - [ ] Прогресс-чип `0/N` всегда
 - [ ] `coachNoteIcon size={16}`
 - [ ] Убрать `backdrop-filter: blur` с ExerciseRow (→ solid color)
+- [ ] **[GAP-2]** `ExerciseRow`: ⚡ бейдж если `planEx._adjusted === true`
 
 ### Фаза 2 — Overview Mode *(~1 день)*
 
@@ -390,6 +399,8 @@ type LogMode = 'live' | 'post_express' | 'post_quick' | 'post_detailed';
 - [ ] `AthleteContextBanner` collapsed
 - [ ] FAB кнопка «Начать» + кнопка «Пост-фактум»
 - [ ] Кнопка «Редактировать» для залогированных дней
+- [ ] **[GAP-1]** `AthleteContextBanner`: standalone-режим — мини-баннер когда `activeSeason=null` но `plan` есть
+- [ ] **[GAP-4]** `weekNav`: скрывать для standalone планов (показывать диапазон дат)
 
 ### Фаза 3 — Focus Mode *(~1.5 дня)*
 

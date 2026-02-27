@@ -1,4 +1,42 @@
 
+### 2026-02-26 — Athlete Training UX Redesign: Phase 1 (P0 Touch Targets + GAP-2 ⚡ Badge)
+
+#### Changed (docs/athlete-training-ux-redesign)
+
+- `gate.md`, `implementation_plan.md`, `context.md` — актуализированы под Track 4.263:
+  - Добавлены 3 новых GAP-задачи: GAP-2 (⚡ бейдж), GAP-1 (standalone баннер), GAP-4 (weekNav для standalone)
+  - Обновлена схема данных (plan_type, exercise_adjustments, start_date/end_date)
+  - Секция «Что НЕ трогать» — актуализирована (PocketBase уже изменён в Track 4.263)
+
+#### Fixed — CSS P0 Touch Targets (AthleteTrainingView.module.css)
+
+- `stepBtn`: 36×36 → **44×44px** + `touch-action: manipulation`
+- `weekNavBtn`: 36×36 → **44×44px** + `touch-action: manipulation`
+- `skipChip`: min-height 36 → **44px** + `touch-action: manipulation`
+- `rpeInput`: добавлен `padding: 20px 0` + `touch-action: none` (hit area 44px)
+- `dayCardPast`: opacity 0.5 → **0.7** (лучше читаемость прошедших дней)
+- `DayCardHeader`: добавлен `position: sticky; top: 0; z-index: 10; background: var(--color-bg-primary)`
+- `exerciseItem` (ATV + ExerciseItem.module.css): убран `backdrop-filter: blur` → `background: var(--surface-1)` (PERF-1 fix, Android scroll lag)
+
+#### Fixed — TSX (AthleteTrainingView.tsx)
+
+- Прогресс-чип `0/N` теперь показывается всегда (убрано условие `loggedCount > 0`)
+- `coachNoteIcon`: size 11 → **16** (читаемость)
+
+#### Added — [GAP-2] ⚡ badge (ExerciseItem.tsx + ExerciseItem.module.css)
+
+- `Zap` icon (size=12) отображается рядом с названием упражнения если `planEx._adjusted === true`
+- Флаг `_adjusted` проставляется `applyAdjustments()` в `planResolution.ts` (Track 4.263)
+- `.adjustedIcon { color: var(--color-warning) }` в ExerciseItem.module.css
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/)
+- `pnpm build` ✅ Exit code: 0
+- `pnpm lint` ✅ 0 errors, 19 warnings (pre-existing)
+
+---
+
 ### 2026-02-27 — Hotfix: Manage Plans button regression (Track 4.263 Schema Decoupling)
 
 #### Fixed

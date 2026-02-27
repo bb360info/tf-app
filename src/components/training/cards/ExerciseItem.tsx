@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { useTranslations } from 'next-intl';
-import { CheckCircle2, ChevronUp, ChevronDown } from 'lucide-react';
+import { CheckCircle2, ChevronUp, ChevronDown, Zap } from 'lucide-react';
 import { cnsCostColor, getExerciseName } from '@/lib/pocketbase/services/exercises';
 import { saveLogExercise, getLastExerciseLog } from '@/lib/pocketbase/services/logs';
 import type { PlanExerciseWithExpand } from '@/lib/pocketbase/services/plans';
@@ -115,6 +115,13 @@ export function ExerciseItem({ planEx, locale, logId, athleteId, t }: ExerciseIt
                         {dosageLabel}
                     </span>
                 </div>
+                {Boolean((planEx as Record<string, unknown>)._adjusted) && (
+                    <Zap
+                        size={12}
+                        className={styles.adjustedIcon}
+                        aria-label="Personalized adjustment"
+                    />
+                )}
                 {saved && <CheckCircle2 size={16} className={styles.doneIcon} />}
                 {open ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
             </button>
