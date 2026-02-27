@@ -211,6 +211,9 @@ export interface CustomExercisesRecord extends BaseRecord, SoftDeletable {
 }
 
 
+/** How the training log was recorded (Phase 3: Focus Mode) */
+export type LogMode = 'live' | 'post_express' | 'post_quick' | 'post_detailed';
+
 export interface TrainingLogsRecord extends BaseRecord, Syncable {
     athlete_id: string; // FK → athletes (UNIQUE: athlete_id + plan_id + date + session)
     plan_id: string; // FK → training_plans
@@ -218,7 +221,9 @@ export interface TrainingLogsRecord extends BaseRecord, Syncable {
     session?: number; // 0 = AM (default), 1 = PM
     notes?: string;
     readiness_score?: number;
+    log_mode?: LogMode; // [Phase 3] how log was created
 }
+
 
 /** Flexible sets format: [{set: 1, reps: 10, weight: 50}, ...] */
 export interface SetData {

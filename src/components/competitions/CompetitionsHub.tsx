@@ -80,6 +80,7 @@ export function CompetitionsHub() {
     const [pastSeasonType, setPastSeasonType] = useState<SeasonType | ''>('');
     const [pastLocation, setPastLocation] = useState('');
     const [pastOfficialResult, setPastOfficialResult] = useState('');
+    const [pastAthleteId, setPastAthleteId] = useState('');
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -98,13 +99,14 @@ export function CompetitionsHub() {
                 if (!self) {
                     setAthleteScopeId(null);
                     setSeasons([]);
-                    return;
-                }
-                setAthleteScopeId(self.id);
-                const loadedSeasons = await listSeasonsForAthlete(self.id);
-                setSeasons(loadedSeasons);
-                if (!seasonFilter && loadedSeasons.length > 0) {
-                    setPastSeasonId(loadedSeasons[0].id);
+                    // [Fix] Don't early return — form should still render
+                } else {
+                    setAthleteScopeId(self.id);
+                    const loadedSeasons = await listSeasonsForAthlete(self.id);
+                    setSeasons(loadedSeasons);
+                    if (!seasonFilter && loadedSeasons.length > 0) {
+                        setPastSeasonId(loadedSeasons[0].id);
+                    }
                 }
             }
         } catch {
@@ -212,21 +214,22 @@ export function CompetitionsHub() {
         const athleteNeedsResult = !isCoach && !pastOfficialResult;
         const athleteNeedsDiscipline = !isCoach && !pastDiscipline;
         const athleteNeedsSeasonType = !isCoach && !pastSeasonType;
+        const coachNeedsAthlete = isCoach && !pastAthleteId;
         // [Track 4.263] season_id is now optional — athlete can add past competition without a season
-        if (!pastName || !pastDate || athleteNeedsResult || athleteNeedsDiscipline || athleteNeedsSeasonType) {
+        if (!pastName || !pastDate || athleteNeedsResult || athleteNeedsDiscipline || athleteNeedsSeasonType || coachNeedsAthlete) {
             setPastError(t('errors.pastRequired'));
             return;
         }
         setPastError('');
         setCreatingPast(true);
+        // [Track 4.263] Polymorphic ownership: auto-detect owner_type by available FK
+        const resolvedAthleteId = isCoach ? pastAthleteId : athleteScopeId;
+        const ownerType: 'season' | 'athlete' = pastSeasonId ? 'season' : 'athlete';
         try {
-            // [Track 4.263] Polymorphic ownership: auto-detect owner_type by available FK
-            const ownerType: 'season' | 'athlete' = pastSeasonId ? 'season' : 'athlete';
-
             const newComp = await createCompetition({
                 owner_type: ownerType,
                 season_id: pastSeasonId || undefined,
-                athlete_id: ownerType === 'athlete' && athleteScopeId ? athleteScopeId : undefined,
+                athlete_id: ownerType === 'athlete' && resolvedAthleteId ? resolvedAthleteId : undefined,
                 name: pastName.trim(),
                 date: pastDate,
                 priority: 'C',
@@ -253,8 +256,10 @@ export function CompetitionsHub() {
             setPastSeasonType('');
             setPastLocation('');
             setPastOfficialResult('');
+            setPastAthleteId('');
             await loadCompetitions();
-        } catch {
+        } catch (err) {
+            console.error('[CompetitionsHub] createPast failed:', err, { ownerType, resolvedAthleteId, pastSeasonId, athleteScopeId });
             setPastError(t('errors.createPastFailed'));
         } finally {
             setCreatingPast(false);
@@ -327,7 +332,6 @@ export function CompetitionsHub() {
                         <div className={styles.formGroup}>
                             <label className={styles.label}>
                                 {t('labels.season')}
-                                <span className={styles.required}>*</span>
                             </label>
                             <select value={pastSeasonId} onChange={(event) => setPastSeasonId(event.target.value)} className={styles.select}>
                                 <option value="">{t('pastForm.selectSeason')}</option>
@@ -339,9 +343,30 @@ export function CompetitionsHub() {
                             </select>
                         </div>
 
+                        {isCoach && (
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>
+                                    {t('pastForm.selectAthlete')}
+                                    <span className={styles.required}>*</span>
+                                </label>
+                                <select
+                                    value={pastAthleteId}
+                                    onChange={(event) => setPastAthleteId(event.target.value)}
+                                    className={styles.select}
+                                >
+                                    <option value="">{t('pastForm.selectAthlete')}</option>
+                                    {athletes.map((athlete) => (
+                                        <option key={athlete.id} value={athlete.id}>
+                                            {athlete.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <div className={styles.formGroup}>
                             <label className={styles.label}>
-                                {tCommon('settings.discipline')}
+                                {tCommon('athleteForm.discipline')}
                                 {!isCoach && <span className={styles.required}>*</span>}
                             </label>
                             <select
@@ -360,7 +385,7 @@ export function CompetitionsHub() {
 
                         <div className={styles.formGroup}>
                             <label className={styles.label}>
-                                {tCommon('settings.seasonType')}
+                                {tCommon('athleteForm.seasonType')}
                                 {!isCoach && <span className={styles.required}>*</span>}
                             </label>
                             <select
@@ -446,7 +471,7 @@ export function CompetitionsHub() {
                             <option value="">{t('filters.allSeasonTypes')}</option>
                             {SEASON_TYPE_VALUES.map((value) => (
                                 <option key={value} value={value}>
-                                    {value === 'indoor' ? tCommon('training.seasonIndoor') : tCommon('training.seasonOutdoor')}
+                                    {value === 'indoor' ? tCommon('athleteForm.seasonIndoor') : tCommon('athleteForm.seasonOutdoor')}
                                 </option>
                             ))}
                         </select>

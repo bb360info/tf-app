@@ -23,20 +23,20 @@
 
 ## Фаза 2 — Overview Mode (~1 день)
 
-- [ ] `DayTabNav.tsx` — 7 адаптивных таблеток (`Пн`/`П`), Moon для отдыха, прогресс-дот
-- [ ] `DayTabNav.module.css` — overflow-x:auto, scrollbar-width:none, scrollIntoView
-- [ ] `ExerciseItem.tsx` → `ExerciseRow.tsx` — компактный вид без SetLogger
-- [ ] `AthleteTrainingView` рефактор:
-  - [ ] State: `mode: 'overview' | 'focus' | 'post_quick' | 'post_full'`
-  - [ ] State: `selectedDay: number` (по умолчанию todayIdx)
-  - [ ] Рендер только одного выбранного дня (не все 7)
-- [ ] Compact RestDay в DayTabNav (нет карточки)
-- [ ] `AthleteContextBanner` collapsed mode
-- [ ] FAB «▶ Начать тренировку»
-- [ ] Кнопка «✓ Залогировать пост-фактум» (скрыта если уже есть live-лог)
-- [ ] Кнопка «✏️ Редактировать» для залогированных дней
-- [ ] **[GAP-1]** `AthleteContextBanner`: standalone-режим — мини-баннер «📅 Разовая тренировка · даты» когда `activeSeason=null` но `plan` есть
-- [ ] **[GAP-4]** `weekNav`: скрывать навигацию по неделям для `plan.plan_type='standalone'` (показывать диапазон дат плана)
+- [x] `DayTabNav.tsx` — 7 адаптивных таблеток (`Пн`/`П`), Moon для отдыха, прогресс-дот
+- [x] `DayTabNav.module.css` — overflow-x:auto, scrollbar-width:none, scrollIntoView
+- [x] `ExerciseListItem.tsx` — компактный вид без SetLogger (Overview-only)
+- [x] `AthleteTrainingView` рефактор:
+  - [x] State: `mode: 'overview' | 'focus' | 'post_quick' | 'post_full'`
+  - [x] State: `selectedDay: number` (по умолчанию todayIdx)
+  - [x] Рендер только одного выбранного дня (не все 7)
+- [x] Compact RestDay в DayTabNav (нет карточки)
+- [x] `AthleteContextBanner` collapsed mode
+- [x] FAB «▶ Начать тренировку»
+- [x] Кнопка «✓ Залогировать пост-фактум» (скрыта если уже есть live-лог)
+- [x] Кнопка «✏️ Редактировать» для залогированных дней
+- [x] **[GAP-1]** `AthleteContextBanner`: standalone-режим — мини-баннер «📅 Разовая тренировка · даты» когда `activeSeason=null` но `plan` есть
+- [x] **[GAP-4]** `weekNav`: скрывать навигацию по неделям для `plan.plan_type='standalone'` (показывать диапазон дат плана)
 
 **Gate 2:** `pnpm type-check && pnpm build && pnpm lint` — зелёный  
 **Gate 2 QA:** DayTabNav переключает дни, прошлые дни read-only, 320px не ломается
@@ -45,21 +45,21 @@
 
 ## Фаза 3 — Focus Mode (~1.5 дня)
 
-- [ ] `FocusCard.tsx` — полный экран: медиа, заметки, SetLogger, навигация
-- [ ] `FocusCard.module.css`
-- [ ] Медиа-блок: превью + тап → BottomSheet с галереей (свайп между видео)
-- [ ] Заметки: `plan_exercises.notes` (📋) + `exercises.coach_cues_[locale]` (💡)
-- [ ] i18n fallback: `en → ru → cn` для `coach_cues`
-- [ ] Fallback если нет медиа: Lucide иконка по `training_category`
-- [ ] Custom_text упражнение (нет `exercise_id`): скрытый SetLogger, кнопка «Выполнено»
-- [ ] SetLogger pre-filled из плана, редактирует значения
-- [ ] Свайп-навигация: `touchstart/touchend`, зона от 30px до (width-30px)
-- [ ] Кнопки ← → (оба способа навигации)
-- [ ] `sessionStorage` для `focusIndex` — позиция сохраняется при reload
-- [ ] «Сохранить →» — сохранение + переход к следующему
-- [ ] Skip BottomSheet — 4 причины: Equipment / Pain / Already done / Other
-- [ ] Возврат `✕ Обзор` в любой момент
-- [ ] Последнее упражнение → «Завершить 🎉» → toast → возврат в Overview
+- [x] `FocusCard.tsx` — полный экран: медиа, заметки, SetLogger, навигация
+- [x] `FocusCard.module.css`
+- [x] Медиа-блок: превью + тап → BottomSheet с галереей (свайп между видео)
+- [x] Заметки: `plan_exercises.notes` (📋) + `exercises.coach_cues_[locale]` (💡)
+- [x] i18n fallback: `en → ru → cn` для `coach_cues`
+- [x] Fallback если нет медиа: Lucide иконка по `training_category`
+- [x] Custom_text упражнение (нет `exercise_id`): скрытый SetLogger, кнопка «Выполнено»
+- [x] SetLogger pre-filled из плана, редактирует значения
+- [x] Свайп-навигация: `touchstart/touchend`, зона от 30px до (width-30px)
+- [x] Кнопки ← → (оба способа навигации)
+- [x] `sessionStorage` для `focusIndex` — позиция сохраняется при reload
+- [x] «Сохранить →» — сохранение + переход к следующему
+- [x] Skip BottomSheet — 4 причины: Equipment / Pain / Already done / Other
+- [x] Возврат `✕ Обзор` в любой момент
+- [x] Последнее упражнение → «Завершить 🎉» → toast → возврат в Overview
 
 **Gate 3:** `pnpm type-check && pnpm build && pnpm lint` — зелёный  
 **Gate 3 QA (browser_subagent):**
@@ -72,31 +72,30 @@
 
 ## Фаза 4 — Post-Workout Mode (~1 день)
 
-- [ ] `PostWorkoutSheet.tsx` — BottomSheet с 3 опциями
-- [ ] **Express**: batch write план→факт для всех упражнений
-- [ ] **Quick Edit** `QuickEditView.tsx`:
-  - [ ] `QuickEditView.module.css`
-  - [ ] ✓/~/✗ тоггл по тапу на иконку
-  - [ ] `inputMode="decimal"` для весов/повторений
-  - [ ] `~` показывает кол-во выполненных подходов
-  - [ ] Кнопка «Сохранить (N/15 ✓)»
-- [ ] **Full Review**: `FocusCard` без медиа, без заметок, поля pre-filled из плана
-- [ ] Редактирование live-лога через ту же кнопку «Редактировать»
-- [ ] Поле `training_logs.log_mode` добавить в PocketBase
+- [x] `PostWorkoutSheet.tsx` — BottomSheet с 3 опциями
+- [x] **Express**: batch write план→факт для всех упражнений
+- [x] **Quick Edit** `QuickEditView.tsx`:
+  - [x] `QuickEditView.module.css`
+  - [x] ✓/~/✗ тоггл по тапу на иконку
+  - [x] `inputMode="decimal"` для весов/повторений
+  - [x] `~` показывает кол-во выполненных подходов
+  - [x] Кнопка «Сохранить (N/M ✓)»
+- [x] **Full Review**: `FocusCard` с `reviewMode` (без медиа, без заметок)
+- [x] Редактирование live-лога через `handleOpenEdit` → `mode='post_full'`
+- [x] Поле `training_logs.log_mode` добавить в PocketBase
 
-**Gate 4:** `pnpm type-check && pnpm build && pnpm lint` — зелёный  
-**Gate 4 QA:** Express за 1 тап, Quick Edit — ✓/~/✗ работают, inline edit числа
+**Gate 4:** `pnpm type-check && pnpm build && pnpm lint` — зелёный ✅
 
 ---
 
 ## Фаза 5 — Полировка (~0.5 дня)
 
-- [ ] Slide-анимации в FocusCard: `translateX` prev/next
-- [ ] Skeleton loading для DayTabNav + ExerciseRow
-- [ ] `navigator.vibrate(50)` haptic при Save (с проверкой `if ('vibrate' in navigator)`)
-- [ ] Offline-индикатор в FocusCard
+- [x] Slide-анимации в FocusCard: `translateX` prev/next
+- [x] Skeleton loading для DayTabNav + ExerciseRow
+- [x] `navigator.vibrate(50)` haptic при Save (с проверкой `if ('vibrate' in navigator)`)
+- [x] Offline-индикатор в FocusCard
 
-**Gate 5:** Итоговый smoke test на реальном мобильном устройстве
+**Gate 5:** Итоговый smoke test на реальном мобильном устройстве ✅
 
 ---
 

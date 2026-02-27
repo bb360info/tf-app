@@ -288,7 +288,7 @@ export async function publishPlan(planId: string): Promise<PlanWithExercises> {
         }
     })();
 
-    // 4. Notify assigned athletes (fire-and-forget, non-blocking)
+    // 4. Notify assigned athletes + season members (fire-and-forget, non-blocking)
     void (async () => {
         try {
             const { listActivePlanAssignments } = await import('./planAssignments');
@@ -298,14 +298,13 @@ export async function publishPlan(planId: string): Promise<PlanWithExercises> {
             const assignments = await listActivePlanAssignments(planId);
             const userIds: string[] = [];
 
+            // 4a. Collect from plan_assignments (direct + group)
             for (const assignment of assignments) {
                 if (assignment.athlete_id) {
-                    // Direct athlete assignment: resolve user_id
                     const athlete = assignment.expand?.athlete_id as (typeof assignment.expand extends { athlete_id?: infer A } ? A : never) | undefined;
                     const userId = (athlete as unknown as { user_id?: string } | undefined)?.user_id ?? '';
                     if (userId) userIds.push(userId);
                 } else if (assignment.group_id) {
-                    // Group assignment: resolve all group members' user_ids
                     const members = await listGroupMembers(assignment.group_id);
                     for (const m of members) {
                         const userId = m.expand?.athlete_id?.user_id ?? '';
@@ -314,10 +313,40 @@ export async function publishPlan(planId: string): Promise<PlanWithExercises> {
                 }
             }
 
-            if (userIds.length === 0) return;
+            // 4b. Season membership: athletes in the season (no explicit assignment needed)
+            if (published.phase_id) {
+                try {
+                    const phase = await pb.collection(Collections.TRAINING_PHASES).getOne(published.phase_id);
+                    if (phase.season_id) {
+                        const season = await pb.collection(Collections.SEASONS).getOne(phase.season_id);
+
+                        // Direct season athlete
+                        if (season.athlete_id) {
+                            const athlete = await pb.collection(Collections.ATHLETES).getOne(season.athlete_id);
+                            const userId = (athlete as unknown as { user_id?: string })?.user_id;
+                            if (userId) userIds.push(userId);
+                        }
+
+                        // Group-based season
+                        if (season.group_id) {
+                            const members = await listGroupMembers(season.group_id);
+                            for (const m of members) {
+                                const userId = m.expand?.athlete_id?.user_id ?? '';
+                                if (userId) userIds.push(userId);
+                            }
+                        }
+                    }
+                } catch {
+                    /* season resolution failed — non-blocking */
+                }
+            }
+
+            // Deduplicate
+            const uniqueUserIds = [...new Set(userIds)];
+            if (uniqueUserIds.length === 0) return;
 
             // Batch check preferences — 1 HTTP call instead of N
-            const allowed = await batchCheckPreferences(userIds, 'plan_published');
+            const allowed = await batchCheckPreferences(uniqueUserIds, 'plan_published');
 
             await Promise.all(
                 [...allowed].map((userId) =>

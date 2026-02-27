@@ -267,11 +267,57 @@
       "rpe": "Perceived effort",
       "rpeEasy": "Easy",
       "rpeMax": "Max",
-      "saved": "Saved"
+      "saved": "Saved",
+      "customExercise": "Exercise"
+    },
+    "categories": {
+      "plyometric": "Plyometrics",
+      "highjump": "High Jump",
+      "strength": "Strength",
+      "gpp": "GPP",
+      "speed": "Speed",
+      "flexibility": "Flexibility",
+      "jump": "Jumps"
+    },
+    "focus": {
+      "backToOverview": "Overview",
+      "save": "Save",
+      "finish": "Finish",
+      "done": "Done",
+      "skipTitle": "Why are you skipping?",
+      "prevExercise": "Previous",
+      "nextExercise": "Next",
+      "mediaGallery": "Video & Photos",
+      "planNotes": "Coach Notes",
+      "coachCues": "Technique",
+      "sessionComplete": "Workout complete!",
+      "skip": {
+        "label": "Skip",
+        "Equipment": "Equipment",
+        "Pain": "Pain / Injury",
+        "AlreadyDone": "Already Done",
+        "Other": "Other",
+        "cancel": "Cancel"
+      }
     },
     "athleteNotePlaceholder": "Training notes...",
     "adaptationBanner": "Low readiness — reduce load or substitute exercises",
     "saving": "Saving...",
+    "postWorkout": {
+      "title": "How to log?",
+      "express": "Express",
+      "expressDesc": "Record plan as actual result",
+      "quickEdit": "Quick Edit",
+      "quickEditDesc": "Edit sets and reps",
+      "fullReview": "Full Review",
+      "fullReviewDesc": "Detailed exercise review",
+      "saveCount": "Save ({done}/{total} ✓)",
+      "loggedToast": "Workout logged",
+      "back": "Back",
+      "partialSets": "Sets completed",
+      "setsUnit": "sets"
+    },
+    "offlineMode": "Offline",
     "skipReason": "Skip reason",
     "skipReasons": {
       "Equipment": "Equipment",
@@ -296,7 +342,8 @@
       "daysLeft": "{days} days",
       "today": "Today"
     },
-    "today": "Today"
+    "today": "Today",
+    "standalonePlan": "Ad-hoc Training"
   },
   "shared": {
     "back": "Back"
@@ -1090,6 +1137,7 @@
       "location": "Location (optional)",
       "officialResult": "Official result (m)",
       "selectSeason": "Select season",
+      "selectAthlete": "Select athlete",
       "selectDiscipline": "Select discipline",
       "selectSeasonType": "Select season type",
       "seasonIndoor": "Indoor",
@@ -1176,7 +1224,7 @@
     "errors": {
       "loadContext": "Failed to load competitions context",
       "loadCompetitions": "Failed to load competitions list",
-      "pastRequired": "Fill name, date, and season",
+      "pastRequired": "Fill in the required fields",
       "createPastFailed": "Failed to create past start",
       "loadCardDetails": "Failed to load card details",
       "saveOfficialFailed": "Failed to save official data",

@@ -42,7 +42,8 @@ export async function getOrCreateLog(
     athleteId: string,
     planId: string,
     dateStr: string, // ISO date string, e.g. "2026-02-19"
-    session = 0      // 0=AM (default), 1=PM
+    session = 0,     // 0=AM (default), 1=PM
+    logMode?: import('../types').LogMode
 ): Promise<TrainingLogWithRelations> {
     const dateOnly = dateStr.slice(0, 10);
     const dateEnd = dateOnly + 'T23:59:59';
@@ -63,6 +64,7 @@ export async function getOrCreateLog(
             plan_id: planId,
             date: new Date(dateOnly).toISOString(),
             session,
+            ...(logMode ? { log_mode: logMode } : {}),
         });
         return created;
     }
@@ -117,6 +119,7 @@ export async function createTrainingLog(data: {
     notes?: string;
     rpe?: number;
     duration_min?: number;
+    log_mode?: import('../types').LogMode;
 }): Promise<TrainingLogWithRelations> {
     return pb.collection(Collections.TRAINING_LOGS).create<TrainingLogWithRelations>({
         ...data,

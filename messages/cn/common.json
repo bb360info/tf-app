@@ -257,11 +257,57 @@
       "rpe": "感知负荷",
       "rpeEasy": "轻松",
       "rpeMax": "最大",
-      "saved": "已保存"
+      "saved": "已保存",
+      "customExercise": "训练动作"
+    },
+    "categories": {
+      "plyometric": "增强式",
+      "highjump": "跳高",
+      "strength": "力量",
+      "gpp": "通用体能",
+      "speed": "速度",
+      "flexibility": "柔韧性",
+      "jump": "跳跃"
+    },
+    "focus": {
+      "backToOverview": "概览",
+      "save": "保存",
+      "finish": "完成",
+      "done": "完成",
+      "skipTitle": "为什么跳过？",
+      "prevExercise": "上一个",
+      "nextExercise": "下一个",
+      "mediaGallery": "视频和照片",
+      "planNotes": "教练备注",
+      "coachCues": "技术提示",
+      "sessionComplete": "训练完成！",
+      "skip": {
+        "label": "跳过",
+        "Equipment": "器材问题",
+        "Pain": "疼痛/受伤",
+        "AlreadyDone": "已完成",
+        "Other": "其他",
+        "cancel": "取消"
+      }
     },
     "athleteNotePlaceholder": "训练笔记...",
     "adaptationBanner": "状态较差 — 建议减少负荷或替换动作",
     "saving": "保存中...",
+    "postWorkout": {
+      "title": "如何记录？",
+      "express": "快速记录",
+      "expressDesc": "将计划作为实际结果记录",
+      "quickEdit": "快速编辑",
+      "quickEditDesc": "编辑组数和次数",
+      "fullReview": "完整回顾",
+      "fullReviewDesc": "逐一详细回顾训练",
+      "saveCount": "保存 ({done}/{total} ✓)",
+      "loggedToast": "训练已记录",
+      "back": "返回",
+      "partialSets": "完成组数",
+      "setsUnit": "组"
+    },
+    "offlineMode": "离线",
     "skipReason": "跳过原因",
     "skipReasons": {
       "Equipment": "器材",
@@ -286,7 +332,8 @@
       "daysLeft": "{days}天",
       "today": "今天"
     },
-    "today": "今天"
+    "today": "今天",
+    "standalonePlan": "临时训练"
   },
   "shared": {
     "back": "返回"
@@ -1076,6 +1123,7 @@
       "location": "地点（可选）",
       "officialResult": "官方成绩 (米)",
       "selectSeason": "选择赛季",
+      "selectAthlete": "选择运动员",
       "selectDiscipline": "选择项目",
       "selectSeasonType": "选择赛季类型",
       "seasonIndoor": "室内",
@@ -1162,7 +1210,7 @@
     "errors": {
       "loadContext": "加载比赛上下文失败",
       "loadCompetitions": "加载比赛列表失败",
-      "pastRequired": "请填写名称、日期和赛季",
+      "pastRequired": "请填写必填字段",
       "createPastFailed": "创建历史比赛失败",
       "loadCardDetails": "加载卡片详情失败",
       "saveOfficialFailed": "保存官方数据失败",

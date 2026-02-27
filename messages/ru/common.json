@@ -265,11 +265,57 @@
       "rpe": "Воспринимаемая нагрузка",
       "rpeEasy": "Легко",
       "rpeMax": "Максимум",
-      "saved": "Сохранено"
+      "saved": "Сохранено",
+      "customExercise": "Упражнение"
+    },
+    "categories": {
+      "plyometric": "Плиометрика",
+      "highjump": "Прыжок в высоту",
+      "strength": "Силовые",
+      "gpp": "ОФП",
+      "speed": "Скорость",
+      "flexibility": "Гибкость",
+      "jump": "Прыжки"
+    },
+    "focus": {
+      "backToOverview": "Обзор",
+      "save": "Сохранить",
+      "finish": "Завершить",
+      "done": "Выполнено",
+      "skipTitle": "Почему пропускаешь?",
+      "prevExercise": "Предыдущее",
+      "nextExercise": "Следующее",
+      "mediaGallery": "Видео и фото",
+      "planNotes": "Заметки тренера",
+      "coachCues": "Техника",
+      "sessionComplete": "Тренировка завершена!",
+      "skip": {
+        "label": "Пропустить",
+        "Equipment": "Инвентарь",
+        "Pain": "Боль / травма",
+        "AlreadyDone": "Уже сделал",
+        "Other": "Другое",
+        "cancel": "Отмена"
+      }
     },
     "athleteNotePlaceholder": "Заметки к тренировке...",
     "adaptationBanner": "Низкая готовность — снизь нагрузку или замени упражнения",
     "saving": "Сохранение...",
+    "postWorkout": {
+      "title": "Как залогируем?",
+      "express": "Express",
+      "expressDesc": "Записать план как результат",
+      "quickEdit": "Quick Edit",
+      "quickEditDesc": "Отредактировать подходы",
+      "fullReview": "Full Review",
+      "fullReviewDesc": "Детальный разбор упражнений",
+      "saveCount": "Сохранить ({done}/{total} ✓)",
+      "loggedToast": "Тренировка залогирована",
+      "back": "Назад",
+      "partialSets": "Подходов выполнено",
+      "setsUnit": "пдх"
+    },
+    "offlineMode": "Офлайн",
     "skipReason": "Причина пропуска",
     "skipReasons": {
       "Equipment": "Инвентарь",
@@ -294,7 +340,8 @@
       "daysLeft": "{days} дн.",
       "today": "Сегодня"
     },
-    "today": "Сегодня"
+    "today": "Сегодня",
+    "standalonePlan": "Разовая тренировка"
   },
   "shared": {
     "back": "Назад"
@@ -1084,6 +1131,7 @@
       "location": "Локация (опционально)",
       "officialResult": "Официальный результат (м)",
       "selectSeason": "Выберите сезон",
+      "selectAthlete": "Выберите атлета",
       "selectDiscipline": "Выберите дисциплину",
       "selectSeasonType": "Выберите тип сезона",
       "seasonIndoor": "Манеж",
@@ -1170,7 +1218,7 @@
     "errors": {
       "loadContext": "Не удалось загрузить контекст соревнований",
       "loadCompetitions": "Не удалось загрузить список соревнований",
-      "pastRequired": "Заполните название, дату и сезон",
+      "pastRequired": "Заполните обязательные поля",
       "createPastFailed": "Не удалось создать прошлый старт",
       "loadCardDetails": "Не удалось загрузить детали карточки",
       "saveOfficialFailed": "Не удалось сохранить official данные",

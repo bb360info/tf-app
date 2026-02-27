@@ -1,12 +1,12 @@
 'use client';
 
 /**
- * AthleteTrainingView — 7-day week view for athletes.
- * Shows 7 days (scroll + highlight today), AM/PM session grouping.
- * Athlete can log performance for each session.
+ * AthleteTrainingView — Overview Mode (Phase 2).
+ * State machine: mode (overview/focus/post_quick/post_full) + selectedDay.
+ * Shows DayTabNav + single-day exercise list + FAB buttons.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import {
     ListX,
@@ -19,11 +19,16 @@ import {
     Wind,
     MessageSquare,
     AlertTriangle,
+    Play,
+    CheckCheck,
+    PenLine,
+    Calendar,
 } from 'lucide-react';
 import {
-    createTrainingLog,
     listTodayLogs,
     listWeekLogs,
+    batchSaveLogExercises,
+    getOrCreateLog,
 } from '@/lib/pocketbase/services/logs';
 import { getPublishedPlanForToday, applyAdjustments } from '@/lib/pocketbase/services/planResolution';
 import type { TrainingLogWithRelations } from '@/lib/pocketbase/services/logs';
@@ -32,19 +37,52 @@ import type { Language } from '@/lib/pocketbase/types';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { groupByDayAndSession } from '@/lib/pocketbase/services/plans';
 import { toLocalISODate } from '@/lib/utils/dateHelpers';
-import { ExerciseItem } from './cards/ExerciseItem';
 import { AthleteContextBanner } from './AthleteContextBanner';
+import { DayTabNav } from './DayTabNav';
+import type { DayTabData } from './DayTabNav';
+import { ExerciseListItem } from './cards/ExerciseListItem';
 import type { SeasonWithRelations } from '@/lib/pocketbase/services/seasons';
 import { getActiveSeasonForAthlete } from '@/lib/pocketbase/services/seasons';
 import styles from './AthleteTrainingView.module.css';
+import dynamic from 'next/dynamic';
 
+// FocusCard loaded dynamically (fullscreen overlay)
+const FocusCard = dynamic(
+    () => import('./cards/FocusCard').then((m) => ({ default: m.FocusCard })),
+    { ssr: false }
+);
+
+// PostWorkoutSheet loaded dynamically (portal-based BottomSheet)
+const PostWorkoutSheet = dynamic(
+    () => import('./cards/PostWorkoutSheet').then((m) => ({ default: m.PostWorkoutSheet })),
+    { ssr: false }
+);
+
+// QuickEditView loaded dynamically (fullscreen overlay)
+const QuickEditView = dynamic(
+    () => import('./cards/QuickEditView').then((m) => ({ default: m.QuickEditView })),
+    { ssr: false }
+);
+
+// Skeleton loading components
+const DayTabNavSkeleton = dynamic(
+    () => import('./DayTabNavSkeleton').then((m) => ({ default: m.DayTabNavSkeleton })),
+    { ssr: false }
+);
+const ExerciseListSkeleton = dynamic(
+    () => import('./cards/ExerciseListSkeleton').then((m) => ({ default: m.ExerciseListSkeleton })),
+    { ssr: false }
+);
+
+// ─── Types ────────────────────────────────────────────────────
+
+type ViewMode = 'overview' | 'focus' | 'post_quick' | 'post_quick_edit' | 'post_full';
 
 // ─── Helpers ─────────────────────────────────────────────────
 
 function getExerciseName(ex: PlanExerciseWithExpand, locale: Language): string {
     const base = ex.expand?.exercise_id;
     if (!base) {
-        // Fallback for warmup custom text items
         if (locale === 'ru') return ex.custom_text_ru ?? ex.exercise_id ?? '';
         if (locale === 'cn') return ex.custom_text_cn ?? ex.custom_text_en ?? ex.exercise_id ?? '';
         return ex.custom_text_en ?? ex.exercise_id ?? '';
@@ -57,15 +95,14 @@ function getExerciseName(ex: PlanExerciseWithExpand, locale: Language): string {
 }
 
 function todayDayIndex(): number {
-    const day = new Date().getDay(); // 0=Sun, 1=Mon...
-    return day === 0 ? 6 : day - 1; // convert to 0=Mon
+    const day = new Date().getDay();
+    return day === 0 ? 6 : day - 1;
 }
 
 function getWeekStart(offsetWeeks = 0): Date {
     const now = new Date();
     const day = now.getDay();
     const monday = new Date(now);
-    // Adjust to Monday (getDay: 0=Sun, 1=Mon,...,6=Sat)
     const daysSinceMonday = day === 0 ? 6 : day - 1;
     monday.setDate(now.getDate() - daysSinceMonday + offsetWeeks * 7);
     monday.setHours(0, 0, 0, 0);
@@ -78,19 +115,12 @@ function getDayDate(weekStart: Date, dayOfWeek: number): Date {
     return d;
 }
 
-const RPE_COLORS = [
-    '', '#22c55e', '#4ade80', '#86efac', '#fde047',
-    '#facc15', '#fb923c', '#f97316', '#ef4444', '#dc2626', '#991b1b',
-];
+// 2-char RU labels for DayTabNav
+const DAY_LABELS_2 = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+// 1-char RU labels for DayTabNav (<375px)
+const DAY_LABELS_1 = ['П', 'В', 'С', 'Ч', 'П', 'С', 'В'];
 
-const DAY_KEYS = ['day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat', 'day_sun'] as const;
-
-// ─── Skip Reasons ─────────────────────────────────────────────────
-
-const SKIP_REASONS = ['Equipment', 'Pain', 'Time', 'CoachDecision', 'Other'] as const;
-type SkipReason = typeof SKIP_REASONS[number];
-
-// ─── Adaptation Banner ────────────────────────────────────────────
+// ─── Adaptation Banner ────────────────────────────────────────
 
 function AdaptationBanner({ t }: { t: ReturnType<typeof useTranslations> }) {
     return (
@@ -101,45 +131,26 @@ function AdaptationBanner({ t }: { t: ReturnType<typeof useTranslations> }) {
     );
 }
 
-// ─── Exercise Item ────────────────────────────────────────────────
+// ─── Warmup Item ──────────────────────────────────────────────
 
-
-// ─── Warmup Item (no RPE/Sets UI) ────────────────────────────────
-
-function WarmupItem({
-    planEx,
-    locale,
-}: {
-    planEx: PlanExerciseWithExpand;
-    locale: Language;
-}) {
+function WarmupItem({ planEx, locale }: { planEx: PlanExerciseWithExpand; locale: Language; }) {
     const name = getExerciseName(planEx, locale);
     const durationSec = planEx.duration_seconds ?? (planEx.duration ? Math.round(planEx.duration) : null);
-
     return (
         <li className={styles.warmupItem}>
             <Wind size={10} className={styles.warmupItemIcon} aria-hidden="true" />
             <span className={styles.warmupItemName}>{name}</span>
-            {durationSec ? (
-                <span className={styles.warmupItemDur}>{durationSec}s</span>
-            ) : null}
+            {durationSec ? <span className={styles.warmupItemDur}>{durationSec}s</span> : null}
         </li>
     );
 }
 
-// ─── Warmup Badge (collapsible) ───────────────────────────────────
+// ─── Warmup Badge (collapsible) ───────────────────────────────
 
 function WarmupBadge({
-    items,
-    locale,
-    t,
-}: {
-    items: PlanExerciseWithExpand[];
-    locale: Language;
-    t: ReturnType<typeof useTranslations>;
-}) {
+    items, locale, t,
+}: { items: PlanExerciseWithExpand[]; locale: Language; t: ReturnType<typeof useTranslations>; }) {
     const [expanded, setExpanded] = useState(false);
-
     return (
         <div className={styles.warmupBadge}>
             <button
@@ -152,120 +163,79 @@ function WarmupBadge({
                 <span className={styles.warmupBadgeTitle}>{t('warmupBlock')}</span>
                 <span className={styles.warmupBadgeCount}>({items.length})</span>
                 <span className={styles.warmupBadgeChevron}>
-                    {expanded
-                        ? <ChevronUp size={14} aria-hidden="true" />
-                        : <ChevronDown size={14} aria-hidden="true" />}
+                    {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
                 </span>
             </button>
-
             {expanded && (
                 <ul className={styles.warmupList} aria-label={t('warmupBlock')}>
-                    {items.map((item) => (
-                        <WarmupItem key={item.id} planEx={item} locale={locale} />
-                    ))}
+                    {items.map((item) => <WarmupItem key={item.id} planEx={item} locale={locale} />)}
                 </ul>
             )}
         </div>
     );
 }
 
+// ─── Day Overview Panel ───────────────────────────────────────
 
-// ─── Rest Day Card ───────────────────────────────────────────────
-
-function RestDayCard({
-    dayOfWeek,
-    date,
-    isToday,
-    isPast,
-    locale,
-    t,
-}: {
-    dayOfWeek: number;
-    date: Date;
-    isToday: boolean;
-    isPast: boolean;
-    locale: Language;
-    t: ReturnType<typeof useTranslations>;
-}) {
-    const formattedDate = date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', {
-        day: 'numeric', month: 'short',
-    });
-    return (
-        <div className={`${styles.dayCard} ${styles.dayCardRest} ${isToday ? styles.dayCardToday : ''} ${isPast ? styles.dayCardPast : ''}`}>
-            <div className={styles.dayCardHeader}>
-                <span className={styles.dayCardName}>{t(DAY_KEYS[dayOfWeek])}</span>
-                <span className={styles.dayCardDate}>{formattedDate}</span>
-                {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
-            </div>
-            <div className={styles.restDayBody}>
-                <Moon size={20} className={styles.restDayIcon} aria-hidden="true" />
-                <span className={styles.restDayLabel}>{t('restDay' as Parameters<typeof t>[0])}</span>
-            </div>
-        </div>
-    );
-}
-
-// ─── Day Card ─────────────────────────────────────────────────────
-
-function DayCard({
-    dayOfWeek,
+function DayOverviewPanel({
     date,
     exercisesBySession,
     logs,
-    plan,
-    athleteId,
     locale,
     isToday,
     isPast,
-    loggedCount,
     t,
     dayNote,
     readinessScore,
+    weekLogMap,
+    onStartWorkout,
+    onPostFactum,
+    onEdit,
 }: {
-    dayOfWeek: number;
+    dayOfWeek?: number;
     date: Date;
     exercisesBySession: Record<number, PlanExerciseWithExpand[]>;
     logs: TrainingLogWithRelations[];
-    plan: PlanWithExercises;
-    athleteId: string;
     locale: Language;
     isToday: boolean;
     isPast: boolean;
-    loggedCount: number;
     t: ReturnType<typeof useTranslations>;
     dayNote?: string;
     readinessScore?: number;
+    weekLogMap: Map<string, TrainingLogWithRelations>;
+    onStartWorkout: () => void;
+    onPostFactum: () => void;
+    onEdit: () => void;
 }) {
     const sessions = Object.keys(exercisesBySession).map(Number).filter((s) => (exercisesBySession[s]?.length ?? 0) > 0);
-    if (sessions.length === 0) return null;
+    const hasLogs = logs.length > 0;
 
-    const dateStr = toLocalISODate(date);
     const formattedDate = date.toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', {
-        day: 'numeric', month: 'short',
+        weekday: 'short', day: 'numeric', month: 'short',
     });
 
-    const getLogForSession = (session: number) =>
-        logs.find((l) => (l.session ?? 0) === session) ?? null;
-
-    const ensureLog = async (session: number) => {
-        const existing = getLogForSession(session);
-        if (existing) return existing;
-        return createTrainingLog({ athlete_id: athleteId, plan_id: plan.id, date: dateStr, session });
-    };
+    const logKey = (d: Date, session: number) => `${toLocalISODate(d)}_${session}`;
+    const loggedSessions = sessions.filter((s) => weekLogMap.has(logKey(date, s)));
 
     return (
-        <div className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''} ${isPast ? styles.dayCardPast : ''}`}>
-            <div className={styles.dayCardHeader}>
-                <span className={styles.dayCardName}>{t(DAY_KEYS[dayOfWeek])}</span>
-                <span className={styles.dayCardDate}>{formattedDate}</span>
-                {<span className={styles.progressChip}>
-                    {Math.min(loggedCount, sessions.length)}/{sessions.length}
+        <div className={styles.dayPanel}>
+            {/* Day header */}
+            <div className={`${styles.dayPanelHeader} ${isToday ? styles.dayPanelHeaderToday : ''}`}>
+                <div className={styles.dayPanelHeaderLeft}>
+                    <span className={styles.dayPanelName}>{formattedDate}</span>
+                    {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
+                </div>
+                <span className={styles.progressChip}>
+                    {loggedSessions.length}/{sessions.length}
                 </span>
-                }
-                {isToday && <span className={styles.todayBadge}>{t('today' as Parameters<typeof t>[0])}</span>}
             </div>
 
-            {/* Coach day note banner */}
+            {/* Readiness / adaptation */}
+            {isToday && readinessScore !== undefined && readinessScore < 60 && readinessScore > 0 && (
+                <AdaptationBanner t={t} />
+            )}
+
+            {/* Coach day note */}
             {dayNote && (
                 <div className={styles.coachNote}>
                     <MessageSquare size={16} className={styles.coachNoteIcon} aria-hidden="true" />
@@ -273,11 +243,14 @@ function DayCard({
                 </div>
             )}
 
+            {/* Sessions */}
             {sessions.map((session) => {
                 const sessionExercises = exercisesBySession[session] ?? [];
-                const log = getLogForSession(session);
+                const warmupItems = sessionExercises.filter((e) => e.block === 'warmup');
+                const mainItems = sessionExercises.filter((e) => e.block !== 'warmup');
                 const SessionIcon = session === 0 ? Sun : Moon;
                 const sessionLabel = session === 0 ? t('sessionAM') : t('sessionPM');
+                const sessionLogged = weekLogMap.has(logKey(date, session));
 
                 return (
                     <div key={session} className={styles.sessionBlock}>
@@ -287,140 +260,105 @@ function DayCard({
                                 <span>{sessionLabel}</span>
                             </div>
                         )}
-                        <LoggableSession
-                            exercises={sessionExercises}
-                            log={log}
-                            ensureLog={() => ensureLog(session)}
-                            locale={locale}
-                            t={t}
-                            readinessScore={isToday ? readinessScore : undefined}
-                            athleteId={athleteId}
-                        />
+
+                        {/* Warmup */}
+                        {warmupItems.length > 0 && (
+                            <div className={styles.warmupWrap}>
+                                <WarmupBadge items={warmupItems} locale={locale} t={t} />
+                            </div>
+                        )}
+
+                        {/* Main exercises: compact ExerciseListItem rows */}
+                        {mainItems.length > 0 && (
+                            <ul className={styles.overviewList} aria-label="Упражнения">
+                                {mainItems.map((ex) => (
+                                    <ExerciseListItem
+                                        key={ex.id}
+                                        planEx={ex}
+                                        locale={locale}
+                                        isLogged={sessionLogged}
+                                    />
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 );
             })}
+
+            {/* Action buttons */}
+            <div className={styles.dayActions}>
+                {/* FAB: Start workout — visible for today/future days */}
+                {!isPast && (
+                    <button
+                        type="button"
+                        className={styles.fab}
+                        onClick={onStartWorkout}
+                    >
+                        <Play size={18} aria-hidden="true" />
+                        {t('startWorkout' as Parameters<typeof t>[0])}
+                    </button>
+                )}
+
+                {/* Post-factum — visible only for today without live log */}
+                {isToday && !hasLogs && (
+                    <button
+                        type="button"
+                        className={styles.fabSecondary}
+                        onClick={onPostFactum}
+                    >
+                        <CheckCheck size={16} aria-hidden="true" />
+                        {t('logPostFactum' as Parameters<typeof t>[0])}
+                    </button>
+                )}
+
+                {/* Edit — for logged past days */}
+                {isPast && hasLogs && (
+                    <button
+                        type="button"
+                        className={styles.fabSecondary}
+                        onClick={onEdit}
+                    >
+                        <PenLine size={16} aria-hidden="true" />
+                        {t('editLog' as Parameters<typeof t>[0])}
+                    </button>
+                )}
+            </div>
         </div>
     );
 }
 
+// ─── Rest Day Panel ───────────────────────────────────────────
 
-// ─── Loggable Session ─────────────────────────────────────────────
-
-function LoggableSession({
-    exercises,
-    log,
-    ensureLog,
-    locale,
-    t,
-    readinessScore,
-    athleteId,
-}: {
-    exercises: PlanExerciseWithExpand[];
-    log: TrainingLogWithRelations | null;
-    ensureLog: () => Promise<TrainingLogWithRelations>;
-    locale: Language;
-    t: ReturnType<typeof useTranslations>;
-    readinessScore?: number;
-    athleteId: string;
-}) {
-    const [currentLog, setCurrentLog] = useState<TrainingLogWithRelations | null>(log);
-    const [initializing, setInitializing] = useState(false);
-    const [notes, setNotes] = useState(log?.notes ?? '');
-    const [savingNotes, setSavingNotes] = useState(false);
-    const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const handleFirstSave = useCallback(async () => {
-        if (currentLog) return currentLog;
-        setInitializing(true);
-        try {
-            const newLog = await ensureLog();
-            setCurrentLog(newLog);
-            return newLog;
-        } finally {
-            setInitializing(false);
-        }
-    }, [currentLog, ensureLog]);
-
-    const handleNotesChange = useCallback((value: string) => {
-        setNotes(value);
-        if (!currentLog) return;
-        if (notesTimerRef.current) clearTimeout(notesTimerRef.current);
-        setSavingNotes(true);
-        notesTimerRef.current = setTimeout(async () => {
-            try {
-                const { updateTrainingLog } = await import('@/lib/pocketbase/services/logs');
-                await updateTrainingLog(currentLog.id, { notes: value });
-            } catch (e) {
-                console.error('[AthleteTrainingView] save notes:', e);
-            } finally {
-                setSavingNotes(false);
-            }
-        }, 500);
-    }, [currentLog]);
-
-    // Cleanup debounce timer on unmount
-    useEffect(() => () => {
-        if (notesTimerRef.current) clearTimeout(notesTimerRef.current);
-    }, []);
-
-    // Split exercises into warmup and main
-    const warmupItems = exercises.filter((e) => e.block === 'warmup');
-    const mainItems = exercises.filter((e) => e.block !== 'warmup');
-
+function RestDayPanel({ t }: { t: ReturnType<typeof useTranslations> }) {
     return (
-        <>
-            {/* Adaptation Banner: low readiness alert */}
-            {readinessScore !== undefined && readinessScore < 60 && readinessScore > 0 && (
-                <AdaptationBanner t={t} />
-            )}
-
-            {/* Warmup badge (collapsible, no template name shown to athlete) */}
-            {warmupItems.length > 0 && (
-                <WarmupBadge items={warmupItems} locale={locale} t={t} />
-            )}
-
-            {/* Main exercises */}
-            <ul className={styles.exerciseList} aria-label="Exercises">
-                {mainItems.map((ex) => (
-                    <ExerciseItem
-                        key={ex.id}
-                        planEx={ex}
-                        locale={locale}
-                        logId={currentLog?.id ?? ''}
-                        athleteId={athleteId}
-                        t={t}
-                    />
-                ))}
-                {!currentLog && !initializing && mainItems.length > 0 && (
-                    <button className={styles.startLogBtn} onClick={handleFirstSave}>
-                        {t('log.record')}
-                    </button>
-                )}
-            </ul>
-
-            {/* Athlete Notes with debounced autosave */}
-            <div className={styles.notesWrap}>
-                <label className={styles.notesLabel}>
-                    <MessageSquare size={13} aria-hidden="true" />
-                    {savingNotes ? t('saving') : t('athleteNotePlaceholder').replace('...', '')}
-                </label>
-                <textarea
-                    className={styles.notesTextarea}
-                    placeholder={t('athleteNotePlaceholder')}
-                    value={notes}
-                    onChange={(e) => handleNotesChange(e.target.value)}
-                    disabled={!currentLog}
-                    rows={2}
-                    maxLength={1000}
-                />
-            </div>
-        </>
+        <div className={styles.restDayPanel}>
+            <Moon size={32} className={styles.restDayIcon} aria-hidden="true" />
+            <span className={styles.restDayLabel}>{t('restDay' as Parameters<typeof t>[0])}</span>
+        </div>
     );
 }
 
+// ─── Standalone Plan Banner [GAP-1] ──────────────────────────
 
-// ─── Main Component ───────────────────────────────────────────────
+function StandaloneBanner({ plan, locale }: { plan: PlanWithExercises; locale: Language; }) {
+    const t = useTranslations('training');
+    const startDate = (plan as Record<string, unknown>).start_date as string | undefined;
+    const endDate = (plan as Record<string, unknown>).end_date as string | undefined;
+    const formatOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
+    const localeStr = locale === 'en' ? 'en-US' : 'ru-RU';
+    const range = startDate && endDate
+        ? `${new Date(startDate).toLocaleDateString(localeStr, formatOpts)} – ${new Date(endDate).toLocaleDateString(localeStr, formatOpts)}`
+        : '';
 
+    return (
+        <div className={styles.standaloneBanner}>
+            <Calendar size={14} aria-hidden="true" />
+            <span>{t('standalonePlan' as Parameters<typeof t>[0])}{range ? ` · ${range}` : ''}</span>
+        </div>
+    );
+}
+
+// ─── Main Component ───────────────────────────────────────────
 
 type AthleteTrainingViewProps = Record<string, never>;
 
@@ -429,6 +367,7 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
     const locale = useLocale() as Language;
     const { user } = useAuth();
 
+    // ── State ──────────────────────────────────────────────────
     const [plan, setPlan] = useState<PlanWithExercises | null>(null);
     const [todayLogs, setTodayLogs] = useState<TrainingLogWithRelations[]>([]);
     const [weekLogs, setWeekLogs] = useState<TrainingLogWithRelations[]>([]);
@@ -439,11 +378,34 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
     const [todayReadiness, setTodayReadiness] = useState<number | undefined>(undefined);
     const [activeSeason, setActiveSeason] = useState<SeasonWithRelations | null>(null);
 
-
+    // ── Phase 2: State machine ─────────────────────────────────
     const todayIdx = todayDayIndex();
-    const weekStart = getWeekStart(weekOffset);
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const [_mode, setMode] = useState<ViewMode>('overview');
+    const [selectedDay, setSelectedDay] = useState<number>(todayIdx);
 
+    // ── Phase 3: Focus Mode ────────────────────────────────────
+    // Persist focusIndex in sessionStorage so page reload resumes at same exercise
+    const FOCUS_INDEX_KEY = `focus_index_${athleteId ?? 'me'}`;
+    const [focusIndex, setFocusIndex] = useState<number>(() => {
+        if (typeof window === 'undefined') return 0;
+        const stored = sessionStorage.getItem(FOCUS_INDEX_KEY);
+        return stored ? parseInt(stored, 10) : 0;
+    });
+    const [focusLogId, setFocusLogId] = useState<string>('');
+
+    // ── Phase 4: Post-Workout Mode ─────────────────────────────
+    const [postLogId, setPostLogId] = useState<string>('');
+
+    // Update sessionStorage when focusIndex changes
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem(FOCUS_INDEX_KEY, String(focusIndex));
+        }
+    }, [focusIndex, FOCUS_INDEX_KEY]);
+
+    const weekStart = getWeekStart(weekOffset);
+
+    // ── Data loading ───────────────────────────────────────────
     useEffect(() => {
         if (!user?.id) return;
         let cancelled = false;
@@ -456,9 +418,7 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
                 let aid: string;
                 try {
                     aid = await getSelfAthleteId();
-                    if (!cancelled) {
-                        setAthleteId(aid);
-                    }
+                    if (!cancelled) setAthleteId(aid);
                 } catch (err) {
                     const { logError } = await import('@/lib/utils/errors');
                     logError(err, { component: 'AthleteTrainingView', action: 'getSelfAthleteId' });
@@ -474,16 +434,12 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
 
                 if (cancelled) return;
 
-                // [Track 4.263] Apply exercise_adjustments: skip filtered + fields overridden
                 if (fetchedPlan) {
                     const rawExercises = (fetchedPlan.expand?.['plan_exercises(plan_id)'] ?? []) as PlanExerciseWithExpand[];
                     const adjusted = await applyAdjustments(rawExercises, aid);
                     const planWithAdjusted: PlanWithExercises = {
                         ...fetchedPlan,
-                        expand: {
-                            ...fetchedPlan.expand,
-                            'plan_exercises(plan_id)': adjusted,
-                        },
+                        expand: { ...fetchedPlan.expand, 'plan_exercises(plan_id)': adjusted },
                     };
                     setPlan(planWithAdjusted);
                 } else {
@@ -506,18 +462,19 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
         return () => { cancelled = true; };
     }, [user?.id]);
 
-    // Load week logs when weekOffset or athleteId changes
+    // Week logs
+    const weekStartISO = toLocalISODate(weekStart);
     useEffect(() => {
         if (!athleteId || !plan) return;
         let cancelled = false;
-        const weekStartISO = toLocalISODate(weekStart);
         listWeekLogs(athleteId, weekStartISO).then((logs) => {
             if (!cancelled) setWeekLogs(logs);
-        }).catch(() => {/* ignore */ });
+        }).catch(() => { /* ignore */ });
         return () => { cancelled = true; };
-    }, [athleteId, plan, weekStart.toISOString()]);
+    }, [athleteId, plan, weekStartISO]);
 
-    // Load today's readiness score for adaptation banner
+
+    // Readiness
     useEffect(() => {
         if (!athleteId) return;
         let cancelled = false;
@@ -525,25 +482,16 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
             getLatestReadinessForGroup([athleteId])
         ).then(([res]) => {
             if (!cancelled && res) setTodayReadiness(res.score);
-        }).catch(() => {/* no checkin today — banner stays hidden */ });
+        }).catch(() => { });
         return () => { cancelled = true; };
     }, [athleteId]);
 
-
-    // Scroll to today on mount
-    useEffect(() => {
-        if (scrollRef.current) {
-            const todayCard = scrollRef.current.querySelector('[data-today="true"]');
-            if (todayCard) {
-                todayCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            }
-        }
-    }, [plan]);
-
+    // ── Loading / error / empty states ─────────────────────────
     if (isLoading) {
         return (
             <div className={styles.loadingState}>
-                <div className={styles.spinner} aria-label={t('readiness')} />
+                <DayTabNavSkeleton />
+                <ExerciseListSkeleton count={4} />
             </div>
         );
     }
@@ -562,17 +510,13 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
         );
     }
 
+    // ── Data preparation ───────────────────────────────────────
     const allExercises = plan.expand?.['plan_exercises(plan_id)'] ?? [];
     const byDayAndSession = groupByDayAndSession(allExercises);
+    const isStandalone = (plan as Record<string, unknown>).plan_type === 'standalone';
 
-    // All 7 days — always render, rest days show RestDayCard
-    const allDays = Array.from({ length: 7 }, (_, d) => d);
-    const hasAnyExercises = allExercises.length > 0;
-
-    // Week-level log map: date+session → log
-    const logKey = (date: Date, session: number) =>
-        `${toLocalISODate(date)}_${session}`;
-
+    // Build weekLogMap
+    const logKey = (date: Date, session: number) => `${toLocalISODate(date)}_${session}`;
     const weekLogMap = new Map<string, TrainingLogWithRelations>();
     for (const log of weekLogs) {
         const dateStr = typeof log.date === 'string'
@@ -580,94 +524,247 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
             : toLocalISODate(new Date(log.date));
         weekLogMap.set(`${dateStr}_${log.session ?? 0}`, log);
     }
-    // Also include today's logs
     for (const log of todayLogs) {
         weekLogMap.set(logKey(new Date(), log.session ?? 0), log);
     }
 
+    // Build tab data for DayTabNav
+    const tabDays: DayTabData[] = Array.from({ length: 7 }, (_, d) => {
+        const date = getDayDate(weekStart, d);
+        const sessionsMap = byDayAndSession[d] ?? {};
+        const hasSessions = Object.values(sessionsMap).some((s) => s.length > 0);
+        const sessions = Object.keys(sessionsMap).map(Number);
+        const loggedCount = sessions.filter((s) => weekLogMap.has(logKey(date, s))).length;
+        const isThisWeekToday = weekOffset === 0 && d === todayIdx;
+        const isPastDay = weekOffset < 0 || (weekOffset === 0 && d < todayIdx);
+
+        return {
+            dayIdx: d,
+            label2: DAY_LABELS_2[d],
+            label1: DAY_LABELS_1[d],
+            isToday: isThisWeekToday,
+            isPast: isPastDay,
+            isRest: !hasSessions,
+            hasLog: loggedCount >= sessions.length && sessions.length > 0,
+            loggedCount,
+            totalSessions: sessions.length,
+        };
+    });
+
+    // Selected day data
+    const selectedDate = getDayDate(weekStart, selectedDay);
+    const isSelectedToday = weekOffset === 0 && selectedDay === todayIdx;
+    const isSelectedPast = weekOffset < 0 || (weekOffset === 0 && selectedDay < todayIdx);
+    const selectedSessionsMap = byDayAndSession[selectedDay] ?? {};
+    const selectedHasSessions = Object.values(selectedSessionsMap).some((s) => (s as PlanExerciseWithExpand[]).length > 0);
+    const selectedLogs: TrainingLogWithRelations[] = Object.keys(selectedSessionsMap).map((s) =>
+        weekLogMap.get(logKey(selectedDate, Number(s)))
+    ).filter(Boolean) as TrainingLogWithRelations[];
+
     const weekLabel = `${weekStart.toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short' })} – ${getDayDate(weekStart, 6).toLocaleDateString(locale === 'en' ? 'en-US' : 'ru-RU', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 
+    // ── Focus Mode helpers ─────────────────────────────────
+    // Flat list of non-warmup exercises for the selected day
+    const selectedFocusExercises: PlanExerciseWithExpand[] = Object.values(
+        selectedSessionsMap as Record<number, PlanExerciseWithExpand[]>
+    ).flat().filter((pe) => pe.block !== 'warmup');
+
+    const handleStartFocus = (logId: string) => {
+        setFocusLogId(logId);
+        setFocusIndex(0);
+        setMode('focus');
+    };
+
+    const handleFocusSkip = (reason: string, exerciseId?: string) => {
+        console.log('[Focus] Skip:', reason, exerciseId);
+        // Advance to next exercise after skip
+        setFocusIndex((i) => Math.min(i + 1, selectedFocusExercises.length - 1));
+    };
+
+    const handleFocusClose = () => {
+        // Clear sessionStorage on manual close
+        if (typeof window !== 'undefined') sessionStorage.removeItem(FOCUS_INDEX_KEY);
+        setFocusIndex(0);
+        setMode('overview');
+    };
+
+    // ── Phase 4 handlers ───────────────────────────────────────
+
+    /** Open post-factum sheet: get or create a log for this day, then show PostWorkoutSheet */
+    const handleOpenPostFactum = async () => {
+        if (!athleteId || !plan) return;
+        try {
+            const log = await getOrCreateLog(athleteId, plan.id, toLocalISODate(selectedDate), 0);
+            setPostLogId(log.id);
+            setFocusIndex(0);
+            setMode('post_quick');
+        } catch (e) {
+            console.error('[AthleteTrainingView] handleOpenPostFactum failed', e);
+        }
+    };
+
+    /** Express: batch-write plan values as actual log for all non-custom exercises */
+    const handleExpressLog = async () => {
+        if (!postLogId || selectedFocusExercises.length === 0) return;
+        try {
+            const entries = selectedFocusExercises
+                .filter((ex) => ex.exercise_id)
+                .map((ex) => {
+                    const setsCount = ex.sets ?? 1;
+                    const reps = parseInt(ex.reps || '8', 10) || 8;
+                    const weight = ex.weight ?? 0;
+                    const setsData = Array.from({ length: setsCount }, (_, i) => ({
+                        set: i + 1,
+                        reps,
+                        weight,
+                        time: ex.duration ?? 0,
+                        distance: ex.distance ?? 0,
+                    }));
+                    return { exerciseId: ex.exercise_id!, setsData };
+                });
+            if (entries.length > 0) {
+                await batchSaveLogExercises(postLogId, entries);
+            }
+            setMode('overview');
+        } catch (e) {
+            console.error('[AthleteTrainingView] handleExpressLog failed', e);
+        }
+    };
+
+    /** Open Full Review (FocusCard without media) for editing an existing log */
+    const handleOpenEdit = () => {
+        const existingLog = weekLogMap.get(logKey(selectedDate, 0));
+        if (existingLog) {
+            setPostLogId(existingLog.id);
+        }
+        setFocusIndex(0);
+        setMode('post_full');
+    };
+
+    // ── Render ─────────────────────────────────────────────────
     return (
         <div className={styles.root}>
-            {/* Athlete Context Banner — season timeline, phase, nearest competition */}
-            {activeSeason && !isLoading && (
-                <AthleteContextBanner
-                    season={activeSeason}
-                    today={new Date()}
+            {/* Focus Mode: fullscreen overlay */}
+            {_mode === 'focus' && selectedFocusExercises.length > 0 && athleteId && (
+                <FocusCard
+                    planEx={selectedFocusExercises[Math.min(focusIndex, selectedFocusExercises.length - 1)]}
+                    locale={locale}
+                    logId={focusLogId}
+                    athleteId={athleteId}
+                    index={focusIndex}
+                    total={selectedFocusExercises.length}
+                    onNext={() => setFocusIndex((i) => {
+                        const next = Math.min(i + 1, selectedFocusExercises.length - 1);
+                        if (next === i) handleFocusClose(); // Last exercise done
+                        return next;
+                    })}
+                    onPrev={() => setFocusIndex((i) => Math.max(i - 1, 0))}
+                    onClose={handleFocusClose}
+                    onSkip={handleFocusSkip}
                 />
             )}
 
-            {/* Week navigation */}
-            <div className={styles.weekNav}>
-                <button
-                    className={styles.weekNavBtn}
-                    onClick={() => setWeekOffset((o) => o - 1)}
-                    aria-label="Previous week"
-                >
-                    <ChevronLeft size={18} />
-                </button>
-                <span className={styles.weekLabel}>{weekLabel}</span>
-                <button
-                    className={styles.weekNavBtn}
-                    onClick={() => setWeekOffset((o) => o + 1)}
-                    disabled={weekOffset >= 0}
-                    aria-label="Next week"
-                >
-                    <ChevronRight size={18} />
-                </button>
-            </div>
+            {/* Post-Workout Sheet: mode selector */}
+            {_mode === 'post_quick' && (
+                <PostWorkoutSheet
+                    isOpen
+                    onClose={() => setMode('overview')}
+                    onExpress={handleExpressLog}
+                    onQuickEdit={() => setMode('post_quick_edit')}
+                    onFullReview={() => setMode('post_full')}
+                />
+            )}
 
-            {/* 7-day scroll — always render all 7 days */}
-            <div className={styles.weekScroll} ref={scrollRef}>
-                {!hasAnyExercises ? (
-                    <div className={styles.emptyState}>
-                        <ListX size={36} strokeWidth={1.5} className={styles.emptyIcon} />
-                        <p className={styles.emptyTitle}>{t('noExercises')}</p>
-                    </div>
+            {/* Quick Edit: toggle-based logging */}
+            {_mode === 'post_quick_edit' && selectedFocusExercises.length > 0 && athleteId && (
+                <QuickEditView
+                    exercises={selectedFocusExercises}
+                    logId={postLogId}
+                    athleteId={athleteId}
+                    locale={locale}
+                    onDone={() => setMode('overview')}
+                    onClose={() => setMode('post_quick')}
+                />
+            )}
+
+            {/* Full Review: FocusCard without media/notes */}
+            {_mode === 'post_full' && selectedFocusExercises.length > 0 && athleteId && (
+                <FocusCard
+                    planEx={selectedFocusExercises[Math.min(focusIndex, selectedFocusExercises.length - 1)]}
+                    locale={locale}
+                    logId={postLogId}
+                    athleteId={athleteId}
+                    index={focusIndex}
+                    total={selectedFocusExercises.length}
+                    reviewMode
+                    onNext={() => setFocusIndex((i) => {
+                        const next = Math.min(i + 1, selectedFocusExercises.length - 1);
+                        if (next === i) setMode('overview'); // all done
+                        return next;
+                    })}
+                    onPrev={() => setFocusIndex((i) => Math.max(i - 1, 0))}
+                    onClose={() => setMode('overview')}
+                    onSkip={handleFocusSkip}
+                />
+            )}
+
+            {/* Context banner: season OR standalone */}
+            {activeSeason && !isLoading && (
+                <AthleteContextBanner season={activeSeason} today={new Date()} />
+            )}
+            {!activeSeason && !isLoading && plan && (
+                <StandaloneBanner plan={plan} locale={locale} />
+            )}
+
+            {/* Week navigation — hidden for standalone plans [GAP-4] */}
+            {!isStandalone && (
+                <div className={styles.weekNav}>
+                    <button
+                        className={styles.weekNavBtn}
+                        onClick={() => setWeekOffset((o) => o - 1)}
+                        aria-label="Previous week"
+                    >
+                        <ChevronLeft size={18} />
+                    </button>
+                    <span className={styles.weekLabel}>{weekLabel}</span>
+                    <button
+                        className={styles.weekNavBtn}
+                        onClick={() => setWeekOffset((o) => o + 1)}
+                        disabled={weekOffset >= 0}
+                        aria-label="Next week"
+                    >
+                        <ChevronRight size={18} />
+                    </button>
+                </div>
+            )}
+
+            {/* DayTabNav */}
+            <DayTabNav
+                days={tabDays}
+                selectedDay={selectedDay}
+                onSelect={setSelectedDay}
+            />
+
+            {/* Selected day content */}
+            <div className={styles.dayViewContainer}>
+                {selectedHasSessions && athleteId ? (
+                    <DayOverviewPanel
+                        date={selectedDate}
+                        exercisesBySession={selectedSessionsMap as Record<number, PlanExerciseWithExpand[]>}
+                        logs={selectedLogs}
+                        locale={locale}
+                        isToday={isSelectedToday}
+                        isPast={isSelectedPast}
+                        t={t}
+                        dayNote={(plan.day_notes as Record<string, string> | undefined)?.[String(selectedDay)] || undefined}
+                        readinessScore={isSelectedToday ? todayReadiness : undefined}
+                        weekLogMap={weekLogMap}
+                        onStartWorkout={() => handleStartFocus(weekLogMap.get(logKey(selectedDate, 0))?.id ?? '')}
+                        onPostFactum={handleOpenPostFactum}
+                        onEdit={handleOpenEdit}
+                    />
                 ) : (
-                    allDays.map((day) => {
-                        const date = getDayDate(weekStart, day);
-                        const isThisWeekToday = weekOffset === 0 && day === todayIdx;
-                        const isPastDay = weekOffset < 0 || (weekOffset === 0 && day < todayIdx);
-                        const sessionsMap = byDayAndSession[day] ?? {};
-                        const hasSessions = Object.values(sessionsMap).some((s) => s.length > 0);
-                        const logsForDay: TrainingLogWithRelations[] = Object.keys(sessionsMap).map((s) =>
-                            weekLogMap.get(logKey(date, Number(s)))
-                        ).filter(Boolean) as TrainingLogWithRelations[];
-
-                        return (
-                            <div key={day} data-today={isThisWeekToday || undefined}>
-                                {hasSessions ? (
-                                    athleteId && plan && (
-                                        <DayCard
-                                            dayOfWeek={day}
-                                            date={date}
-                                            exercisesBySession={sessionsMap}
-                                            logs={logsForDay}
-                                            plan={plan}
-                                            athleteId={athleteId}
-                                            locale={locale}
-                                            isToday={isThisWeekToday}
-                                            isPast={isPastDay}
-                                            loggedCount={logsForDay.length}
-                                            t={t}
-                                            dayNote={(plan.day_notes as Record<string, string> | undefined)?.[String(day)] || undefined}
-                                            readinessScore={isThisWeekToday ? todayReadiness : undefined}
-                                        />
-                                    )
-                                ) : (
-                                    <RestDayCard
-                                        dayOfWeek={day}
-                                        date={date}
-                                        isToday={isThisWeekToday}
-                                        isPast={isPastDay}
-                                        locale={locale}
-                                        t={t}
-                                    />
-                                )}
-                            </div>
-                        );
-                    })
+                    <RestDayPanel t={t} />
                 )}
             </div>
         </div>

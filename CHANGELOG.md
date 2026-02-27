@@ -1,3 +1,88 @@
+# Changelog
+
+## [Unreleased] — Athlete Training UX Redesign Phase 4-5
+
+### Added
+
+- `PostWorkoutSheet.tsx` — BottomSheet с 3 режимами пост-тренировки (Express / Quick Edit / Full Review)
+- `QuickEditView.tsx` — быстрое логирование ✓/~/✗ тоглами, partial sets, batchSaveLogExercises
+- `useOnlineStatus.ts` — реактивный hook на navigator online/offline events
+- `DayTabNavSkeleton.tsx` + `ExerciseListSkeleton.tsx` + `Skeleton.module.css` — skeleton loading с shimmer-анимацией
+- Slide-анимации в `FocusCard` (translateX ±60px при навигации prev/next)
+- Offline badge (WifiOff + `var(--color-warning)`) в header FocusCard
+- `navigator.vibrate(50)` haptic при сохранении (FocusCard + QuickEditView)
+- i18n ключи `training.postWorkout.*` + `training.offlineMode` в RU/EN/CN
+
+### Changed
+
+- `FocusCard.tsx` — добавлен `reviewMode` prop (скрывает медиа и заметки для Full Review)
+- `AthleteTrainingView.tsx` — skeleton вместо спиннера при загрузке, интеграция PostWorkoutSheet/QuickEditView
+
+## [Unreleased] — Focus Mode (Phase 3)
+
+### Added
+
+- **`FocusCard.tsx`** — fullscreen exercise card for Focus Mode: media preview, coach cues (📋/💡), SetLogger integration, swipe navigation (30px edge guard per iOS PWA), header counter
+- **`FocusCard.module.css`** — all design tokens from `tokens.css`, mobile-first 375px base, fixed fullscreen overlay (`--z-modal`)
+- **Skip BottomSheet** — 4 skip reasons: Equipment / Pain / AlreadyDone / Other, integrated into FocusCard via `BottomSheet.tsx`
+- **Media Gallery BottomSheet** — tappable illustration opens full-size view in BottomSheet
+- **Category icon fallback** — Lucide icon per `training_category` when no illustration
+- **`sessionStorage` persistence** — `focusIndex` survives page reload, cleared on explicit close
+- **Dynamic import** of `FocusCard` in `AthleteTrainingView.tsx` — no SSR, opens when "Start Workout" FAB tapped
+- **i18n keys** — `training.focus.*` and `training.categories.*` added to `ru/en/cn` JSON files
+- **`LogMode` type** — `live | post_express | post_quick | post_detailed` added to `types.ts`
+
+### Changed
+
+- **PocketBase `training_logs`** — added `log_mode` select field (`live | post_express | post_quick | post_detailed`)
+- **`AthleteTrainingView.tsx`** — Focus Mode state machine: `focusIndex` state, `handleStartFocus`, `handleFocusSkip`, `handleFocusClose` handlers
+
+### Verified
+
+- `pnpm type-check` ✅ (0 errors)
+- `pnpm lint` ✅ (0 errors, 15 pre-existing warnings)
+
+### 2026-02-26 — Athlete Training UX Redesign: Phase 2 (Overview Mode)
+
+#### Added
+
+- `DayTabNav.tsx` + `DayTabNav.module.css` — 7-day tab bar с адаптивными лейблами (`Пн`/`П`), Moon иконка для дней отдыха, progress dot (зелёный/жёлтый/серый). `scrollIntoView` при смене активного дня.
+- `ExerciseListItem.tsx` + `ExerciseListItem.module.css` — компактная строка упражнения для Overview-режима (без SetLogger). CNS-dot, имя, дозировка, ⚡ adjustment badge, статус залогировано ✓ / незалогировано ○.
+- `StandaloneBanner` (inline в AthleteTrainingView) — мини-баннер «Разовая тренировка · даты» когда `activeSeason=null` но `plan` есть **[GAP-1]**.
+
+#### Changed
+
+- `AthleteTrainingView.tsx` — полный рефакторинг:
+  - State machine: `mode: 'overview' | 'focus' | 'post_quick' | 'post_full'` + `selectedDay: number` (default todayIdx)
+  - Рендер одного дня вместо 7 скролла DayCard-карточек
+  - FAB «▶ Начать тренировку» (primary, 52px, для текущего/будущего дня)
+  - Кнопка «✓ Залогировать пост-фактум» (сегодня, нет live-лога)
+  - Кнопка «✏️ Редактировать» (прошлые залогированные дни)
+  - weekNav скрывается для `plan_type='standalone'` **[GAP-4]**
+  - RestDay теперь Moon-таб в DayTabNav, не полная карточка
+- `AthleteTrainingView.module.css` — добавлены классы: `.dayViewContainer`, `.dayPanel`, `.dayPanelHeader`, `.fab`, `.fabSecondary`, `.overviewList`, `.restDayPanel`, `.standaloneBanner`
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/)
+- `pnpm lint` ✅ 0 errors, 15 warnings (pre-existing в test_pb.js + tests/)
+
+---
+
+### 2026-02-27 — Deployment: Athlete Training UX Redesign Phase 1 & Track 4.263
+
+#### Changed
+
+- Задеплоена актуальная версия приложения на VPS (`https://jumpedia.app`).
+- Исправлена конфигурация `tsconfig.json` (временно исключена папка `tests/`) для прохождения `type-check` в окружении без Playwright.
+
+#### Verified
+
+- `pnpm type-check` ✅ (0 ошибок в src/)
+- `pnpm build` ✅
+- Deploy `https://jumpedia.app` → HTTP 200 ✅
+
+---
 
 ### 2026-02-26 — Athlete Training UX Redesign: Phase 1 (P0 Touch Targets + GAP-2 ⚡ Badge)
 

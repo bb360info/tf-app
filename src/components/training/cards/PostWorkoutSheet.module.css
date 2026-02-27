@@ -1,0 +1,82 @@
+/* PostWorkoutSheet.module.css — Post-Workout режим выбора: Express / Quick Edit / Full Review */
+
+.optionList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-bottom: var(--space-2);
+}
+
+/* Кнопка-опция: glass card стиль */
+.optionBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: 68px;
+    padding: var(--space-3) var(--space-4);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.optionBtn:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.optionBtn:active {
+    transform: scale(0.98);
+}
+
+/* Акцентная кнопка (Express) */
+.optionBtnAccent {
+    background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent-primary) 30%, transparent);
+}
+
+.optionBtnAccent:hover {
+    background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+}
+
+/* Иконка */
+.optionIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+}
+
+.optionIconAccent {
+    background: color-mix(in srgb, var(--color-accent-primary) 15%, transparent);
+    color: var(--color-accent-primary);
+}
+
+/* Текст */
+.optionText {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0-5);
+    flex: 1;
+    min-width: 0;
+}
+
+.optionLabel {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.optionDesc {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.3;
+}

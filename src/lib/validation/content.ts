@@ -121,10 +121,10 @@ export const CompetitionMediaSchema = z.object({
 // ─── Achievements ──────────────────────────────────────────────────
 
 export const AchievementTypeSchema = z.enum([
-    'streak',
-    'personal_best',
-    'milestone',
-    'consistency',
+    'streak_3d', 'streak_7d', 'streak_30d', 'streak_100d',
+    'first_workout', 'workouts_10', 'workouts_50', 'workouts_100',
+    'first_test', 'first_pb', 'pb_5', 'all_tests',
+    'first_competition',
 ]);
 
 export const AchievementsSchema = z.object({
@@ -142,6 +142,10 @@ export const NotificationTypeSchema = z.enum([
     'checkin_reminder',
     'achievement',
     'system',
+    'low_readiness',
+    'coach_note',
+    'invite_accepted',
+    'competition_upcoming',
 ]);
 
 export const NotificationsSchema = z.object({
@@ -150,6 +154,11 @@ export const NotificationsSchema = z.object({
     message: z.string().min(1),
     read: z.boolean(),
     link: z.string().optional(),
+    message_key: z.string().optional(),
+    message_params: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+    priority: z.enum(['normal', 'urgent']).optional(),
+    expires_at: z.string().optional(),
+    delivered: z.boolean().optional(),
 });
 
 // ─── Error Logs ────────────────────────────────────────────────────
