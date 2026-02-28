@@ -1,14 +1,15 @@
 import { useState, useId } from 'react';
 import { useTranslations } from 'next-intl';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, BookOpen } from 'lucide-react';
 import type { AdHocWarmupData } from '../types';
 import styles from '../DayColumn.module.css';
 
 interface AdHocWarmupStepBtnProps {
     onAdd: (data: AdHocWarmupData) => void;
+    onAddFromCatalog?: () => void;
 }
 
-export function AdHocWarmupStepBtn({ onAdd }: AdHocWarmupStepBtnProps) {
+export function AdHocWarmupStepBtn({ onAdd, onAddFromCatalog }: AdHocWarmupStepBtnProps) {
     const t = useTranslations('training');
     const [open, setOpen] = useState(false);
     const [text, setText] = useState('');
@@ -23,10 +24,24 @@ export function AdHocWarmupStepBtn({ onAdd }: AdHocWarmupStepBtnProps) {
 
     if (!open) {
         return (
-            <button type="button" className={styles.warmupBtn} onClick={() => setOpen(true)} id={`${uid}-step`}>
-                <Plus size={12} aria-hidden="true" />
-                {t('addWarmupStep')}
-            </button>
+            <div className={styles.warmupAddRow} style={{ display: 'contents' }}>
+                <button type="button" className={styles.warmupBtn} onClick={() => setOpen(true)} id={`${uid}-step`}>
+                    <Plus size={14} aria-hidden="true" />
+                    {t('addWarmupStep')}
+                </button>
+                {onAddFromCatalog && (
+                    <button
+                        type="button"
+                        className={styles.warmupBtn}
+                        onClick={onAddFromCatalog}
+                        id={`${uid}-catalog`}
+                        title={t('addWarmupFromCatalog')}
+                    >
+                        <BookOpen size={14} aria-hidden="true" />
+                        {t('addWarmupFromCatalog')}
+                    </button>
+                )}
+            </div>
         );
     }
 

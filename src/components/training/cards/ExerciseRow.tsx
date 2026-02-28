@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, GripVertical } from 'lucide-react';
+import { Trash2, GripVertical, UserCog } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { getExerciseName, cnsCostColor } from '@/lib/pocketbase/services/exercises';
@@ -14,9 +14,11 @@ interface RowProps {
     locale: 'ru' | 'en' | 'cn';
     onUpdate: (id: string, data: UpdateExerciseData) => void;
     onRemove: (id: string) => void;
+    /** If provided — shows UserCog button for per-athlete dosage override */
+    onAdjust?: (planExerciseId: string) => void;
 }
 
-export function ExerciseRow({ planExercise, locale, onUpdate, onRemove }: RowProps) {
+export function ExerciseRow({ planExercise, locale, onUpdate, onRemove, onAdjust }: RowProps) {
     const exercise = planExercise.expand?.exercise_id;
     const unitType: UnitType = exercise?.unit_type ?? 'reps';
     const [editing, setEditing] = useState(false);
@@ -91,6 +93,16 @@ export function ExerciseRow({ planExercise, locale, onUpdate, onRemove }: RowPro
                 </span>
 
                 <div className={styles.rowActions}>
+                    {onAdjust && (
+                        <button
+                            className={styles.adjustBtn}
+                            onClick={() => onAdjust(planExercise.id)}
+                            aria-label="Adjust dosage"
+                            title="Adjust dosage"
+                        >
+                            <UserCog size={14} />
+                        </button>
+                    )}
                     <button
                         className={styles.actionBtn}
                         onClick={() => onRemove(planExercise.id)}

@@ -506,3 +506,121 @@ export async function createTemplateFromPlanDay(
     return getTemplate(template.id);
 }
 
+// ─── Phase 5: Phase-Level Warmup Stamping ─────────────────────────────────
+
+/**
+ * Stamp a warmup template to ALL exercise slots across ALL non-override plans in a phase.
+ *
+ * For each plan in the phase:
+ *   - Skips plans where plan_type === 'override'
+ *   - Finds all distinct (day_of_week, session) combos with exercises
+ *   - Calls stampTemplate() for each slot sequentially (SQLite-safe)
+ *
+ * @returns Applied count (plans touched) and skipped count (empty/override plans)
+ */
+export async function stampWarmupToAllDays(
+    templateId: string,
+    phaseId: string
+): Promise<{ applied: number; skipped: number }> {
+    // 1. Fetch all non-override, non-deleted plans in the phase
+    const plans = await pb.collection(Collections.TRAINING_PLANS).getFullList({
+        filter: pb.filter(
+            'phase_id = {:phaseId} && deleted_at = "" && plan_type != "override"',
+            { phaseId }
+        ),
+        fields: 'id',
+    });
+
+    let applied = 0;
+    let skipped = 0;
+
+    for (const plan of plans) {
+        // 2. Find all distinct (day_of_week, session) slots that have exercises
+        const exercises = await pb
+            .collection(Collections.PLAN_EXERCISES)
+            .getFullList<{ day_of_week: number; session: number }>({
+                filter: pb.filter(
+                    'plan_id = {:pid} && deleted_at = ""',
+                    { pid: plan.id }
+                ),
+                fields: 'day_of_week,session',
+            });
+
+        // De-duplicate slots
+        const slotMap = new Map<string, { day: number; session: number }>();
+        for (const ex of exercises) {
+            const key = `${ex.day_of_week}-${ex.session}`;
+            if (!slotMap.has(key)) {
+                slotMap.set(key, { day: ex.day_of_week, session: ex.session });
+            }
+        }
+
+        if (slotMap.size === 0) {
+            skipped++;
+            continue;
+        }
+
+        // 3. Stamp warmup to each slot sequentially (SQLite safety)
+        for (const slot of slotMap.values()) {
+            await stampTemplate(templateId, plan.id, slot.day, slot.session);
+        }
+        applied++;
+    }
+
+    return { applied, skipped };
+}
+
+/**
+ * Stamp a warmup template to a specific day within a plan.
+ *
+ * Used by WeekConstructor per-day warmup picker (Task 3.2).
+ * Ejects existing warmup block for that day+session, then stamps template items.
+ *
+ * @param templateId - Warmup template to apply
+ * @param planId     - Target training plan
+ * @param dayOfWeek  - 0=Mon … 6=Sun
+ * @param session    - Session index (default 0)
+ * @returns Applied count (number of template items created)
+ */
+export async function stampWarmupToDay(
+    templateId: string,
+    planId: string,
+    dayOfWeek: number,
+    session: number = 0
+): Promise<{ applied: number }> {
+    const template = await getTemplate(templateId);
+    const items = template.expand?.['template_items(template_id)'] ?? [];
+
+    if (items.length === 0) return { applied: 0 };
+
+    // Eject existing warmup block for this day+session (idempotent)
+    await ejectTemplateItems(planId, dayOfWeek, session, { warmup: true, main: false });
+
+    // Stamp items sequentially (SQLite safety)
+    const sortedItems = [...items].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    for (const [idx, item] of sortedItems.entries()) {
+        await pb.collection(Collections.PLAN_EXERCISES).create({
+            plan_id: planId,
+            day_of_week: dayOfWeek,
+            session,
+            block: 'warmup',
+            order: idx,
+            exercise_id: item.exercise_id || undefined,
+            custom_text_ru: item.custom_text_ru,
+            custom_text_en: item.custom_text_en,
+            custom_text_cn: item.custom_text_cn,
+            duration: item.duration_seconds,
+            sets: item.sets,
+            reps: item.reps,
+            intensity: item.intensity,
+            weight: item.weight,
+            distance: item.distance,
+            rest_seconds: item.rest_seconds,
+            notes: item.notes,
+            source_template_id: templateId,
+        });
+    }
+
+    return { applied: sortedItems.length };
+}
+

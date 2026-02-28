@@ -7,7 +7,7 @@ import pb from '../client';
 import { Collections } from '../collections';
 import type { PlanAssignmentsRecord } from '../types';
 import type { RecordModel } from 'pocketbase';
-import { getPlan } from './plans';
+// [Track 4.267] getPlan import removed — replaced with lightweight getOne in assign functions
 
 // ─── Types ─────────────────────────────────────────────────────────
 
@@ -27,8 +27,9 @@ export async function assignPlanToAthlete(
     planId: string,
     athleteId: string
 ): Promise<PlanAssignmentWithRelations> {
-    // Guard: only published plans can be assigned to athletes
-    const plan = await getPlan(planId);
+    // [Track 4.267] Lightweight status check — only fetch id+status, no exercise expand
+    const plan = await pb.collection(Collections.TRAINING_PLANS)
+        .getOne(planId, { fields: 'id,status' });
     if (plan.status !== 'published') {
         throw new Error(`Cannot assign plan: status is "${plan.status}", expected "published"`);
     }
@@ -62,8 +63,9 @@ export async function assignPlanToGroup(
     planId: string,
     groupId: string
 ): Promise<PlanAssignmentWithRelations> {
-    // Guard: only published plans can be assigned to groups
-    const plan = await getPlan(planId);
+    // [Track 4.267] Lightweight status check — only fetch id+status, no exercise expand
+    const plan = await pb.collection(Collections.TRAINING_PLANS)
+        .getOne(planId, { fields: 'id,status' });
     if (plan.status !== 'published') {
         throw new Error(`Cannot assign plan: status is "${plan.status}", expected "published"`);
     }

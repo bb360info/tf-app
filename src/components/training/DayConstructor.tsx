@@ -43,8 +43,11 @@ interface Props {
     onSaveAsTemplate?: (session: number, name: string) => void | Promise<void>;
     onEjectWarmup?: (day: number, session: number) => void;
     onAddWarmupItem?: (day: number, session: number, data: AdHocWarmupData) => void;
+    onAddFromCatalog?: (session: number) => void;
     hasLog?: boolean;
     groupReadiness?: Map<string, number>;
+    /** If provided — shows per-exercise UserCog adjustment button (athlete-specific plans only) */
+    onAdjustExercise?: (planExerciseId: string) => void;
 }
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -65,8 +68,10 @@ export function DayConstructor({
     onSaveAsTemplate,
     onEjectWarmup,
     onAddWarmupItem,
+    onAddFromCatalog,
     hasLog = false,
     groupReadiness,
+    onAdjustExercise,
 }: Props) {
     const t = useTranslations();
     const locale = useLocale() as 'ru' | 'en' | 'cn';
@@ -178,7 +183,7 @@ export function DayConstructor({
                             {(hasWarmup || (!readOnly && onAddWarmupItem)) && (
                                 <div className={styles.warmupSection}>
                                     <div className={styles.sectionDivider}>
-                                        <Wind size={12} aria-hidden="true" />
+                                        <Wind size={16} aria-hidden="true" />
                                         <span>{t('training.warmupBlock')}</span>
                                         {hasWarmup && !readOnly && onEjectWarmup && (
                                             <button
@@ -187,7 +192,7 @@ export function DayConstructor({
                                                 title={t('training.ejectWarmup')}
                                                 aria-label={t('training.ejectWarmup')}
                                             >
-                                                <X size={12} aria-hidden="true" />
+                                                <X size={16} aria-hidden="true" />
                                             </button>
                                         )}
                                     </div>
@@ -208,6 +213,7 @@ export function DayConstructor({
                                         <div className={styles.warmupAddRow}>
                                             <AdHocWarmupStepBtn
                                                 onAdd={(data) => onAddWarmupItem(dayOfWeek, session, data)}
+                                                onAddFromCatalog={onAddFromCatalog ? () => onAddFromCatalog(session) : undefined}
                                             />
                                         </div>
                                     )}
@@ -240,6 +246,7 @@ export function DayConstructor({
                                                     locale={locale}
                                                     onUpdate={onUpdate}
                                                     onRemove={onRemove}
+                                                    onAdjust={onAdjustExercise}
                                                 />
                                             ))}
                                         </div>

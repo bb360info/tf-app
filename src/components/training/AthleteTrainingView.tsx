@@ -138,7 +138,7 @@ function WarmupItem({ planEx, locale }: { planEx: PlanExerciseWithExpand; locale
     const durationSec = planEx.duration_seconds ?? (planEx.duration ? Math.round(planEx.duration) : null);
     return (
         <li className={styles.warmupItem}>
-            <Wind size={10} className={styles.warmupItemIcon} aria-hidden="true" />
+            <Wind size={16} className={styles.warmupItemIcon} aria-hidden="true" />
             <span className={styles.warmupItemName}>{name}</span>
             {durationSec ? <span className={styles.warmupItemDur}>{durationSec}s</span> : null}
         </li>
@@ -159,7 +159,7 @@ function WarmupBadge({
                 onClick={() => setExpanded((e) => !e)}
                 aria-expanded={expanded}
             >
-                <Wind size={13} className={styles.warmupBadgeIcon} aria-hidden="true" />
+                <Wind size={16} className={styles.warmupBadgeIcon} aria-hidden="true" />
                 <span className={styles.warmupBadgeTitle}>{t('warmupBlock')}</span>
                 <span className={styles.warmupBadgeCount}>({items.length})</span>
                 <span className={styles.warmupBadgeChevron}>
@@ -569,10 +569,16 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
         selectedSessionsMap as Record<number, PlanExerciseWithExpand[]>
     ).flat().filter((pe) => pe.block !== 'warmup');
 
-    const handleStartFocus = (logId: string) => {
-        setFocusLogId(logId);
-        setFocusIndex(0);
-        setMode('focus');
+    const handleStartFocus = async () => {
+        if (!athleteId || !plan) return;
+        try {
+            const log = await getOrCreateLog(athleteId, plan.id, toLocalISODate(selectedDate), 0, 'live');
+            setFocusLogId(log.id);
+            setFocusIndex(0);
+            setMode('focus');
+        } catch (e) {
+            console.error('[AthleteTrainingView] handleStartFocus failed', e);
+        }
     };
 
     const handleFocusSkip = (reason: string, exerciseId?: string) => {
@@ -594,7 +600,7 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
     const handleOpenPostFactum = async () => {
         if (!athleteId || !plan) return;
         try {
-            const log = await getOrCreateLog(athleteId, plan.id, toLocalISODate(selectedDate), 0);
+            const log = await getOrCreateLog(athleteId, plan.id, toLocalISODate(selectedDate), 0, 'post_express');
             setPostLogId(log.id);
             setFocusIndex(0);
             setMode('post_quick');
@@ -759,7 +765,7 @@ export function AthleteTrainingView(_props: AthleteTrainingViewProps = {}) {
                         dayNote={(plan.day_notes as Record<string, string> | undefined)?.[String(selectedDay)] || undefined}
                         readinessScore={isSelectedToday ? todayReadiness : undefined}
                         weekLogMap={weekLogMap}
-                        onStartWorkout={() => handleStartFocus(weekLogMap.get(logKey(selectedDate, 0))?.id ?? '')}
+                        onStartWorkout={handleStartFocus}
                         onPostFactum={handleOpenPostFactum}
                         onEdit={handleOpenEdit}
                     />

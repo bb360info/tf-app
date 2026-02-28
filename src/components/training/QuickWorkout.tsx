@@ -86,6 +86,8 @@ export function QuickWorkout({ onClose }: Props) {
     const [selectedAthleteId, setSelectedAthleteId] = useState('');
     const [selectedGroupId, setSelectedGroupId] = useState('');
     const [conflictContext, setConflictContext] = useState<AssignContext | null>(null);
+    /** [Track 4.267 Phase 2] true when selected date has no season — offer standalone save */
+    const [noSeasonMode, setNoSeasonMode] = useState(false);
 
     // CNS total
     const cnsTotal = exercises.reduce((acc, ex) => acc + ex.cns_cost, 0);
@@ -240,7 +242,8 @@ export function QuickWorkout({ onClose }: Props) {
                 return start <= selectedDate && selectedDate <= end;
             });
             if (!season) {
-                throw new Error(t('noSeasonForDate'));
+                // [Track 4.267 Phase 2] Sentinel — caught in handleAssign to offer standalone save
+                throw new Error('NO_SEASON');
             }
 
             const phases = (season.expand?.['training_phases(season_id)'] ?? [])
@@ -321,7 +324,13 @@ export function QuickWorkout({ onClose }: Props) {
                 onClose();
             }
         } catch (err) {
-            setLibraryError(err instanceof Error ? err.message : t('saveError'));
+            const message = err instanceof Error ? err.message : '';
+            if (message === 'NO_SEASON') {
+                // [Track 4.267 Phase 2] No season found — show standalone offer instead of error
+                setNoSeasonMode(true);
+                return;
+            }
+            setLibraryError(message || t('saveError'));
             setConflictContext(null);
         } finally {
             setAssigning(false);
@@ -337,6 +346,51 @@ export function QuickWorkout({ onClose }: Props) {
         t,
         onClose,
     ]);
+
+    /**
+     * [Track 4.267 Phase 2] Save workout as a standalone plan (no season/phase required).
+     * Creates a training_plan with plan_type='standalone' and publishes it immediately.
+     */
+    const handleSaveStandalone = useCallback(async () => {
+        if (exercises.length === 0 || assigning) return;
+        setAssigning(true);
+        setLibraryError('');
+        try {
+            const { createPlan, addExerciseToPlan, publishPlan } = await import('@/lib/pocketbase/services/plans');
+
+            const selectedDate = new Date(`${date}T12:00:00`);
+            const day = selectedDate.getDay();
+            const dayOfWeek = day === 0 ? 6 : day - 1;
+
+            // Standalone: no phase_id, no season. plan_type marks it as independent.
+            const plan = await createPlan({
+                phase_id: '',
+                week_number: 1,
+                plan_type: 'standalone',
+                notes: notes || undefined,
+            } as Parameters<typeof createPlan>[0]);
+
+            for (let i = 0; i < exercises.length; i++) {
+                await addExerciseToPlan({
+                    plan_id: plan.id,
+                    exercise_id: exercises[i].exerciseId,
+                    day_of_week: dayOfWeek,
+                    session: 0,
+                    order: i,
+                    sets: exercises[i].sets,
+                    reps: exercises[i].reps,
+                });
+            }
+
+            await publishPlan(plan.id);
+            showToast({ message: t('savedStandalone'), type: 'success' });
+            onClose();
+        } catch (err) {
+            setLibraryError(err instanceof Error ? err.message : t('saveError'));
+        } finally {
+            setAssigning(false);
+        }
+    }, [exercises, date, notes, assigning, t, showToast, onClose]);
 
     useEffect(() => {
         let cancelled = false;
@@ -663,6 +717,34 @@ export function QuickWorkout({ onClose }: Props) {
                     </div>
                 </div>
             )}
+
+            {/* No-season banner [Track 4.267 Phase 2] */}
+            {noSeasonMode && (
+                <div className={styles.conflictOverlay}>
+                    <div className={styles.noSeasonDialog}>
+                        <p className={styles.noSeasonText}>{t('noSeasonExplain')}</p>
+                        <div className={styles.conflictActions}>
+                            <button
+                                type="button"
+                                className={styles.conflictBtn}
+                                onClick={() => setNoSeasonMode(false)}
+                                disabled={assigning}
+                            >
+                                {t('cancel')}
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.standaloneBtn}
+                                onClick={() => void handleSaveStandalone()}
+                                disabled={assigning}
+                            >
+                                {assigning ? t('assigning') : t('saveStandalone')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
+

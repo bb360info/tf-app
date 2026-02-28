@@ -120,3 +120,93 @@
 .dayCell:last-child {
     border-right: none;
 }
+
+/* ── Publish Week Button [Phase 6] ────────────────────────────── */
+
+.publishWeekBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    padding: var(--space-1);
+    margin-top: var(--space-1);
+    background: transparent;
+    border: 1px solid var(--color-success);
+    border-radius: var(--radius-sm);
+    color: var(--color-success);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default);
+    touch-action: manipulation;
+    /* Extend touch target without changing visual size */
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+}
+
+/* Enlarge tap target to ≥44px via pseudo element */
+.publishWeekBtn::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+}
+
+.publishWeekBtn:hover {
+    background: var(--color-success);
+    color: var(--color-text-inverse);
+}
+
+.publishWeekBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Inline Confirm Group [Phase 6/7 QA] ────────────────────────── */
+
+.publishConfirmGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+}
+
+.publishConfirmYesBtn,
+.publishConfirmNoBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    padding: var(--space-1);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.publishConfirmYesBtn {
+    color: var(--color-success);
+}
+
+.publishConfirmYesBtn:hover {
+    background: color-mix(in srgb, var(--color-success) 15%, transparent);
+}
+
+.publishConfirmNoBtn {
+    color: var(--color-text-secondary);
+}
+
+.publishConfirmNoBtn:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+}
+
+/* ── prefers-reduced-motion [Phase 6 Task 3] ─────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .publishWeekBtn {
+        transition: none;
+    }
+}

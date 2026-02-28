@@ -158,3 +158,23 @@
 .actionBtn:hover svg {
     color: var(--color-danger);
 }
+
+.adjustBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    transition: all var(--duration-fast) var(--ease-default);
+}
+
+.adjustBtn:hover {
+    background: var(--color-primary-ghost);
+    color: var(--color-accent-primary);
+}

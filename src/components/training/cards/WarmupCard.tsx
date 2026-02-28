@@ -31,7 +31,7 @@ export function WarmupCard({ item, locale, onRemove, readOnly }: WarmupCardProps
 
     return (
         <div className={styles.warmupCard}>
-            <Wind size={10} className={styles.warmupCardIcon} aria-hidden="true" />
+            <Wind size={16} className={styles.warmupCardIcon} aria-hidden="true" />
             <span className={styles.warmupCardName}>{name}</span>
             {durationSec ? (
                 <span className={styles.warmupCardDur}>{durationSec}s</span>
@@ -42,7 +42,7 @@ export function WarmupCard({ item, locale, onRemove, readOnly }: WarmupCardProps
                     onClick={() => onRemove(item.id)}
                     aria-label="Remove warmup item"
                 >
-                    <Trash2 size={11} aria-hidden="true" />
+                    <Trash2 size={16} aria-hidden="true" />
                 </button>
             )}
         </div>

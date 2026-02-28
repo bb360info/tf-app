@@ -80,13 +80,15 @@
     border: none;
     color: var(--color-text-tertiary);
     padding: var(--space-1);
+    min-width: 44px;
+    min-height: 44px;
     margin-left: auto;
     cursor: pointer;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all var(--duration-fast) var(--ease-default);
 }
 
 .ejectBtn:hover {

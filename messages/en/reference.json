@@ -1,0 +1,190 @@
+{
+  "reference": {
+    "title": "Reference",
+    "subtitle": "Technique, errors, periodization, injuries and science",
+    "categories": {
+      "technique": {
+        "title": "Jump Technique",
+        "desc": "Phases of high jump: approach, takeoff, flight"
+      },
+      "errors": {
+        "title": "Common Errors",
+        "desc": "Analysis of frequent mistakes and corrections"
+      },
+      "periodization": {
+        "title": "Periodization",
+        "desc": "GPP → SPP → PRE_COMP → COMP → TRANSITION"
+      },
+      "injuries": {
+        "title": "Injuries & Prevention",
+        "desc": "Common injuries, rehab and prevention"
+      },
+      "warmup": {
+        "title": "Warm-Up",
+        "desc": "Warm-up protocols and box breathing timer"
+      },
+      "mental": {
+        "title": "Mental Prep",
+        "desc": "Visualization cards and pre-competition routine"
+      }
+    },
+    "scientific": {
+      "title": "Scientific Basis",
+      "subtitle": "Periodization comparison and peaking rules",
+      "tra_dup": {
+        "heading": "TRA vs DUP — Periodization Comparison",
+        "tra_label": "Traditional (TRA)",
+        "dup_label": "Undulating (DUP)",
+        "rows": [
+          {
+            "aspect": "Load",
+            "tra": "Linearly increases",
+            "dup": "Changes each week"
+          },
+          {
+            "aspect": "Intensity",
+            "tra": "Gradually rises",
+            "dup": "Alternates High/Low"
+          },
+          {
+            "aspect": "Volume",
+            "tra": "Decreases to comp",
+            "dup": "Undulating"
+          },
+          {
+            "aspect": "Use case",
+            "tra": "Classic season",
+            "dup": "Short mesocycles"
+          },
+          {
+            "aspect": "Strength gain",
+            "tra": "+",
+            "dup": "++"
+          },
+          {
+            "aspect": "Monotony",
+            "tra": "High",
+            "dup": "Low"
+          }
+        ]
+      },
+      "peaking": {
+        "heading": "Peaking Rules",
+        "rules": [
+          "10-14 days before competition — reduce volume 40-60%",
+          "Intensity maintained or slightly increased",
+          "No new exercises within 3 weeks of competition",
+          "Minimum 2 specific sessions per week in PRE_COMP",
+          "Sleep: priority ≥ 8h in final 2 weeks",
+          "Competition warm-up — rehearse 2-3 weeks before"
+        ]
+      }
+    },
+    "technique": {
+      "title": "High Jump Technique",
+      "phases": [
+        {
+          "name": "Approach",
+          "desc": "8-10 curved steps. Last 3 steps — increasing speed. Arc angle 30-45° to bar."
+        },
+        {
+          "name": "Penultimate step",
+          "desc": "Longer last step — center of mass lowers. Foot placed heel-first, roll."
+        },
+        {
+          "name": "Takeoff",
+          "desc": "Explosive extension at ankle, knee, hip. Swing free leg and arms upward."
+        },
+        {
+          "name": "Flight (Fosbury Flop)",
+          "desc": "Arch at lower back, clear bar sequentially: back → hips → legs."
+        },
+        {
+          "name": "Landing",
+          "desc": "On mat, back first. Delay leg extension until hips clear bar."
+        }
+      ]
+    },
+    "errors": {
+      "title": "Common Errors",
+      "items": [
+        {
+          "error": "Straight-line approach",
+          "fix": "Start arc at step 4-5, gradually increase curve radius"
+        },
+        {
+          "error": "Takeoff too far from bar",
+          "fix": "Takeoff point 60-80 cm from bar projection"
+        },
+        {
+          "error": "Weak arm swing",
+          "fix": "Synchronized explosive arm drive upward at takeoff"
+        },
+        {
+          "error": "Early back arch",
+          "fix": "Arch only after shoulders have cleared bar"
+        },
+        {
+          "error": "Bent legs in flop",
+          "fix": "Extend legs upward after hips clear bar"
+        }
+      ]
+    },
+    "periodization": {
+      "title": "Season Periodization",
+      "phases": [
+        {
+          "name": "GPP",
+          "duration": "6-10 wks",
+          "focus": "Base strength, high volume, low intensity"
+        },
+        {
+          "name": "SPP",
+          "duration": "4-6 wks",
+          "focus": "Sport-specific prep, jump work, rising intensity"
+        },
+        {
+          "name": "PRE_COMP",
+          "duration": "2-3 wks",
+          "focus": "Speed sharpening, volume drops, high intensity"
+        },
+        {
+          "name": "COMP",
+          "duration": "1-3 wks",
+          "focus": "Competition peak, minimal volume, max intensity"
+        },
+        {
+          "name": "TRANSITION",
+          "duration": "2-4 wks",
+          "focus": "Recovery, light general activity"
+        }
+      ]
+    },
+    "injuries": {
+      "title": "Injuries & Prevention",
+      "items": [
+        {
+          "injury": "Achilles tendinitis",
+          "cause": "Excess jump volume, hard footwear",
+          "prevention": "Eccentric exercises, gradual load progression"
+        },
+        {
+          "injury": "Patellofemoral syndrome",
+          "cause": "Quad weakness, poor landing mechanics",
+          "prevention": "Glute strengthening, proper foot roll"
+        },
+        {
+          "injury": "Ankle sprain",
+          "cause": "Uneven surface, fatigue",
+          "prevention": "Proprioception drills, ankle warm-up"
+        },
+        {
+          "injury": "Low back pain",
+          "cause": "Excessive lordosis in flop, weak core",
+          "prevention": "Core strengthening, arch technique"
+        }
+      ]
+    },
+    "back": "Back to Reference"
+  }
+}

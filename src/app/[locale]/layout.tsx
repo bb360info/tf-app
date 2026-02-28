@@ -25,7 +25,7 @@ export async function generateMetadata({
     params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
     const { locale } = await params;
-    const messages = (await import(`../../../messages/${locale}/common.json`))
+    const messages = (await import(`../../../messages/${locale}/shared.json`))
         .default;
 
     return {

@@ -194,8 +194,9 @@ export default function SeasonWizard({ onClose, onCreated, initialGroupId }: Pro
             // 1. Create season
             const season = await createSeason({
                 name,
-                start_date: new Date(startDate).toISOString(),
-                end_date: new Date(endDate).toISOString(),
+                // [Track 4.267] Midday UTC — prevents timezone shift at date boundaries
+                start_date: `${startDate}T12:00:00.000Z`,
+                end_date: `${endDate}T12:00:00.000Z`,
                 coach_id: user.id,
                 athlete_id: targetType === 'athlete' ? (selectedAthleteId || undefined) : undefined,
                 group_id: targetType === 'group' ? (selectedGroupId || undefined) : undefined,
@@ -207,8 +208,9 @@ export default function SeasonWizard({ onClose, onCreated, initialGroupId }: Pro
                     season.id,
                     phases.map(p => ({
                         phase_type: p.phase_type,
-                        start_date: new Date(p.start_date).toISOString(),
-                        end_date: new Date(p.end_date).toISOString(),
+                        // [Track 4.267] Midday UTC — prevents timezone shift
+                        start_date: `${p.start_date}T12:00:00.000Z`,
+                        end_date: `${p.end_date}T12:00:00.000Z`,
                         focus: p.focus || undefined,
                     }))
                 );

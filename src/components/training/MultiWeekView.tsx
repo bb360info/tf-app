@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Send, CheckCircle2, XCircle } from 'lucide-react';
 import { listPlansForPhase, groupByDay, type PlanWithExercises } from '@/lib/pocketbase/services/plans';
 import DaySummaryCard from './DaySummaryCard';
 import styles from './MultiWeekView.module.css';
@@ -14,6 +14,7 @@ interface Props {
     startDate?: string;
     onBack: () => void;
     onSelectWeek: (weekNum: number) => void;
+    onPublishWeek?: (weekNum: number, planId: string) => Promise<void>; // [Phase 6]
 }
 
 export default function MultiWeekView({
@@ -23,27 +24,44 @@ export default function MultiWeekView({
     startDate,
     onBack,
     onSelectWeek,
+    onPublishWeek,
 }: Props) {
     const t = useTranslations();
     const [plans, setPlans] = useState<PlanWithExercises[]>([]);
     const [loading, setLoading] = useState(true);
+    const [publishingWeek, setPublishingWeek] = useState<number | null>(null);
+    const [confirmPublishWeek, setConfirmPublishWeek] = useState<number | null>(null);
+
+    const fetchAll = useCallback(async () => {
+        setLoading(true);
+        try {
+            const data = await listPlansForPhase(phaseId);
+            console.log('[MultiWeekView] Loaded plans:', data.length, data);
+            setPlans(data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }, [phaseId]);
 
     useEffect(() => {
-        async function fetchAll() {
-            setLoading(true);
-            try {
-                // Ensure we fetch fresh data
-                const data = await listPlansForPhase(phaseId);
-                console.log('[MultiWeekView] Loaded plans:', data.length, data);
-                setPlans(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
         fetchAll();
-    }, [phaseId]);
+    }, [fetchAll]);
+
+    const handlePublishWeek = useCallback(async (weekNum: number, planId: string) => {
+        if (!onPublishWeek) return;
+        setPublishingWeek(weekNum);
+        try {
+            await onPublishWeek(weekNum, planId);
+            await fetchAll(); // Refresh grid after publish
+            setConfirmPublishWeek(null);
+        } catch (err) {
+            console.error('[MultiWeekView] publish week failed:', err);
+        } finally {
+            setPublishingWeek(null);
+        }
+    }, [onPublishWeek, fetchAll]);
 
     // Map plans by week number for easy access
     const plansByWeek = useMemo(() => {
@@ -126,8 +144,6 @@ export default function MultiWeekView({
                     const weekExercises = plan?.expand?.['plan_exercises(plan_id)'] || [];
                     const byDay = groupByDay(weekExercises);
 
-
-
                     return (
                         <div key={weekNum} className={styles.weekRow}>
                             <div
@@ -136,6 +152,48 @@ export default function MultiWeekView({
                                 title={t('training.openWeek')}
                             >
                                 <span className={styles.weekNum}>{weekNum}</span>
+                                {/* Publish draft week button [Phase 6] */}
+                                {plan?.status === 'draft' && onPublishWeek && (
+                                    confirmPublishWeek === weekNum ? (
+                                        <div className={styles.publishConfirmGroup}>
+                                            <button
+                                                className={styles.publishConfirmYesBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handlePublishWeek(weekNum, plan.id);
+                                                }}
+                                                disabled={publishingWeek !== null}
+                                                title={t('confirm')}
+                                            >
+                                                <CheckCircle2 size={16} />
+                                            </button>
+                                            <button
+                                                className={styles.publishConfirmNoBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setConfirmPublishWeek(null);
+                                                }}
+                                                disabled={publishingWeek !== null}
+                                                title={t('cancel')}
+                                            >
+                                                <XCircle size={16} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            className={styles.publishWeekBtn}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setConfirmPublishWeek(weekNum);
+                                            }}
+                                            disabled={publishingWeek !== null}
+                                            title={t('training.publishWeek')}
+                                            aria-label={t('training.publishWeek')}
+                                        >
+                                            <Send size={12} />
+                                        </button>
+                                    )
+                                )}
                             </div>
                             {Array.from({ length: 7 }, (_, d) => (
                                 <div key={d} className={styles.dayCell}>

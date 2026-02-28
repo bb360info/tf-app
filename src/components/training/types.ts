@@ -9,8 +9,9 @@ export interface UpdateExerciseData {
 }
 
 export interface AdHocWarmupData {
-    custom_text_ru: string;
+    custom_text_ru?: string;
     custom_text_en?: string;
     custom_text_cn?: string;
     duration_seconds?: number;
+    exercise_id?: string; // From catalog
 }

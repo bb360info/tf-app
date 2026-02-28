@@ -2,18 +2,24 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, Calendar, AlertTriangle, AlertCircle, Users, UserCog, ChevronUp, Diamond, Minus, MapPin } from 'lucide-react';
+import { ArrowLeft, Calendar, AlertTriangle, AlertCircle, UserCog, ChevronUp, Diamond, Minus, MapPin, Send, Users, Wind, Pencil } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import {
     getSeason,
+    updateSeason,
+    getSeasonParticipantInfo,
     PHASE_COLORS,
     PHASE_LABELS,
     type SeasonWithRelations,
+    type PhaseRecord,
 } from '@/lib/pocketbase/services/seasons';
 import { validatePeaking, type PeakingWarning } from '@/lib/pocketbase/services/peaking';
 import type { PhaseType, TrainingPhasesRecord } from '@/lib/pocketbase/types';
 import type { RecordModel } from 'pocketbase';
 import dynamic from 'next/dynamic';
+import { usePhaseAssignment } from '@/lib/hooks/usePhaseAssignment';
+import { useToast } from '@/lib/hooks/useToast';
+import { SeasonParticipants } from './SeasonParticipants';
 import styles from './SeasonDetail.module.css';
 
 const WeekConstructorLazy = dynamic(() => import('./WeekConstructor'), {
@@ -35,17 +41,31 @@ interface SelectedPhase {
     name: string;
     maxWeeks: number;
     startDate?: string;
+    initialWeek?: number; // for dot-navigation [Phase 6]
 }
 
 export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props) {
     const t = useTranslations();
     const locale = useLocale() as 'ru' | 'en' | 'cn';
+    const { showToast } = useToast();
     const [season, setSeason] = useState<SeasonWithRelations | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedPhase, setSelectedPhase] = useState<SelectedPhase | null>(null);
     const [viewMode, setViewMode] = useState<'week' | 'multi'>('week');
     const [peakingWarnings, setPeakingWarnings] = useState<PeakingWarning[]>([]);
+    // [Task 3.1] Inline season edit
+    const [isEditingSeason, setIsEditingSeason] = useState(false);
+    const [editName, setEditName] = useState('');
+    const [editStartDate, setEditStartDate] = useState('');
+    const [editEndDate, setEditEndDate] = useState('');
+    const [savingSeason, setSavingSeason] = useState(false);
+    // [BugFix #5] Collect allWeekPlans from each PhaseCard to pass to SeasonParticipants.
+    // PhaseCard reports via onPlansLoaded callback — aggregated here keyed by phase.id.
+    const [allWeekPlansByPhase, setAllWeekPlansByPhase] = useState<Record<string, { week_number?: number; status: 'published' | 'draft' }[]>>({});
+    const handlePhasePlansLoaded = useCallback((phaseId: string, plans: { week_number?: number; status: 'published' | 'draft' }[]) => {
+        setAllWeekPlansByPhase(prev => ({ ...prev, [phaseId]: plans }));
+    }, []);
 
     const loadSeason = useCallback(async () => {
         try {
@@ -67,6 +87,43 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
     useEffect(() => {
         loadSeason();
     }, [loadSeason]);
+
+    /** [Task 3.1] Start inline editing — pre-fill inputs from current season */
+    const handleStartEdit = useCallback(() => {
+        if (!season) return;
+        setEditName(season.name ?? '');
+        // stored as ISO date string YYYY-MM-DD (midday UTC) — strip time part
+        setEditStartDate((season.start_date ?? '').substring(0, 10));
+        setEditEndDate((season.end_date ?? '').substring(0, 10));
+        setIsEditingSeason(true);
+    }, [season]);
+
+    /** [Task 3.1] Save season name + dates inline */
+    const handleSaveSeason = useCallback(async () => {
+        if (!season) return;
+        if (new Date(editStartDate) >= new Date(editEndDate)) {
+            showToast({ message: t('training.invalidDateRange', { defaultMessage: 'End date must be after start date' }), type: 'error' });
+            return;
+        }
+        setSavingSeason(true);
+        try {
+            const updated = await updateSeason(season.id, {
+                name: editName.trim() || season.name,
+                // midday UTC trick — avoids timezone-induced date shift
+                start_date: `${editStartDate}T12:00:00.000Z`,
+                end_date: `${editEndDate}T12:00:00.000Z`,
+            });
+            setSeason(updated);
+            setIsEditingSeason(false);
+            showToast({ message: t('training.editSeasonSaved', { defaultMessage: 'Season saved!' }), type: 'success' });
+        } catch (err) {
+            const { logError } = await import('@/lib/utils/errors');
+            logError(err, { component: 'SeasonDetail', action: 'handleSaveSeason' });
+            showToast({ message: t('errors.networkError'), type: 'error' });
+        } finally {
+            setSavingSeason(false);
+        }
+    }, [season, editName, editStartDate, editEndDate, t, showToast]);
 
     const formatDate = (dateStr: string) => {
         try {
@@ -105,7 +162,7 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
         return Math.max(1, diffWeeks + 1);
     };
 
-    const handleManagePlans = (phase: TrainingPhasesRecord & RecordModel) => {
+    const handleManagePlans = (phase: TrainingPhasesRecord & RecordModel, weekNum?: number) => {
         setViewMode('week'); // Reset to week view by default
         setSelectedPhase({
             id: phase.id,
@@ -113,8 +170,18 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
             name: PHASE_LABELS[phase.phase_type][locale],
             maxWeeks: getPhaseWeeks(phase),
             startDate: phase.start_date,
+            initialWeek: weekNum,
         });
     };
+
+    /** Publish a single week's plan from MultiWeekView [Phase 6]
+     *  [Phase 7] Now calls loadSeason() so PhaseCard status-map + progress bar refresh immediately.
+     */
+    const handlePublishWeekInView = useCallback(async (_weekNum: number, planId: string) => {
+        const { publishPlan } = await import('@/lib/pocketbase/services/plans');
+        await publishPlan(planId);
+        await loadSeason(); // refresh PhaseCard after publish from MultiWeekView
+    }, [loadSeason]);
 
     // If MultiWeekView is active
     if (selectedPhase && viewMode === 'multi') {
@@ -124,14 +191,16 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 phaseName={selectedPhase.name}
                 maxWeeks={selectedPhase.maxWeeks}
                 startDate={selectedPhase.startDate} // Use phase start date, not season!
-                onSelectWeek={(_weekNum: number) => {
-                    // Note: WeekConstructor maintains its own week state.
-                    // We should ideally pass initialWeek, but for now just switching view
+                onSelectWeek={(weekNum: number) => {
+                    // Navigate to specific week in WeekConstructor [Phase 6]
+                    setSelectedPhase((prev) => prev ? { ...prev, initialWeek: weekNum } : prev);
                     setViewMode('week');
                 }}
+                onPublishWeek={handlePublishWeekInView} // [Phase 6]
                 onBack={() => {
                     setViewMode('week');
                     setSelectedPhase(null);
+                    void loadSeason(); // [Track 4.267] Refresh data after edits
                 }}
             />
         );
@@ -146,10 +215,12 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 phaseName={selectedPhase.name}
                 maxWeeks={selectedPhase.maxWeeks}
                 startDate={selectedPhase.startDate} // Use phase start date
+                initialWeek={selectedPhase.initialWeek} // [Phase 6] open on specific week
                 readinessScore={readinessScore}
                 onBack={() => {
                     setViewMode('week');
                     setSelectedPhase(null);
+                    void loadSeason(); // [Track 4.267] Refresh data after edits
                 }}
                 onSwitchToMultiView={() => setViewMode('multi')}
             />
@@ -206,10 +277,69 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
             </button>
 
             <div className={styles.header}>
-                <h1 className={styles.title}>{season.name}</h1>
-                <p className={styles.dates}>
-                    {formatDate(season.start_date)} — {formatDate(season.end_date)}
-                </p>
+                {isEditingSeason ? (
+                    <div className={styles.seasonEditRow}>
+                        <input
+                            className={styles.seasonNameInput}
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            placeholder={season.name}
+                            aria-label={t('training.editSeason')}
+                            autoFocus
+                        />
+                        <div className={styles.seasonEditDates}>
+                            <input
+                                type="date"
+                                className={styles.seasonDateInput}
+                                value={editStartDate}
+                                onChange={e => setEditStartDate(e.target.value)}
+                                aria-label={t('training.startDate')}
+                            />
+                            <span className={styles.seasonDateSep}>—</span>
+                            <input
+                                type="date"
+                                className={styles.seasonDateInput}
+                                value={editEndDate}
+                                onChange={e => setEditEndDate(e.target.value)}
+                                aria-label={t('training.endDate')}
+                            />
+                        </div>
+                        <div className={styles.seasonEditActions}>
+                            <button
+                                className={styles.seasonSaveBtn}
+                                onClick={handleSaveSeason}
+                                disabled={savingSeason || !editName.trim()}
+                                aria-label={t('training.editSeasonSave')}
+                            >
+                                {savingSeason ? '...' : t('training.editSeasonSave')}
+                            </button>
+                            <button
+                                className={styles.seasonCancelBtn}
+                                onClick={() => setIsEditingSeason(false)}
+                                aria-label={t('training.editSeasonCancel')}
+                            >
+                                {t('training.editSeasonCancel')}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className={styles.seasonTitleRow}>
+                            <h1 className={styles.title}>{season.name}</h1>
+                            <button
+                                className={styles.seasonEditBtn}
+                                onClick={handleStartEdit}
+                                aria-label={t('training.editSeason')}
+                                title={t('training.editSeason')}
+                            >
+                                <Pencil size={16} />
+                            </button>
+                        </div>
+                        <p className={styles.dates}>
+                            {formatDate(season.start_date)} — {formatDate(season.end_date)}
+                        </p>
+                    </>
+                )}
             </div>
 
             {/* Gantt Timeline */}
@@ -262,6 +392,17 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 </div>
             )}
 
+            {/* Season Participants Panel */}
+            <SeasonParticipants
+                season={season}
+                participantInfo={getSeasonParticipantInfo(season)}
+                phases={sortedPhases as PhaseRecord[]}
+                allWeekPlansByPhase={allWeekPlansByPhase} /* [BugFix #5] populated by PhaseCard callbacks */
+                onParticipantChanged={loadSeason}
+                t={(key, params) => t(key, params)}
+                locale={locale}
+            />
+
             {/* Phases List */}
             <section className={styles.section}>
                 <h2 className={styles.sectionTitle}>
@@ -270,13 +411,14 @@ export default function SeasonDetail({ seasonId, onBack, readinessScore }: Props
                 <div className={styles.cardList}>
                     {sortedPhases.map((phase) => (
                         <PhaseCard
-                            key={phase.id}
+                            key={`${phase.id}-${season.updated ?? ''}`}
                             phase={phase}
                             locale={locale}
                             formatDate={formatDate}
-                            onManagePlans={() => handleManagePlans(phase)}
+                            onManagePlans={(weekNum?: number) => handleManagePlans(phase, weekNum)}
                             weeksCount={getPhaseWeeks(phase)}
                             t={t}
+                            onPlansLoaded={handlePhasePlansLoaded}
                         />
                     ))}
                 </div>
@@ -367,162 +509,70 @@ function PhaseCard({
     onManagePlans,
     weeksCount,
     t,
+    onPlansLoaded,
 }: {
     phase: { phase_type: PhaseType; start_date?: string; end_date?: string; focus?: string } & RecordModel;
     locale: 'ru' | 'en' | 'cn';
     formatDate: (d: string) => string;
-    onManagePlans: () => void;
+    onManagePlans: (weekNum?: number) => void;
     weeksCount: number;
     t: ReturnType<typeof useTranslations>;
+    /** [BugFix #5] Called when plans are loaded — lets SeasonDetail pass data to SeasonParticipants */
+    onPlansLoaded?: (phaseId: string, plans: { week_number?: number; status: 'published' | 'draft' }[]) => void;
 }) {
-    const [showAssign, setShowAssign] = useState(false);
-    const [assignType, setAssignType] = useState<'group' | 'athlete'>('group');
-    const [selectedId, setSelectedId] = useState('');
-    const [options, setOptions] = useState<{ id: string; name: string }[]>([]);
-    const [loadingOptions, setLoadingOptions] = useState(false);
-    const [assigning, setAssigning] = useState(false);
-    const [assignOk, setAssignOk] = useState(false);
-    const [assignError, setAssignError] = useState<string | null>(null);
-    const [overrideCount, setOverrideCount] = useState(0);
+    // All assignment state/logic extracted to hook (Track 4.265 Phase 4)
+    const assign = usePhaseAssignment(phase.id);
 
-    const [publishedPlans, setPublishedPlans] = useState<Array<{ id: string; week_number: number | undefined }>>([]);
-    const [allWeekPlans, setAllWeekPlans] = useState<Array<{ week_number: number | undefined; status: 'published' | 'draft' }>>([]);
-    const [selectedPlanId, setSelectedPlanId] = useState('');
-    const [assignments, setAssignments] = useState<RecordModel[]>([]);
-    const [loadingAssignments, setLoadingAssignments] = useState(false);
-
-    // Initial load of published plans and their assignments
-    const loadAssignments = useCallback(async () => {
-        setLoadingAssignments(true);
-        try {
-            const { listPlansForPhase } = await import('@/lib/pocketbase/services/plans');
-            const plans = await listPlansForPhase(phase.id);
-            const pubs = plans.filter((p) => p.status === 'published').map(p => ({
-                id: p.id,
-                week_number: p.week_number
-            }));
-
-            setPublishedPlans(pubs);
-
-            // For Weekly Status Map: track all plans (published + draft)
-            setAllWeekPlans(plans.map(p => ({ week_number: p.week_number, status: p.status as 'published' | 'draft' })));
-
-            if (pubs.length > 0) {
-                const { listActivePlanAssignments } = await import('@/lib/pocketbase/services/planAssignments');
-                let allAssigns: RecordModel[] = [];
-                for (const p of pubs) {
-                    const assigns = await listActivePlanAssignments(p.id);
-                    const enriched = assigns.map(a => ({ ...a, _planWeek: p.week_number }));
-                    allAssigns = [...allAssigns, ...enriched];
-                }
-                setAssignments(allAssigns);
-
-                // If previously selected plan is no longer valid or nothing selected, select the first one
-                setSelectedPlanId(prev => {
-                    if (!prev || !pubs.find(p => p.id === prev)) return pubs[0].id;
-                    return prev;
-                });
-            } else {
-                setAssignments([]);
-                setSelectedPlanId('');
-            }
-        } catch {
-            /* non-critical */
-        } finally {
-            setLoadingAssignments(false);
-        }
-    }, [phase.id]);
-
+    // [BugFix #5] Report plans to parent so SeasonParticipants can show real progress
     useEffect(() => {
-        loadAssignments();
-    }, [loadAssignments]);
-
-    // Load override count for badge (non-blocking)
-    useEffect(() => {
-        if (!phase.id) return;
-        import('@/lib/pocketbase/services/plans')
-            .then(({ countOverridesForPhase }) => countOverridesForPhase(phase.id))
-            .then(setOverrideCount)
-            .catch(() => { });
-    }, [phase.id]);
-
-    // Load groups or athletes when panel opens or type changes
-    const loadOptions = async (type: 'group' | 'athlete') => {
-        setLoadingOptions(true);
-        setOptions([]);
-        setSelectedId('');
-        try {
-            if (type === 'group') {
-                const { listMyGroups } = await import('@/lib/pocketbase/services/groups');
-                const groups = await listMyGroups();
-                setOptions(groups.map((g) => ({ id: g.id, name: g.name })));
-            } else {
-                const { listMyAthletes } = await import('@/lib/pocketbase/services/athletes');
-                const athletes = await listMyAthletes();
-                setOptions(athletes.map((a) => ({ id: a.id, name: a.name })));
-            }
-        } catch {
-            /* non-critical: assign options enrichment */
-            setOptions([]);
-        } finally {
-            setLoadingOptions(false);
+        if (!assign.loadingAssignments && onPlansLoaded) {
+            onPlansLoaded(phase.id, assign.allWeekPlans);
         }
+    }, [assign.loadingAssignments, assign.allWeekPlans, onPlansLoaded, phase.id]);
+
+    // Default Warmup Template selector [Phase 6 / A2 from Phase 5]
+    const [showWarmupSelector, setShowWarmupSelector] = useState(false);
+    const [warmupTemplates, setWarmupTemplates] = useState<{ id: string; name_ru?: string; name_en?: string; name_cn?: string }[]>([]);
+    const [selectedTemplateId, setSelectedTemplateId] = useState('');
+    const [warmupApplying, setWarmupApplying] = useState(false);
+    const [warmupApplyConfirm, setWarmupApplyConfirm] = useState(false); // [Phase 7: inline confirm replaces window.confirm]
+    const [warmupApplyResult, setWarmupApplyResult] = useState<number | null>(null);
+
+    const handleToggleWarmupSelector = async () => {
+        if (!showWarmupSelector && warmupTemplates.length === 0) {
+            try {
+                const { listTemplates } = await import('@/lib/pocketbase/services/templates');
+                const tpls = await listTemplates('warmup');
+                setWarmupTemplates(tpls);
+                if (tpls.length > 0) setSelectedTemplateId(tpls[0].id);
+            } catch (err) {
+                console.error('[PhaseCard] Failed to load warmup templates:', err);
+            }
+        }
+        setWarmupApplyConfirm(false);
+        setWarmupApplyResult(null);
+        setShowWarmupSelector((v) => !v);
     };
 
-    const handleToggleAssign = () => {
-        const next = !showAssign;
-        setShowAssign(next);
-        if (next) loadOptions(assignType);
+    /** [Phase 7] Replaces window.confirm — shows inline confirm row first */
+    const handleApplyWarmupToPhase = () => {
+        if (!selectedTemplateId) return;
+        setWarmupApplyConfirm(true);
     };
 
-    const handleTypeChange = (type: 'group' | 'athlete') => {
-        setAssignType(type);
-        setAssignError(null);
-        loadOptions(type);
-    };
-
-    const handleAssign = async () => {
-        if (!selectedId || !selectedPlanId || assigning) return;
-        setAssigning(true);
-        setAssignError(null);
+    /** [Phase 7] Actual apply — called after inline confirm */
+    const doApplyWarmupToPhase = async () => {
+        setWarmupApplying(true);
+        setWarmupApplyConfirm(false);
         try {
-            const { listPlansForPhase } = await import('@/lib/pocketbase/services/plans');
-            const plans = await listPlansForPhase(phase.id);
-            const published = plans.find((p) => p.id === selectedPlanId && p.status === 'published');
-            if (!published) {
-                setAssignError(t('training.noPublishedPlan'));
-                setAssigning(false);
-                return;
-            }
-
-            const { assignPlanToGroup, assignPlanToAthlete } = await import('@/lib/pocketbase/services/planAssignments');
-            if (assignType === 'group') {
-                await assignPlanToGroup(published.id, selectedId);
-            } else {
-                await assignPlanToAthlete(published.id, selectedId);
-            }
-            setAssignOk(true);
-            setTimeout(() => {
-                setShowAssign(false);
-                setAssignOk(false);
-                setSelectedId('');
-                setAssignError(null);
-                loadAssignments();
-            }, 1000);
+            const { stampWarmupToAllDays } = await import('@/lib/pocketbase/services/templates');
+            const result = await stampWarmupToAllDays(selectedTemplateId, phase.id);
+            setWarmupApplyResult(result.applied);
+            setShowWarmupSelector(false);
         } catch (err) {
-            setAssignError(err instanceof Error ? err.message : t('errors.assignFailed'));
+            console.error('[PhaseCard] stampWarmupToAllDays failed:', err);
         } finally {
-            setAssigning(false);
-        }
-    };
-
-    const handleUnassign = async (assignId: string) => {
-        try {
-            const { unassignPlan } = await import('@/lib/pocketbase/services/planAssignments');
-            await unassignPlan(assignId);
-            loadAssignments();
-        } catch (e) {
-            console.error('Failed to unassign', e);
+            setWarmupApplying(false);
         }
     };
 
@@ -549,18 +599,18 @@ function PhaseCard({
                 <p className={styles.cardMeta}>{phase.focus}</p>
             )}
 
-            {/* Weekly Status Map */}
+            {/* Weekly Status Map — dots navigate to specific week [Phase 6] */}
             {weeksCount > 0 && (
                 <div className={styles.weekStatusMap} aria-label={t('training.weeklyStatus')}>
                     {Array.from({ length: weeksCount }, (_, i) => {
                         const weekNum = i + 1;
-                        const plan = allWeekPlans.find(p => p.week_number != null && p.week_number === weekNum);
+                        const plan = assign.allWeekPlans.find(p => p.week_number != null && p.week_number === weekNum);
                         const status = plan ? plan.status : 'empty';
                         return (
                             <button
                                 key={weekNum}
                                 className={`${styles.weekDot} ${styles[`weekDot_${status}`]}`}
-                                onClick={onManagePlans}
+                                onClick={() => onManagePlans(weekNum)}
                                 title={`${t('training.week', { n: weekNum })}: ${status === 'published' ? t('training.weekStatusPublished') : status === 'draft' ? t('training.weekStatusDraft') : t('training.weekStatusEmpty')}`}
                                 aria-label={`${t('training.week', { n: weekNum })}: ${status}`}
                             />
@@ -569,130 +619,162 @@ function PhaseCard({
                 </div>
             )}
 
+            {/* Phase Progress Bar [Phase 6] */}
+            {assign.allWeekPlans.length > 0 && (() => {
+                const publishedCount = assign.allWeekPlans.filter(p => p.status === 'published').length;
+                const totalPlans = assign.allWeekPlans.length;
+                const percent = Math.round((publishedCount / totalPlans) * 100);
+                return (
+                    <>
+                        <div className={styles.phaseProgressBar}>
+                            <div
+                                className={styles.phaseProgressFill}
+                                style={{ width: `${percent}%` }}
+                            />
+                        </div>
+                        <p className={styles.phaseProgressLabel}>
+                            {publishedCount}/{totalPlans} {t('training.plansPublished')}
+                        </p>
+                    </>
+                );
+            })()}
+
             <div className={styles.phaseActions}>
-                <button className={styles.managePlansBtn} onClick={onManagePlans}>
+                <button className={styles.managePlansBtn} onClick={() => onManagePlans()}>
                     <Calendar size={14} />
                     {t('training.managePlans')} ({weeksCount} {t('training.weeks')})
                 </button>
-                {overrideCount > 0 && (
+
+                {/* Default Warmup Template selector [Phase 6] */}
+                <button
+                    className={styles.applyWarmupBtn}
+                    onClick={handleToggleWarmupSelector}
+                    title={t('training.applyWarmupToPhase')}
+                    aria-expanded={showWarmupSelector}
+                >
+                    <Wind size={14} />
+                    {t('training.applyWarmupToPhase')}
+                </button>
+                {showWarmupSelector && !warmupApplyConfirm && (
+                    <div className={styles.warmupSelectorRow}>
+                        {warmupTemplates.length === 0 ? (
+                            <span className={styles.warmupNoTemplates}>{t('training.selectWarmupTemplate')}</span>
+                        ) : (
+                            <>
+                                <select
+                                    className={styles.warmupSelect}
+                                    value={selectedTemplateId}
+                                    onChange={(e) => setSelectedTemplateId(e.target.value)}
+                                >
+                                    {warmupTemplates.map((tpl) => (
+                                        <option key={tpl.id} value={tpl.id}>
+                                            {locale === 'en' ? (tpl.name_en || tpl.name_ru) :
+                                                locale === 'cn' ? (tpl.name_cn || tpl.name_ru) :
+                                                    tpl.name_ru}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    className={styles.warmupApplyBtn}
+                                    onClick={handleApplyWarmupToPhase}
+                                    disabled={warmupApplying || !selectedTemplateId}
+                                >
+                                    {warmupApplying ? '...' : t('training.applyWarmupToPhaseApply')}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                )}
+                {/* [Phase 7] Inline confirm replaces window.confirm — consistent UX, works on iOS Safari */}
+                {warmupApplyConfirm && (
+                    <div className={styles.publishConfirm}>
+                        <span className={styles.publishConfirmText}>
+                            {t('training.warmupApplyConfirm')}
+                        </span>
+                        <button
+                            className={styles.publishConfirmBtn}
+                            onClick={doApplyWarmupToPhase}
+                            disabled={warmupApplying}
+                        >
+                            {warmupApplying ? '...' : t('training.confirmYes')}
+                        </button>
+                        <button
+                            className={styles.publishCancelBtn}
+                            onClick={() => setWarmupApplyConfirm(false)}
+                        >
+                            {t('training.confirmNo')}
+                        </button>
+                    </div>
+                )}
+                {warmupApplyResult !== null && (
+                    <p className={styles.phaseProgressLabel} style={{ color: 'var(--color-success)' }}>
+                        {t('training.warmupApplied')} ({warmupApplyResult})
+                    </p>
+                )}
+                {assign.overrideCount > 0 && (
                     <span className={styles.overrideBadge} title={t('training.overrides')}>
                         <UserCog size={11} />
-                        {overrideCount} {t('training.overrides')}
+                        {assign.overrideCount} {t('training.overrides')}
                     </span>
                 )}
-                <button
-                    className={styles.assignBtn}
-                    onClick={handleToggleAssign}
-                    title={t('training.assign')}
-                >
-                    <Users size={14} />
-                    {t('training.assign')}
-                </button>
+                {assign.draftCount > 0 && !assign.showPublishConfirm && (
+                    <button
+                        className={styles.publishAllBtn}
+                        onClick={() => assign.setShowPublishConfirm(true)}
+                        disabled={assign.publishingAll}
+                        title={t('training.publishAllDrafts', { count: assign.draftCount })}
+                    >
+                        <Send size={14} />
+                        {t('training.publishAllDrafts', { count: assign.draftCount })}
+                    </button>
+                )}
+                {assign.showPublishConfirm && (
+                    <div className={styles.publishConfirm}>
+                        <span className={styles.publishConfirmText}>
+                            {t('training.publishConfirm', { count: assign.draftCount })}
+                        </span>
+                        <button
+                            className={styles.publishConfirmBtn}
+                            onClick={assign.handlePublishAll}
+                            disabled={assign.publishingAll}
+                        >
+                            {assign.publishingAll ? t('training.publishing') : t('training.confirmYes')}
+                        </button>
+                        <button
+                            className={styles.publishCancelBtn}
+                            onClick={() => assign.setShowPublishConfirm(false)}
+                        >
+                            {t('training.confirmNo')}
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {/* Active Assignments */}
-            {!loadingAssignments && assignments.length > 0 && (
-                <div className={styles.assignmentsList}>
-                    {assignments.map(a => (
-                        <div key={a.id} className={styles.assignmentBadge}>
-                            <span>
-                                {a._planWeek ? `[${t('training.week', { n: a._planWeek })}] ` : ''}
-                                {a.group_id
-                                    ? t('training.assignedToGroup', { name: a.expand?.group_id?.name || 'Unknown' })
-                                    : t('training.assignedToAthlete', { name: a.expand?.athlete_id?.name || 'Unknown' })
-                                }
-                            </span>
-                            <button
-                                className={styles.unassignBtn}
-                                onClick={() => handleUnassign(a.id)}
-                                title={t('training.unassign')}
-                                aria-label={t('training.unassign')}
-                            >
-                                &times;
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {showAssign && (
-                <div className={styles.assignPanel}>
-                    {/* Radio: Group vs Athlete */}
-                    <div className={styles.assignTypeRow}>
-                        <button
-                            className={`${styles.assignTypeBtn} ${assignType === 'group' ? styles.assignTypeBtnActive : ''}`}
-                            onClick={() => handleTypeChange('group')}
-                        >
-                            <Users size={13} />
-                            {t('training.assignToGroup')}
-                        </button>
-                        <button
-                            className={`${styles.assignTypeBtn} ${assignType === 'athlete' ? styles.assignTypeBtnActive : ''}`}
-                            onClick={() => handleTypeChange('athlete')}
-                        >
-                            {t('training.assignToAthlete')}
-                        </button>
+            {/* Assignment status — read-only (full assign UI moved to SeasonParticipants) */}
+            {
+                !assign.loadingAssignments && assign.assignments.length > 0 && (
+                    <div className={styles.assignmentsList}>
+                        {assign.assignments.map(a => (
+                            <div key={a.id} className={styles.assignmentBadge}>
+                                <Users size={12} aria-hidden="true" />
+                                <span>
+                                    {(a as RecordModel & { _planWeek?: number })._planWeek
+                                        ? `[${t('training.week', { n: (a as RecordModel & { _planWeek?: number })._planWeek ?? 0 })}] `
+                                        : ''}
+                                    {(a as RecordModel & { group_id?: string }).group_id
+                                        ? t('training.assignedToGroup', {
+                                            name: (a as RecordModel & { expand?: { group_id?: { name?: string } } }).expand?.group_id?.name ?? 'Unknown',
+                                        })
+                                        : t('training.assignedToAthlete', {
+                                            name: (a as RecordModel & { expand?: { athlete_id?: { name?: string } } }).expand?.athlete_id?.name ?? 'Unknown',
+                                        })
+                                    }
+                                </span>
+                            </div>
+                        ))}
                     </div>
-
-                    <div className={styles.assignRow} style={{ marginBottom: 16 }}>
-                        <select
-                            className={styles.assignSelect}
-                            value={selectedPlanId}
-                            onChange={(e) => setSelectedPlanId(e.target.value)}
-                            disabled={publishedPlans.length === 0}
-                        >
-                            {publishedPlans.length === 0 ? (
-                                <option value="">{t('training.noPublishedPlan')}</option>
-                            ) : (
-                                publishedPlans.map((p) => (
-                                    <option key={p.id} value={p.id}>
-                                        {t('training.week', { n: p.week_number ?? '?' })}
-                                    </option>
-                                ))
-                            )}
-                        </select>
-                    </div>
-
-                    {/* Dropdown for athlete/group */}
-                    <div className={styles.assignRow}>
-                        <select
-                            className={styles.assignSelect}
-                            value={selectedId}
-                            onChange={(e) => { setSelectedId(e.target.value); setAssignError(null); }}
-                            disabled={loadingOptions || options.length === 0}
-                        >
-                            <option value="">
-                                {loadingOptions
-                                    ? '...'
-                                    : options.length === 0
-                                        ? (assignType === 'group' ? t('training.noGroups') : t('training.noAthletes'))
-                                        : assignType === 'group'
-                                            ? t('training.selectGroup')
-                                            : t('training.selectAthlete')
-                                }
-                            </option>
-                            {options.map((opt) => (
-                                <option key={opt.id} value={opt.id}>{opt.name}</option>
-                            ))}
-                        </select>
-                        <button
-                            className={styles.assignConfirmBtn}
-                            onClick={handleAssign}
-                            disabled={!selectedId || !selectedPlanId || assigning}
-                        >
-                            {assignOk ? '✓' : assigning ? '...' : t('training.assign')}
-                        </button>
-                    </div>
-                    {selectedPlanId && selectedId && (
-                        <p className={styles.assignPreview}>
-                            {t('training.assigningPreview', { plan: t('training.week', { n: publishedPlans.find(p => p.id === selectedPlanId)?.week_number ?? '?' }) })}
-                        </p>
-                    )}
-                    {assignError && (
-                        <p className={styles.assignError}>{assignError}</p>
-                    )}
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

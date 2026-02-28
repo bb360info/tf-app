@@ -10,6 +10,9 @@ import type {
     SeasonsRecord,
     TrainingPhasesRecord,
     CompetitionsRecord,
+    AthletesRecord,
+    GroupsRecord,
+    GroupMembersRecord,
     PhaseType,
     CompetitionStatus,
     Discipline,
@@ -24,8 +27,37 @@ export type SeasonWithRelations = SeasonsRecord &
         expand?: {
             'training_phases(season_id)'?: (TrainingPhasesRecord & RecordModel)[];
             'competitions(season_id)'?: (CompetitionsRecord & RecordModel)[];
+            athlete_id?: AthletesRecord & RecordModel;
+            group_id?: (GroupsRecord & RecordModel) & {
+                expand?: {
+                    'group_members(group_id)'?: (GroupMembersRecord & RecordModel)[];
+                };
+            };
         };
     };
+
+export type SeasonParticipantInfo =
+    | { type: 'athlete'; name: string; athleteId: string }
+    | { type: 'group'; name: string; groupId: string; memberCount: number }
+    | { type: 'none' };
+
+/** Extract participant info from an expanded season record */
+export function getSeasonParticipantInfo(season: SeasonWithRelations): SeasonParticipantInfo {
+    const expandedAthlete = season.expand?.athlete_id;
+    const expandedGroup = season.expand?.group_id;
+
+    if (expandedAthlete && season.athlete_id) {
+        return { type: 'athlete', name: expandedAthlete.name, athleteId: season.athlete_id };
+    }
+    if (expandedGroup && season.group_id) {
+        const memberCount = expandedGroup.expand?.['group_members(group_id)']?.length ?? 0;
+        return { type: 'group', name: expandedGroup.name, groupId: season.group_id, memberCount };
+    }
+    // Fallback: fields exist but not expanded — use IDs as signal
+    if (season.athlete_id) return { type: 'athlete', name: '—', athleteId: season.athlete_id };
+    if (season.group_id) return { type: 'group', name: '—', groupId: season.group_id, memberCount: 0 };
+    return { type: 'none' };
+}
 
 export type PhaseRecord = TrainingPhasesRecord & RecordModel;
 export type CompetitionRecord = CompetitionsRecord & RecordModel;
@@ -89,10 +121,10 @@ export async function getActiveSeasonForAthlete(
     }
 }
 
-/** Get a single season with phases and competitions */
+/** Get a single season with phases, competitions, and participant info */
 export async function getSeason(id: string): Promise<SeasonWithRelations> {
     return pb.collection(Collections.SEASONS).getOne<SeasonWithRelations>(id, {
-        expand: 'training_phases(season_id),competitions(season_id)',
+        expand: 'training_phases(season_id),competitions(season_id),athlete_id,group_id,group_id.group_members(group_id)',
     });
 }
 
@@ -108,12 +140,40 @@ export async function createSeason(data: {
     return pb.collection(Collections.SEASONS).create<SeasonWithRelations>(data);
 }
 
-/** Update a season */
+/** Update a season (general fields) */
 export async function updateSeason(
     id: string,
     data: Partial<Pick<SeasonsRecord, 'name' | 'start_date' | 'end_date'>>
 ): Promise<SeasonWithRelations> {
     return pb.collection(Collections.SEASONS).update<SeasonWithRelations>(id, data);
+}
+
+/**
+ * Update season participant assignment.
+ * Pass null to clear athlete_id or group_id.
+ */
+export async function updateSeasonParticipant(
+    seasonId: string,
+    patch: { athlete_id?: string | null; group_id?: string | null }
+): Promise<void> {
+    await pb.collection(Collections.SEASONS).update(seasonId, patch);
+}
+
+/**
+ * Deactivate ALL active plan_assignments for all plans in a season.
+ * Call this BEFORE updating season participant (athlete_id/group_id change).
+ * Prevents stale assignments from pointing to the old athlete/group.
+ * [Post Track 4.265 BugFix #1]
+ * [Track 4.267] Delegates to unified assignmentLifecycle service.
+ */
+export async function clearSeasonAssignments(seasonId: string): Promise<void> {
+    try {
+        const { deactivateForSeason } = await import('./assignmentLifecycle');
+        await deactivateForSeason(seasonId);
+    } catch (err) {
+        // Non-blocking: log but don't throw — participant update should still proceed
+        console.warn('[clearSeasonAssignments] failed (non-blocking):', err);
+    }
 }
 
 /** Soft-delete a season */
