@@ -55,6 +55,16 @@ export async function getPreferences(
     }
 }
 
+/**
+ * Get the user's IANA timezone from notification_preferences.
+ * Falls back to browser Intl API if no preferences record found.
+ * Read-only — does NOT call getOrCreatePreferences, will not create a record.
+ */
+export async function getUserTimezone(userId: string): Promise<string> {
+    const prefs = await getPreferences(userId);
+    return prefs?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
 /** Update preferences by record ID. */
 export async function updatePreferences(
     recordId: string,

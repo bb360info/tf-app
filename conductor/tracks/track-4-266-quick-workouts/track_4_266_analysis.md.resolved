@@ -1,0 +1,228 @@
+# 🏗️ Архитектурный ревью Track 4.266 — Context-Aware Quick Workouts
+
+🛠 Скиллы: `concise-planning`, `architecture`, `architect-review`, `brainstorming`
+
+---
+
+## 1. Общая оценка плана
+
+**Вердикт: план грамотный по направлению, но требует доработки в 5 ключевых местах.**
+
+Вариант C3 (Context-Aware Hybrid) — правильный выбор. Он не усложняет схему, а использует уже заложенные в Track 4.263 поля (`plan_type`, опциональный `phase_id`). Однако есть ряд архитектурных слепых зон и конфликтов с Track 4.265.
+
+---
+
+## 2. ❌ Конфликты с Track 4.265
+
+### 2.1 [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) — прямое пересечение
+
+| Зона | Track 4.265 | Track 4.266 |
+|------|-------------|-------------|
+| [getOrCreatePlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#83-102) | Использует как есть | Нужна альтернатива `ensureStandalonePlan()` |
+| [publishPlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#235-396) | Модифицирован (auto-assign, deactivation scope fix) | Plan 4.266 не учитывает auto-assign логику при standalone publish |
+| [publishAllDrafts()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#405-425) | Добавлен в Phase 2 | Не затрагивает, но standalone планы должны быть **ИСКЛЮЧЕНЫ** из [publishAllDrafts()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#405-425) |
+
+> [!IMPORTANT]
+> [publishAllDrafts()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#405-425) уже имеет фильтр `plan_type != 'override'`, но **standalone** планы тоже нужно исключить — они не относятся к фазе и не должны попасть в batch-publish.
+
+### 2.2 [SeasonWizard.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx) — критический конфликт
+
+**Track 4.265 НЕ модифицирует [handleSave()](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240) в SeasonWizard.** Текущий [handleSave()](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240) создаёт сезон → фазы → компетиции и вызывает `onCreated()`.
+
+**Track 4.266 хочет добавить шаг Conflict Resolution** между `competitions` и [review](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#592-659) в визарде. Это:
+- Добавляет новый [WizardStep](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#22-23) в массив `STEPS`
+- Требует async-запрос `getStandalonePlansForPeriod()` при переходе на этот шаг
+- Модифицирует [handleSave()](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240) — после создания фаз нужно вызвать `resolveStandaloneConflict()` для каждого конфликта
+
+> [!WARNING]
+> Если Track 4.265 Phase 6 ещё не закрыт к моменту начала 4.266, оба трека будут модифицировать [SeasonWizard.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx) параллельно — гарантирован merge-конфликт.
+
+### 2.3 [QuickWorkout.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/QuickWorkout.tsx) — мягкий конфликт
+
+Track 4.265 не трогает [QuickWorkout.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/QuickWorkout.tsx), но Track 4.265 Phase 3 (Auto-Assignment on Publish) меняет поведение [publishPlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#235-396) — теперь publish автоматически создаёт assignments. Это означает:
+
+- В 4.266, когда QuickWorkout создаёт standalone план → вызывает [publishPlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#235-396) → auto-assign попытается найти season → **НЕ НАЙДЁТ** (у standalone нет phase_id → нет season_id) → `catch` сработает, но тихо. **Это ОК**, но нужно убедиться, что auto-assign gracefully handles `phase_id = null`.
+
+### 2.4 Рекомендация по порядку
+
+```
+✅ Правильно: Сначала закрыть Track 4.265 → потом начать Track 4.266
+❌ Неправильно: Работать над обоими параллельно
+```
+
+---
+
+## 3. 🏗️ Архитектурные проблемы плана
+
+### 3.1 ⚠️ `ensureStandalonePlan()` — дублирование логики
+
+План предлагает создать НОВУЮ функцию `ensureStandalonePlan()`. Но уже есть [createPlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#52-67) с `plan_type: 'standalone'`. Ещё одна "ensure" функция — это дублирование паттерна [getOrCreatePlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#83-102).
+
+**Рекомендация: расширить [getOrCreatePlan()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#83-102) или создать вариант `createStandalonePlan()`** — одноразовую фабрику, а не get-or-create (standalone планы всегда создаются заново, не ищутся).
+
+```typescript
+// Предлагаю: простая фабрика
+export async function createStandalonePlan(data: {
+    athlete_id?: string;
+    start_date: string; // дата тренировки
+    end_date: string;
+    notes?: string;
+}): Promise<PlanWithExercises> {
+    return createPlan({
+        plan_type: 'standalone',
+        phase_id: '', // PocketBase optional field
+        week_number: 1,
+        start_date: data.start_date,
+        end_date: data.end_date,
+        status: 'draft',
+        notes: data.notes,
+    });
+}
+```
+
+### 3.2 ⚠️ Standalone план без `athlete_id` — кому он принадлежит?
+
+Текущий `training_plans` имеет `athlete_id` (опционально, Track 4.263). План 4.266 не упоминает, **как standalone план привязывается к конкретному атлету**. Сценарий:
+
+1. Тренер создаёт quick workout для атлета Маши на 15 марта
+2. Тренер создаёт quick workout для атлета Пети на 15 марта
+3. При создании сезона `getStandalonePlansForPeriod(athleteId, ...)` должен вернуть только планы **конкретного** атлета
+
+**Проблема:** текущий `ensurePlanAndAssign()` в QuickWorkout после создания плана делает `assignPlanToAthlete()`, но assignment — это отдельная таблица. А `training_plans.athlete_id` может быть пустым.
+
+**Рекомендация:** при создании standalone плана **обязательно заполнять `athlete_id`** в самом плане, а не только в assignment. Иначе `getStandalonePlansForPeriod` не сможет фильтровать.
+
+### 3.3 ⚠️ `resolveStandaloneConflict` — транзакционная целостность
+
+Если тренер выбирает "Merge" для 5 standalone планов, а на 3-м сервер падает — состояние будет inconsistent. Нужен:
+
+- Either: all-or-nothing подход (собрать все actions, выполнить в цикле, откатить при ошибке)
+- Or: idempotent retry (при ошибке — повторить весь batch)
+
+**Рекомендация:** sequential loop с try/catch per item + rollback list. SQLite not supports real transactions via PocketBase API, но можно собрать список изменённых IDs и откатить при crash.
+
+### 3.4 ⚠️ Дата standalone плана vs `start_date`/`end_date`
+
+`training_plans` имеет `start_date` и `end_date`, но для standalone quick workout это **один день**. План не уточняет, как ставится `start_date` и `end_date`. Если оба = дата тренировки, то `getStandalonePlansForPeriod()` может правильно фильтровать по range overlap.
+
+**Рекомендация:** для standalone: `start_date = end_date = дата тренировки`.
+
+---
+
+## 4. 🎨 UX-предложения
+
+### 4.1 Conflict Resolution — перенести из SeasonWizard в отдельный шаг ПОСЛЕ создания
+
+Вместо добавления шага В визард:
+
+**Текущий план:** `basics → phases → conflicts → competitions → review`
+**Проблема:** пользователь ещё не создал сезон, а мы уже спрашиваем про конфликты. Фазы могут измениться на следующем шаге.
+
+**Предложение:** Conflict Resolution **ПОСЛЕ** создания сезона, как отдельный модальный диалог:
+
+```
+1. Визард создаёт сезон (как сейчас)
+2. После onCreated() → проверяем standalone планы
+3. Если есть конфликты → показываем ConflictResolutionDialog
+4. Пользователь разрешает конфликты
+5. Возврат к SeasonDetail
+```
+
+**Плюсы:**
+- Не усложняет SeasonWizard
+- Фазы уже созданы → мы ТОЧНО знаем `targetPhaseId` для merge
+- Можно использовать тот же паттерн и для СУЩЕСТВУЮЩИХ сезонов (не только при создании)
+- Меньше конфликт с Track 4.265
+
+### 4.2 QuickWorkout — visual feedback при standalone save
+
+Сейчас при сохранении в season тренировка уходит молча. Для standalone нужно:
+- Показать info badge: "Сохранено как независимая тренировка (без сезона)"
+- Добавить link: "Создать сезон для этого периода →"
+- Цвет бейджа: `var(--color-warning)` (жёлтый, чтобы отличить от нормального flow)
+
+### 4.3 Видимость standalone тренировок
+
+**Где атлет увидит standalone тренировку?** План не описывает это.
+
+Сейчас `AthleteTrainingView` показывает планы через `plan_assignments`. Если standalone план создан + `assignPlanToAthlete()` сработал → он будет виден. Но нужен UI-маркер:
+- Бейдж "Standalone" рядом с датой
+- Другой цвет фона (например, `var(--color-bg-tertiary)`)
+- Tooltip: "Эта тренировка создана вне сезона"
+
+### 4.4 Batch conflict resolution вместо per-item
+
+План предлагает обработку "для каждого конфликта или оптом". Для UX лучше:
+
+```
+┌──────────────────────────────────────────────────┐
+│ 🔔 Найдены 3 независимые тренировки в датах       │
+│    нового сезона                                  │
+│                                                    │
+│ ☐ 15.03 — Quick workout (5 упражнений)           │
+│ ☐ 18.03 — Quick workout (3 упражнения)           │
+│ ☐ 22.03 — Quick workout (8 упражнений)           │
+│                                                    │
+│ Действие для выбранных:                           │
+│ [Включить в сезон] [Оставить] [Удалить]          │
+│                                                    │
+│ [ ] Применить ко всем выбранным                   │
+└──────────────────────────────────────────────────┘
+```
+
+С чекбоксами и batch-действием — это привычнее, чем per-item confirmation.
+
+---
+
+## 5. 📋 Итоговые рекомендации
+
+| # | Проблема | Серьёзность | Рекомендация |
+|---|----------|-------------|--------------|
+| 1 | Конфликт с 4.265 в SeasonWizard | 🔴 Высокая | Начать 4.266 ТОЛЬКО после закрытия 4.265 |
+| 2 | [publishAllDrafts()](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#405-425) пропустит standalone | 🟡 Средняя | Добавить фильтр `plan_type != 'standalone'` |
+| 3 | `ensureStandalonePlan` дублирует паттерн | 🟡 Средняя | Заменить на `createStandalonePlan()` (фабрика) |
+| 4 | Standalone без `athlete_id` в плане | 🔴 Высокая | Обязательно заполнять `training_plans.athlete_id` при создании |
+| 5 | Нет rollback при batch resolve | 🟡 Средняя | Добавить idempotent retry + error list |
+| 6 | Conflict step В визарде — не оптимально | 🟡 Средняя | Вынести в пост-создание модал |
+| 7 | Нет UI для standalone в AthleteTrainingView | 🟡 Средняя | Добавить бейдж + цвет |
+| 8 | `start_date`/`end_date` для standalone не определён | 🟡 Средняя | `start_date = end_date = дата тренировки` |
+
+---
+
+## 6. Улучшенная структура gate.md (предложение)
+
+```markdown
+- [ ] Phase 1: Backend — Standalone Plan Service
+  - [ ] Create `createStandalonePlan()` factory in plans.ts
+  - [ ] Set athlete_id on standalone plan (not just assignment)
+  - [ ] Create `getStandalonePlansForPeriod(athleteId, startDate, endDate)`
+  - [ ] Create `resolveStandaloneConflicts(conflicts: ConflictResolution[])`
+  - [ ] Add filter: publishAllDrafts excludes standalone plans
+  - [ ] Verify auto-assign in publishPlan handles phase_id=null gracefully
+
+- [ ] Phase 2: QuickWorkout standalone saving
+  - [ ] Remove noSeasonForDate throw → create standalone plan
+  - [ ] Show standalone badge on success  
+  - [ ] Create plan with start_date=end_date=selected date
+  - [ ] pnpm type-check && pnpm build
+
+- [ ] Phase 3: Conflict Resolution (post-season-creation)
+  - [ ] New component ConflictResolutionDialog.tsx
+  - [ ] Batch UI with checkboxes + action buttons
+  - [ ] Integration: after SeasonWizard.onCreated → check conflicts → show dialog
+  - [ ] resolveStandaloneConflicts with retry/error handling
+  - [ ] i18n keys (RU/EN/CN)
+
+- [ ] Phase 4: AthleteTrainingView standalone visibility
+  - [ ] Standalone badge in plan card
+  - [ ] Different bg color for standalone plans
+  - [ ] Tooltip explaining standalone status
+
+- [ ] Phase 5: Verification & QA
+  - [ ] Test: create standalone when no season
+  - [ ] Test: create season overlapping standalone → conflict dialog
+  - [ ] Test: merge/keep/delete all work correctly
+  - [ ] Test: publishAllDrafts skips standalone
+  - [ ] Test: auto-assign handles standalone gracefully
+  - [ ] pnpm test && pnpm build && pnpm type-check && pnpm lint
+```
