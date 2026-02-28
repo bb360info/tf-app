@@ -443,7 +443,8 @@ export async function archivePlan(planId: string): Promise<PlanWithExercises> {
  */
 export async function publishAllDrafts(phaseId: string): Promise<number> {
     const plans = await listPlansForPhase(phaseId);
-    const drafts = plans.filter(p => p.status === 'draft' && p.plan_type !== 'override');
+    // [Track 4.268 Phase 2.5] Also exclude standalone — they're not part of a phase batch
+    const drafts = plans.filter(p => p.status === 'draft' && p.plan_type !== 'override' && p.plan_type !== 'standalone');
     let count = 0;
     for (const draft of drafts) {
         try {
