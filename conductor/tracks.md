@@ -33,8 +33,12 @@
 | ~~⬜~~ | ~~4.261~~ | ~~Athlete UX Overhaul + Tech Debt Closure~~ | — | _Absorbed into 4.262_ |
 | ✅ Done | 4.262 | Athlete UX Completion + Historical PR Onboarding | 6-8 | [Gate 4.262](tracks/track-4.262-athlete-ux-pr-onboarding/gate.md) |
 | ✅ Done | 4.263 | Schema Decoupling — Polymorphic Ownership | 4-6 | [Gate 4.263](tracks/track-4.263-schema-decoupling/gate.md) |
-| 🔵 Active | 4.264 | Schema & Code Audit Fixes (6 багов из аудита) | 1-2 | [Gate 4.264](tracks/track-4.264-schema-audit-fixes/gate.md) |
+| ✅ Done | 4.264 | Schema & Code Audit Fixes (6 багов из аудита) | 1-2 | [Gate 4.264](tracks/track-4.264-schema-audit-fixes/gate.md) |
+| ✅ Done | 4.265 | Season-Level Assignment & Warmup Fixes | 5-8 | [Gate 4.265](tracks/track-4.265-season-level-assignment/gate.md) |
 | ✅ Done | 4.26 | Invite Self-Profile Hotfix | 1 | [Gate 4.26](tracks/track-4.26-invite-self-profile-hotfix/gate.md) |
+| ✅ Done | 4.266 | Pre-Video Tech Debt & Polish | 4-6 | [Gate 4.266](tracks/track-4.266-pre-video-tech-debt/gate.md) |
+| 🔵 Active | 4.267 | Constructor Bugs, Assignment Fixes, Planning UX & Quick Workouts | 8-12 | [Gate 4.267](tracks/track-4.267-constructor-bugs/gate.md) |
+| 🟡 Next | 4.268 | Tech Debt Zero (Pre-Video Prep) | 3-5 | [Gate 4.268](tracks/track-4.268-tech-debt-zero/gate.md) |
 | ⬜ | 5 | Video + Biomechanics | 3-4 | [Gate 5](tracks/track-5-video/gate.md) |
 | ⬜ | 6 | Polish + Launch | 2-3 | [Gate 6](tracks/track-6-polish/gate.md) |
 

@@ -101,7 +101,7 @@ Read `conductor/tracks.md`:
 Запускай ТОЛЬКО если пользователь **не дал** конкретную задачу И это начало нового рабочего дня/сессии:
 
 ```bash
-pnpm type-check 2>&1 | tail -5
+pnpm type-check 2>&1 | tail -30
 ```
 
 Если есть ошибки TS, первая строка ТВОЕГО доклада должна быть:
@@ -126,14 +126,24 @@ tail -30 CHANGELOG.md
 
 ### Шаг 8. Загрузка скиллов
 
-1. Read `.agent/skills/project_skills.json` — вспомни доступные группы скиллов и `_blocklist`
-2. Определи какие группы скиллов релевантны для **следующей задачи** (из шага 7)
-3. **Загрузи `SKILL.md`** для каждой выбранной группы — используй `view_file` на каждый `.agent/skills/skills/<group>/SKILL.md`
+Выполни воркфлоу `[/auto-skills]` для подбора релевантных скиллов (опираясь на задачу из Шага 7).
 
 > [!IMPORTANT]
-> Это обязательно (Skill Loading Iron Law из GEMINI.md). Лимит по умолчанию: **2-4 скилла**. Расширяй до 5-7 только для high-risk задач. Проверь `_blocklist` — заблокированные скиллы НИКОГДА не грузить.
+> Это обязательно (Skill Loading Iron Law из GEMINI.md). Не пытайся подбирать скиллы вручную, делегируй это воркфлоу `[/auto-skills]`, который содержит все актуальные правила лимитов и блок-листов.
 
-### Шаг 9. Доклад
+### Шаг 9. Обновление `workflow_state.md` (ОБЯЗАТЕЛЬНО ДО ДОКЛАДА)
+
+Обнови файл `workflow_state.md` в папке активного трека:
+
+- `last_read_docs_versions.gate_md`
+- `last_read_docs_versions.context_md`
+- `last_read_docs_versions.changelog_tail`
+- `last_loaded_skills`
+- `last_switch_agent_context` (короткое summary + mode full/light)
+
+⚠️ ВАЖНО: Сделай это до вывода финального текстового сообщения (доклада), чтобы не забыть!
+
+### Шаг 10. Доклад
 
 Сделай краткий доклад в формате:
 
@@ -162,7 +172,7 @@ tail -30 CHANGELOG.md
 Первая строка доклада ВСЕГДА начинается с кода модели в квадратных скобках, например:
 `[CS] 🔵 Активный трек: Track 5 — Video + Biomechanics`
 
-### Шаг 10. Рекомендация «что дальше»
+### Шаг 11. Рекомендация «что дальше»
 
 - Если найден `phase-N-plan.md` → «Фаза N спланирована. Продолжить выполнение?»
 - Если найден `implementation_plan.md` → «Найден план трека. Запустить `/phase` для следующей фазы?»
@@ -200,13 +210,3 @@ cp <brain-artifact>/implementation_plan.md → conductor/tracks/track-N-<slug>/i
 ```
 
 Это позволяет следующему агенту автоматически подхватить контекст через `/switch-agent`.
-
-## Обновление `workflow_state.md` после доклада
-
-Обнови в active track:
-
-- `last_read_docs_versions.gate_md`
-- `last_read_docs_versions.context_md`
-- `last_read_docs_versions.changelog_tail`
-- `last_loaded_skills`
-- `last_switch_agent_context` (короткое summary + mode full/light)

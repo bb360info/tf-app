@@ -1,5 +1,214 @@
 # Changelog
 
+### [2026-02-27] Track 4.267 Phase 4 — Unit Tests
+
+**Added:**
+
+- `assignmentLifecycle.test.ts` [NEW] — 10 unit-тестов: `deactivateForPlan` (3 кейса), `deactivateSiblings` (3 кейса), `deactivateForSeason` (4 кейса)
+- `revertToDraft.test.ts` [NEW] — 4 теста: порядок вызовов (deactivation перед status update), error safety (план остаётся published при сбое деактивации)
+- `duplicatePlanWeek.test.ts` [NEW] — 6 тестов: published guard, no-source early return, soft-delete existing, copy to dest, empty source skip, warmup filter
+- `assignOptimized.test.ts` [NEW] — 8 тестов: `assignPlanToAthlete` + `assignPlanToGroup` — lightweight `getOne({fields:'id,status'})`, idempotency, reactivation, non-published guard
+
+**Verified:** `pnpm test` ✅ **159/159** (было 131, добавлено 28 новых тестов)
+
+**Added:**
+
+- `stampWarmupToDay()` in `templates.ts` — applies warmup template to a specific day (per-day, not whole week)
+- `handleApplyWarmupToDay()` in `usePlanActions.ts` — hook integration for per-day warmup picker
+- Inline season edit UI in `SeasonDetail.tsx` — pencil button → edit name + start/end dates in-place with validation
+- Per-day warmup template picker in `WeekConstructor.tsx` — Wind icon → lazy-loaded template select + apply
+- `ExerciseAdjustmentPanel.tsx` + CSS — glassmorphism overlay modal for per-athlete exercise overrides (sets, reps, intensity, skip, notes)
+- i18n: 19 new keys in RU/EN/CN (editSeason, adjustmentTitle, warmupDayApplied, etc.)
+- CSS: `.seasonTitleRow`, `.seasonEditRow`, `.seasonSaveBtn`, `.dayWarmupPicker*` — all tokens & 44px touch targets
+
+**Changed:**
+
+- `SeasonDetail.tsx`: `useToast` added; header now toggles between view/edit mode
+- `WeekConstructor.tsx`: `useCallback` + `Wind` added to imports; per-day warmup state & handlers
+
+### [2026-02-27] Track 4.267 Phase 2 — Medium Bugs (UX + Consistency)
+
+**Added:**
+
+- `getExistingPlan()` — finds plan without creating it (lazy load pattern)
+- `ensurePlan()` — creates plan lazily on first coach action
+- `ensurePlanExists()` callback in `usePlanData` — used by all mutation hooks
+- Empty week UI in `WeekConstructor` — shown when plan is null, guides coach to add first exercise
+- QuickWorkout standalone mode — saves workout without season (`plan_type: 'standalone'`)
+- i18n: `training.emptyWeek` (RU/EN/CN), `quickPlan.noSeasonExplain/saveStandalone/savedStandalone`
+
+**Changed:**
+
+- `usePlanData`: `getOrCreatePlan` → `getExistingPlan` (no more phantom draft plans on empty weeks)
+- `usePlanActions`: all mutation handlers call `ensurePlanExists()` before first write
+- QuickWorkout: `noSeasonForDate` error → sentinal `NO_SEASON` → `noSeasonMode` UI dialog
+
+**Fixed:**
+
+- Phantom draft plans created when coach opens an empty week without adding anything
+
+**Fixed:**
+
+- `parse_json.ts`: `any` → `Record<string, unknown>` — устранена lint-ошибка `no-explicit-any`
+- `WeekConstructor.tsx`: убран ручной `useCallback` из `handleDayNoteChange` (конфликт с React Compiler мемоизацией, `Compilation Skipped` error). Заменён на plain `async function` — React Compiler мемоизирует автоматически.
+- `WeekConstructor.tsx`: удалён неиспользуемый импорт `useToast` + деструктуризация `showToast`
+
+**Verified:**
+
+- `pnpm lint` ✅ **0 errors** (было 2), 15 warnings (pre-existing)
+- `pnpm type-check` ✅ 0 ошибок
+- `pnpm test` ✅ 131/131 passed (14 файлов, включая 3 новых Phase 4)
+- `pnpm build` ✅ Exit code: 0
+- `wc -l WeekConstructor.tsx` → **419** (< 450) ✅
+- QA timezone: поле `timezone` в `notification_preferences` ✅ (подтверждено через PocketBase Admin)
+- QA override boundary: поля `start_date` + `plan_type` в `training_plans` ✅ (подтверждено через PocketBase Admin)
+
+---
+
+### [2026-02-27] Track 4.266 Phase 4 — Unit Tests
+
+**Added:**
+
+- `src/lib/utils/__tests__/dateHelpers.test.ts` [NEW]: 13 unit-тестов — `diffCalendarDays` (DST US spring-forward + EU fall-back + same day), `getWeekDayDate` (Mon/Thu/Sun), `todayForUser` (UTC/Shanghai/NY)
+- `src/lib/pocketbase/services/__tests__/planResolution.test.ts` [NEW]: 6 unit-тестов — `calcWeekNumber` граничные кейсы (day=1→week=1, day=7→week=1, day=8→week=2, DST US boundary → week=2)
+- `src/lib/pocketbase/services/__tests__/applyAdjustments.test.ts` [NEW]: 6 unit-тестов — пустой массив (нет запроса), N упражнений → 1 getFullList, skip=true исключает, override-поля + _adjusted=true, preserve original на undefined
+- `scripts/qa-preview.sh` [NEW]: QA smoke-скрипт (type-check + test + lint)
+- `package.json`: `qa` и `qa:fast` скрипты
+
+**Changed:**
+
+- `planResolution.ts` → `calcWeekNumber` → добавлен `export` для unit-тестирования
+
+**Verified:** `pnpm test` ✅ 131/131 passed · `pnpm type-check` ✅ ноль ошибок
+
+---
+
+**Fixed:**
+
+- `seasons.ts`: добавлена `clearSeasonAssignments(seasonId)` — деактивирует все активные `plan_assignments` по всем планам сезона перед сменой участника. Устраняет главную причину "слёта" атлетов — стоячие ассайнменты на старого атлета.
+- `SeasonParticipants.tsx`: `handleSave` теперь вызывает `clearSeasonAssignments` перед `updateSeasonParticipant` (BugFix #1)
+- `plans.ts`: `publishPlan()` step 3.6 (auto-assign) переделан с fire-and-forget на `await`. Исправляет race condition где `loadAssignments()` вызывался до завершения auto-assign, UI показывал "нет ассайнментов" (BugFix #2)
+- `planResolution.ts`: `getPublishedPlanViaAssignments` переписан — теперь ищет план через `season → phase → currentWeek → plan → check assignment` вместо `ANY active assignment WHERE athlete_id = X`. Устраняет показ плана прошлой недели (BugFix #3)
+- `SeasonDetail.tsx`: PhaseCard `key` включает `season.updated` → при смене участника PhaseCard перемонтируется и `usePhaseAssignment` перезагружает ассайнменты (BugFix #4)
+- `SeasonDetail.tsx` + `SeasonParticipants.tsx`: `allWeekPlansByPhase` теперь собирается через `onPlansLoaded` callback из каждого PhaseCard и передаётся в SeasonParticipants — прогресс-бары показывают реальные данные (BugFix #5)
+
+**Verified:**
+
+- `pnpm type-check` ✅ (0 ошибок)
+- `pnpm test` ✅ 106/106 passed
+- `pnpm build` ✅ Exit code: 0
+
+---
+
+### [2026-02-27] Track 4.265 Phase 6 (Final) — MultiWeekView Publish, Warmup Selector, Motion
+
+**Added:**
+
+- MultiWeekView: `publishWeekBtn` — кнопка `Send` (Lucide) в weekLabel для draft-планов → `onPublishWeek(weekNum, planId)` prop, confirm dialog, re-fetch после publish
+- PhaseCard: Default Warmup Template selector — кнопка `Wind` → inline `<select>` со списком warmup-шаблонов → `stampWarmupToAllDays(templateId, phaseId)` с confirm dialog
+- i18n: `publishWeek`, `applyWarmupToPhase`, `applyWarmupToPhaseApply`, `selectWarmupTemplate`, `warmupApplyConfirm` (RU/EN/CN)
+
+**Changed:**
+
+- `SeasonDetail.tsx`: `handlePublishWeekInView` handler → `publishPlan(planId)` → передаётся в `MultiWeekViewLazy` как `onPublishWeek`
+- `MultiWeekView.tsx`: `fetchAll` вынесен в `useCallback`, `publishingWeek` state для блокировки повторных кликов
+
+**Fixed:**
+
+- `SeasonDetail.module.css`: `@media (prefers-reduced-motion: reduce)` для `.phaseProgressFill`, `.weekDot`, `.applyWarmupBtn`, `.warmupApplyBtn`
+- `MultiWeekView.module.css`: `@media (prefers-reduced-motion: reduce)` для `.publishWeekBtn`
+- CSS: `.publishWeekBtn::before` pseudo-element для 44px tap target при визуальном размере 28px
+
+**Verified:**
+
+- `pnpm type-check` ✅ (0 ошибок)
+- `pnpm build` ✅ Exit code: 0
+
+---
+
+### [2026-02-27] Track 4.265 Phase 6 — UI/UX Polish & Design Compliance
+
+**Added:**
+
+- `duplicatePlanWeek(phaseId, srcWeek, dstWeek)` в `plans.ts` — копирует упражнения из предыдущей недели в текущую (без warmup-блоков, sequential SQLite-safe inserts)
+- WeekConstructor: `initialWeek` prop — открывает конструктор на конкретной неделе (из dot-навигации или MultiWeekView)
+- WeekConstructor: кнопка `Copy` (Lucide) в toolbar — дублирует предыдущую неделю в текущую (`handleDuplicateWeek`)
+- PhaseCard: progress bar `phaseProgressBar` — показывает долю опубликованных планов (N/total)
+- i18n: `plansPublished`, `confirmDuplicateWeek`, `duplicateWeek` (RU/EN/CN)
+
+**Changed:**
+
+- `SeasonDetail.tsx`: Week Status Map dots теперь кликают `onManagePlans(weekNum)` → открывают WeekConstructor на нужной неделе
+- `SeasonDetail.tsx`: `handleManagePlans(phase, weekNum?)` — принимает опциональный номер недели
+- `SelectedPhase` interface: добавлен `initialWeek?: number`
+- `PhaseCard`: `onManagePlans: (weekNum?: number) => void` (было `() => void`)
+- `MultiWeekView`: `onSelectWeek` устанавливает `initialWeek` перед переходом в WeekConstructor
+
+**Fixed (CSS Audit):**
+
+- `ganttLabel`: `font-size: 11px` → `var(--text-xs)`, `padding: 0 4px` → `var(--space-1)`
+- `ganttMarkers`: `margin-top: 4px` → `var(--space-1)`, `font-size: 14px` → `var(--text-sm)`
+- `assignTypeBtn`: `min-height: 36px` → `44px` (touch target compliance)
+- `assignConfirmBtn` (×2): `min-height: 40px` → `44px` (touch target compliance)
+- CSS классы `.phaseProgressBar`, `.phaseProgressFill`, `.phaseProgressLabel` добавлены через design tokens
+
+**Verified:**
+
+- `pnpm type-check` ✅ (0 ошибок)
+- `pnpm build` ✅ Exit code: 0
+
+---
+
+### [2026-02-27] Track 4.265 Phase 5 — Warmup UX Fixes & Pre-Assignment
+
+**Added:**
+
+- `stampWarmupToAllDays(templateId, phaseId)` в `templates.ts` — batch stamping разминки по всем слотам фазы (sequential, SQLite-safe)
+- WeekConstructor toolbar: кнопка Wind → TemplatePanel → `handleApplyWarmupToWeek` (stamping текущей недели)
+- `AdHocWarmupStepBtn`: кнопка «Из каталога» (BookOpen icon) → ExercisePicker в warmup mode → `addWarmupItem({ exercise_id })`
+- `pickerMode: 'normal' | 'warmup'` в WeekConstructor — ветвление при `handleAddExercise`
+- i18n: `addWarmupFromCatalog`, `applyWarmupToWeek`, `applyWarmupToPhase`, `warmupApplied` (RU/EN/CN)
+
+**Fixed:**
+
+- `WarmupCard`: `Wind` 10→16px, `Trash2` 11→16px, `.warmupCardRemove` → min 44×44px
+- `DayConstructor`: warmup header `Wind` 12→16px, eject `X` 12→16px, `.ejectBtn` → min 44×44px
+- `AthleteTrainingView`: `WarmupItem` Wind 10→16px, `WarmupBadge` Wind 13→16px
+
+**Changed:**
+
+- `AdHocWarmupData.custom_text_ru` стал optional; добавлен `exercise_id?: string`
+- DayConstructor получил `onAddFromCatalog?: (session: number)` prop
+
+**Added:**
+
+- `SeasonParticipants.tsx` — панель участников сезона (athlete/group/none), phase progress bars, collapsible header
+- `SeasonParticipants.module.css` — glassmorphism, 44px touch targets, mobile-first
+- `usePhaseAssignment.ts` — хук с 14 state-переменными + 5 handlers (извлечён из PhaseCard)
+- i18n ключи: `participants`, `changeParticipant`, `noParticipants`, `assignParticipant`, `memberCount` (RU/EN/CN)
+
+**Changed:**
+
+- `seasons.ts`: `SeasonWithRelations` расширен athlete/group expands; добавлены `getSeasonParticipantInfo()` и `updateSeasonParticipant()`
+- `SeasonDetail.tsx`: `PhaseCard` рефакторнут (manual assign panel удалён → status-only view); `SeasonParticipants` интегрирован перед списком фаз
+
+---
+
+### Fixed
+
+- `AthleteTrainingView.tsx`: warmup exercises now correctly excluded from Focus Mode and QuickEdit — `pe.is_warmup` → `pe.block !== 'warmup'`
+- `content.ts`: `AchievementTypeSchema` updated 4 → 13 concrete types matching `types.ts`
+- `content.ts`: `NotificationTypeSchema` updated 4 → 8 types; `NotificationsSchema` extended with `message_key`, `message_params`, `priority`, `expires_at`, `delivered`
+- `notifications.pb.js`: removed duplicate `plan_published` hook that caused athletes to receive 2 notifications on plan publish
+- `AthleteTrainingView.tsx`: `StandaloneBanner` hardcoded Russian text → `t('standalonePlan')` i18n key (RU/EN/CN added)
+- `logs.ts`: `getOrCreateLog()` + `createTrainingLog()` now accept optional `log_mode` parameter
+
+### Changed
+
+- `plans.ts` `publishPlan()`: notification logic expanded to include season membership (direct `athlete_id` + group members) with `Set`-based deduplication
+
+---
+
 ## [Unreleased] — Athlete Training UX Redesign Phase 4-5
 
 ### Added
@@ -333,6 +542,32 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [Unreleased] — 2026-02-27 (Track 4.266 Phase 2)
+
+### Fixed
+
+- `planResolution.ts`: `applyAdjustments` — устранён N+1 запрос: заменён цикл `getFirstListItem` на один `getFullList` с OR-фильтром
+
+### Added
+
+- `plans.ts`: `PlanExerciseStrict` — строгий interface (backward-compat alias `PlanExerciseWithExpand = PlanExerciseStrict`). Поле `_adjusted?: boolean` перенесено в интерфейс.
+- `plans.ts`: `createIndividualOverride()` — `start_date: today` при создании override для 14-day boundary в planResolution
+
+### Fixed
+
+- `dateHelpers.ts`: `getWeekStart()` — исправлена DST-уязвимость (заменён `setDate()` на UTC-арифметику с T12:00Z трюком)
+- `planResolution.ts`: `calcWeekNumber` — убран небезопасный `diffMs / 86400000`, теперь использует `diffCalendarDays` (T12:00Z trick)
+- `planResolution.ts`: `getPublishedOverrideForAthlete` — добавлено 14-дневное окно `start_date >= cutoff`, старые overrides больше не перекрывают актуальный план
+
+### Added
+
+- `dateHelpers.ts`: новая функция `diffCalendarDays(from, to)` — DST-безопасная разница в днях (T12:00:00Z trick)
+- `dateHelpers.ts`: новая функция `getWeekDayDate(weekStart, dayIndex)` — DRY-хелпер для дат в неделе
+- `notificationPreferences.ts`: `getUserTimezone(userId)` — получает IANA timezone пользователя из notification_preferences (read-only, fallback: Intl API)
+- `planResolution.ts`: `getPublishedPlanForToday` теперь timezone-aware — резолвит IANA timezone атлета через `getUserTimezone` и передаёт в `todayForUser(tz)`
+- `AthleteTrainingView.tsx`: `handleStartFocus` рефакторен в async — теперь вызывает `getOrCreateLog(..., 'live')` (Track 4.266 Phase 1 [1.1])
+- `AthleteTrainingView.tsx`: `handleOpenPostFactum` — добавлен 5-й аргумент `'post_express'` в `getOrCreateLog` (Track 4.266 Phase 1 [1.2])
 
 ## [Unreleased] · Track 4.262 Phase 4 — All-7-Days + Progress Indicators
 
@@ -2096,3 +2331,56 @@ Format: [Keep a Changelog](https://keepachangelog.com/)
 
 - `src/components/competitions/CompetitionCard.tsx` now uses `moderateCompetitionMedia()` and displays moderation reason in media items.
 - `docs/SECURITY.md` expanded with explicit competition media security test scenarios (foreign media visibility/edit and moderation behavior).
+
+## [Unreleased] — 2026-02-27
+
+### Fixed
+
+- `publishPlan()` (plans.ts): деактивация plan_assignments теперь фильтрует по `week_number` — ранее деактивировались все назначения фазы вместо same-week только (Track 4.265 Phase 1)
+- `publishPlan()` (plans.ts): добавлен guard для `plan_type === 'override'` — override-планы пропускают деактивацию assignments (у них нет assignments)
+
+### Added
+
+- `publishPlan.test.ts`: юнит-тесты для deactivation scope (3 кейса: same-week only, override guard, no siblings)
+
+### Added — 2026-02-27 (Phase 2)
+
+- `publishAllDrafts(phaseId)` function in `plans.ts`: bulk publishes all non-override drafts in a phase sequentially
+- "Publish N drafts" button in `PhaseCard` (SeasonDetail.tsx): inline confirm UX, `Send` icon, `draftCount` computed from `allWeekPlans` state
+- `publishAllBtn`, `publishConfirm`, `publishConfirmBtn`, `publishCancelBtn` CSS classes in SeasonDetail.module.css (all design tokens, min-height 44px)
+- i18n keys `publishAllDrafts`, `publishConfirm`, `publishing`, `confirmYes`, `confirmNo` in RU/EN/CN (Track 4.265 Phase 2)
+
+### Added — 2026-02-27 (Phase 3)
+
+- `publishPlan()` (plans.ts): step 3.6 — auto-assign plan to season.athlete_id or season.group_id on publish (idempotent, non-blocking, skip override). Reduces manual assignment clicks to 0 per season.
+- `autoAssignment.test.ts`: 3 unit tests — athlete_id → assigned, group_id → assigned, override → skip (Track 4.265 Phase 3)
+
+### [2026-02-27] Track 4.266 Phase 3 — Monolith Refactoring: WeekConstructor
+
+**Changed:**
+
+- `WeekConstructor.tsx`: сокращён с 906 до 423 строк (−54%) — создано 5 хуков и 1 компонент
+- `hooks/useWeekNavigation.ts` [NEW]: week navigation state + handlers
+- `hooks/useTemplatePicker.ts` [NEW]: template panel + warmup state/handlers
+- `hooks/useDayConstructor.ts` [NEW]: day selection + exercise picker state/handlers
+- `hooks/usePlanActions.ts` [NEW]: все CRUD операции + publish/duplicate/snapshot/autofill
+- `hooks/usePlanData.ts` [NEW]: loadPlan + весь plan data state + effects
+- `WeekToolbar.tsx` [NEW]: Toolbar JSX (~175 строк) как отдельный компонент
+
+**Verified:** `pnpm type-check` ✅ · `pnpm build` ✅ · `wc -l WeekConstructor.tsx` → 423 (< 450) ✅
+
+---
+
+## [2026-02-27] Track 4.267 Phase 3.3b — UserCog Integration in DayConstructor
+
+### Added
+
+- `ExerciseRow.tsx`: optional `onAdjust?` prop + `UserCog` button in `rowActions` (Lucide, hidden if prop absent)
+- `ExerciseRow.module.css`: `.adjustBtn` class — 44×44px touch target, accent-primary hover, all design tokens
+- `DayConstructor.tsx`: optional `onAdjustExercise?` prop forwarded to each `ExerciseRow` via `onAdjust`
+- `WeekConstructor.tsx`: `adjustTarget` state, `handleAdjustExercise()` callback, `ExerciseAdjustmentPanelLazy` dynamic import, overlay render (guarded by `athleteId && !isReadOnly`)
+- `messages/*/training.json`: `adjustExercise` i18n key added in RU/EN/CN
+
+**Behaviour:** UserCog button appears only for athlete-specific plans (`athleteId` available in `usePlanData`). Group plans → no button. ReadOnly (published) plans → no button.
+
+**Verified:** `pnpm type-check` ✅ · `pnpm test` 131/131 ✅ · `pnpm build` ✅

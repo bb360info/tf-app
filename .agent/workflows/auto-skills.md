@@ -6,34 +6,26 @@ description: Automatically select and apply relevant skills from the installed s
 
 Before starting any task, the agent MUST:
 
-1. **Read compact trigger index first** at `conductor/trigger_groups.min.json` (lightweight map: triggers -> groups -> skills).
+1. **Read the full preset** at `.agent/skills/project_skills.json` to identify available skills and the `_blocklist`.
 
-2. **Read the full preset only when needed** at `.agent/skills/project_skills.json`:
-   - mandatory for `_blocklist` validation
-   - mandatory if matched group has `mandatory_reads`
-   - mandatory for fallback disambiguation when compact index is insufficient
-
-3. **Match the task to a group** using these rules:
+2. **Match the task to a group** using these rules:
    - Read the task description and identify keywords (both English and Russian triggers are defined in `project_skills.json`)
-   - Match against compact index first (`conductor/trigger_groups.min.json`)
-   - If ambiguous/no match -> verify with `project_skills.json`
+   - Match against `project_skills.json` to find the relevant skill group(s)
    - Always include the `always` group (`concise-planning`, `lint-and-validate`) for any code changes
-   - **UI/CSS задачи:** дополнительно запусти `/ui-work` — он загрузит `jumpedia-design-system` и другие UI-скиллы
+   - **UI/CSS задачи:** обязательно загрузи файлы `docs/DESIGN_SYSTEM.md`, `src/styles/tokens.css` и скилл `jumpedia-design-system` напрямую
    - **Перед сдачей кода:** загрузи `verification-before-completion` (не нужен при старте планирования)
    - Select **1-3 groups maximum** (2-4 skills total by default; up to 5 for high-risk)
    - ⚠️ Check `_blocklist` — NEVER load blocked skills regardless of keyword match
 
-4. **If no match in compact index/full preset** → read the tiered catalog at `.agent/skills/skills_catalog.md` (~100 lines, grouped by domain).
+3. **If no match in preset** → use the `find_by_name` tool (or similar) to search for relevant skills in the `.agent/skills/skills/` directory. Do not use complex nested catalogs to prevent context bloat.
 
-5. **If still no match** → search the full index at `.agent/skills/data/skills_index.json` (559 skills).
+4. **Follow mandatory_reads** — if the matched group has a `mandatory_reads` field, read those files BEFORE loading skills.
 
-6. **Load the matched SKILL.md** file(s) by reading `.agent/skills/skills/<skill-id>/SKILL.md` (use the `path` field from `skills_index.json` if loading from the full index).
+5. **Load the matched SKILL.md** file(s) by reading `.agent/skills/skills/<skill-id>/SKILL.md`.
 
-7. **Follow mandatory_reads** — if the matched group has a `mandatory_reads` field, read those files BEFORE loading skills.
+6. **Follow the skill instructions** as part of your task execution.
 
-8. **Follow the skill instructions** as part of your task execution.
-
-9. **Announce which skills you are using** at the start of your response so the user knows.
+7. **Announce which skills you are using** at the start of your response so the user knows.
 
 ## Skill Selection Rules
 
@@ -52,9 +44,7 @@ Before starting any task, the agent MUST:
 ```
 project_skills.json (curated skills, with triggers + blocklist)
        ↓ not found
-skills_catalog.md (grouped markdown, ~40 skills)
-       ↓ not found
-data/skills_index.json (559 skills, full search)
+Search locally in `.agent/skills/skills/`
 ```
 
 ## Blocked Skills (NEVER Load)

@@ -1,0 +1,376 @@
+# Аналитический отчёт — Track 4.267: Constructor Bugs
+
+🛠 Скиллы: `systematic-debugging` + `concise-planning` + `lint-and-validate`
+
+---
+
+## Статус верификации багов по коду
+
+### ✅ Критические баги — ПОДТВЕРЖДЕНЫ
+
+#### Баг 1.1–1.2 — [duplicatePlanWeek](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#572-648) без guard на published
+
+**Файл:** [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) L578–647
+
+```
+L613: const destPlan = await getOrCreatePlan(phaseId, toWeek);  // ← BAG: может вернуть published!
+L616–626: // Удаляет ВСЕ упражнения — в published плане!
+// PlanAssignment остаётся active, но контент плана перезаписан
+```
+
+**Подтверждено:** [getOrCreatePlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#93-112) (L94–111) не проверяет статус, возвращает любой существующий план. После удаления упражнений assignments не деактивируются. **Данные атлета теряются.**
+
+#### Баг 1.4–1.5 — `reassignPublishedPlans` не существует
+
+**Файл:** [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) — функция **отсутствует**
+
+> [clearSeasonAssignments](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#162-203) (L168–202) удаляет assignments при смене участника, но `reassignPublishedPlans` нет. Новый атлет/группа не получают published планы.
+
+---
+
+### ✅ Высокие баги — ПОДТВЕРЖДЕНЫ
+
+#### Баг 2.1 — [revertToDraft](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#436-442) не деактивирует assignments
+
+**Файл:** [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) L437–441
+
+```typescript
+export async function revertToDraft(planId: string): Promise<PlanWithExercises> {
+    return pb.collection(Collections.TRAINING_PLANS).update<PlanWithExercises>(planId, {
+        status: 'draft' as PlanStatus,   // ← только меняет статус
+    });
+    // БАГ: PlanAssignment остаётся active — атлет видит "черновой" план!
+}
+```
+
+#### Баг 2.3 — sibling deactivation fire-and-forget
+
+**Файл:** [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) L281–303
+
+```typescript
+void (async () => { // ← fire-and-forget!
+    // деактивация sibling assignments
+})();
+```
+
+[publishPlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#245-406) возвращает до завершения деактивации. UI показывает "опубликовано", а старые assignments ещё живы.
+
+---
+
+### ✅ Средние баги — ПОДТВЕРЖДЕНЫ
+
+#### Баг 3.1 — Пустые draft-планы в `allWeekPlans`
+
+**Файл:** [usePhaseAssignment.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/hooks/usePhaseAssignment.ts) L82–87
+
+```typescript
+setAllWeekPlans(
+    plans.map((p) => ({   // ← ВСЕ планы, включая пустые drафты!
+        week_number: p.week_number as number | undefined,
+        status: p.status as 'published' | 'draft',
+    }))
+);
+```
+
+[getOrCreatePlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#93-112) в `usePlanData.ts L60` создаёт пустой draft при каждом открытии. Все эти планы попадают в прогресс-бар. Процент = `published / (published + всехpустых_drafts)` → занижен.
+
+#### Баг 3.2 — `onBack` из WeekConstructor не перезагружает сезон
+
+**Файл:** [SeasonDetail.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonDetail.tsx) L173–176
+
+```typescript
+onBack={() => {
+    setViewMode('week');
+    setSelectedPhase(null);   // ← loadSeason() НЕ вызывается!
+}}
+```
+
+PhaseCard dots и progress bar остаются устаревшими после публикации в WeekConstructor.
+
+---
+
+### ✅ Низкие баги — ПОДТВЕРЖДЕНЫ
+
+#### Баг 4.1 — Timezone в `SeasonWizard.handleSave`
+
+**Файл:** [SeasonWizard.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx) L197–211
+
+```typescript
+const season = await createSeason({
+    start_date: new Date(startDate).toISOString(),  // L197 ← UTC midnight вместо локального!
+    end_date: new Date(endDate).toISOString(),        // L198 ← то же
+});
+await createPhasesForSeason(season.id,
+    phases.map(p => ({
+        start_date: new Date(p.start_date).toISOString(), // L210 ← то же
+        end_date: new Date(p.end_date).toISOString(),     // L211 ← то же
+    }))
+);
+```
+
+`toLocalISODate` импортирован (L18), используется в `generateDefaultPhases` (L123–124), но **НЕ в [handleSave](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240)**. В UTC+5 пользователь вводит `2025-03-01`, записывается `2025-02-28T19:00:00Z` → дата сдвигается на день назад.
+
+#### Баг 4.2 — [getPhaseWeeks](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonDetail.tsx#94-118) не нормализует по UTC
+
+**Файл:** [SeasonDetail.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonDetail.tsx) L95–117
+
+```typescript
+const start = new Date(phase.start_date);  // ← parse в локальном TZ
+const end = new Date(phase.end_date);
+// Использует getDay(), setDate() — зависимо от локального TZ
+// В UTC+N > 0 при midnight UTC → иной день
+```
+
+#### Баг 4.3 — `loggedDays` weekStart рассчитывается вручную
+
+**Файл:** [usePlanData.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/hooks/usePlanData.ts) L70–76
+
+```typescript
+const weekStart = new Date(startDate);
+weekStart.setDate(weekStart.getDate() + (weekNumber - 1) * 7); // ← не использует getWeekDayDate
+```
+
+`dateHelpers.ts` имеет `getWeekDayDate` — нужно использовать его.
+
+---
+
+### ✅ QuickWorkout standalone — ПОДТВЕРЖДЕНО не реализовано
+
+**Файл:** [QuickWorkout.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/QuickWorkout.tsx) L242–244
+
+```typescript
+if (!season) {
+    throw new Error(t('noSeasonForDate'));  // ← всегда бросает ошибку
+}
+```
+
+`ensureStandalonePlan` в [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) **отсутствует**. `getStandalonePlansForPeriod` в [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) **отсутствует**. `resolveStandaloneConflict` **отсутствует**.
+
+---
+
+## 🔍 Скрытые проблемы, не указанные в плане
+
+### 🚨 ПРОБЛЕМА A: [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59) делает лишний HTTP-запрос
+
+**Файл:** [planAssignments.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts) L31–34
+
+```typescript
+export async function assignPlanToAthlete(planId: string, athleteId: string) {
+    const plan = await getPlan(planId);  // ← ЛИШНИЙ запрос в каждой итерации reassignPublishedPlans!
+    if (plan.status !== 'published') throw new Error(...);
+```
+
+В `reassignPublishedPlans` будем вызывать [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59) для каждого published плана. Но мы уже знаем что план published — отфильтровали заранее. **N дополнительных GET-запросов**.
+
+**Решение:** Добавить internal `_assignPlanUnchecked(planId, athleteId/groupId)` без проверки статуса, вызывать из `reassignPublishedPlans`. Или передавать `skipStatusCheck: boolean`.
+
+### 🚨 ПРОБЛЕМА B: `deactivatePlanAssignments` и отсутствующая функция [listPlanAssignments](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#18-24) без status фильтра
+
+**Файл:** [planAssignments.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts) L19–23
+
+```typescript
+export async function listPlanAssignments(planId: string) {
+    filter: pb.filter('plan_id = {:planId} && (status = "active" || status = "")', { planId }),
+```
+
+Хорошо — уже фильтрует active. Это означает что `deactivatePlanAssignments` в следующей итерации (после первого [unassignPlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#93-99)) не найдёт уже деактивированных. Safe.
+
+### 🚨 ПРОБЛЕМА C: `ensureStandalonePlan` — нет owner check
+
+В [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) план создаётся без `coach_id`. Нужно убедиться, что PB rules разрешают создание standalone без coach_id или передавать его явно. Посмотреть PB rule для `training_plans`.
+
+**Решение в плане:** добавить coach_id из `pb.authStore.record?.id` при создании standalone.
+
+### 🚨 ПРОБЛЕМА D: [duplicatePlanWeek](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#572-648) — `softDeletePlanExercises` нужна как отдельная функция
+
+План [A]: создать `softDeletePlanExercises(planId)`. В [plans.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts) код L616–626 уже делает это inline — нужно вынести в reusable helper, т.к. используется и в [duplicatePlanWeek](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#572-648).
+
+### 🚨 ПРОБЛЕМА E: `usePhaseAssignment.allWeekPlans` содержит `status: 'draft' | 'published'` — но не 'archived'
+
+Если план заархивирован ([archivePlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#408-414)) — он пройдёт в `allWeekPlans` с невалидным status типом. TypeScript не поймает — тип `PlanStatus = 'draft' | 'published' | 'archived'`, но интерфейс [WeekPlanStatus](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/hooks/usePhaseAssignment.ts#11-15) принимает только `'published' | 'draft'`.
+
+**Решение [3.1]:** при фильтрации добавить `filter(p => p.status === 'published' || p.status === 'draft')`.
+
+### 🚨 ПРОБЛЕМА F: `applyWarmupTemplateToDay` vs [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446)
+
+В [templates.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts) уже есть [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446) (L391–445) — функция, которая делает почти то же что `applyWarmupTemplateToDay` из плана [5.1]:
+- Для warmup: eject существующего warmup + append (L402–404)
+- Sequential inserts (L423–444)
+- Строит `startOrder` из существующих items
+
+**Вывод:** `applyWarmupTemplateToDay(templateId, planId, dayOfWeek)` = **это уже [appendTemplate(templateId, planId, dayOfWeek, 0)](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446)**. Не нужно создавать новую функцию! Можно использовать [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446) напрямую в `WarmupTemplatePicker`.
+
+### 🚨 ПРОБЛЕМА G: SeasonWizard конфликт-шаг — `STEPS` — это const array
+
+**Файл:** [SeasonWizard.tsx](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx) L44, L79
+
+```typescript
+const STEPS: WizardStep[] = ['basics', 'phases', 'competitions', 'review'];
+const stepIndex = STEPS.indexOf(step);
+```
+
+[goNext](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#81-86)/[goBack](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#87-92) используют `STEPS.length` и `STEPS.indexOf`. Если динамически менять `effectiveSteps`, нужно либо:
+- Использовать `effectiveSteps` везде (state + computed)
+- Или пересчитывать `stepIndex` через `effectiveSteps`
+
+Иначе conflict step будет иметь неправильный `stepIndex`. [WizardStep](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#22-23) type нужно расширить: `'basics' | 'phases' | 'competitions' | 'conflicts' | 'review'`.
+
+### 🚨 ПРОБЛЕМА H: `SeasonParticipants.handleSave` — функция не найдена
+
+`grep` по `SeasonParticipants.tsx` не вернул [handleSave](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240). Нужна проверка структуры компонента перед имплементацией [1.5].
+
+---
+
+## 📋 Улучшения к implementation_plan.md
+
+### 1. Порядок выполнения: Phase 2 перед Phase 1
+
+**Текущий план:** Phase 1 (duplicatePlanWeek guard) → Phase 2 (lifecycle helpers)
+
+**Проблема:** [1.1] и [1.2] используют `deactivatePlanAssignments` из Phase 2 [2.2]. Нельзя реализовать [1.1] без [2.2].
+
+**Рекомендация:** Начать с [2.2] `deactivatePlanAssignments`, потом [2.1] [revertToDraft](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#436-442), потом [1.1–1.3].
+
+### 2. `softDeletePlanExercises` — добавить как явный шаг
+
+В плане упомянута в псевдокоде А, но нет явного gate-item. Добавить в Phase 1:
+
+```
+- [1.0 softDeletePlanExercises helper] `plans.ts`: вынести inline код L616-626 в `softDeletePlanExercises(planId)`.
+```
+
+### 3. `applyWarmupTemplateToDay` — переиспользовать [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446)
+
+Phase 5 [5.1]: вместо новой функции использовать существующий [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446). Нужно только добавить `WarmupTemplatePicker` компонент [5.2] и кнопку [5.3]. Шаг [5.1] — убрать или заменить на "verify appendTemplate covers this use case".
+
+### 4. [updateSeason](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#143-150) — уже существует в [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts)!
+
+**Файл:** [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) L143–149
+
+```typescript
+export async function updateSeason(
+    id: string,
+    data: Partial<Pick<SeasonsRecord, 'name' | 'start_date' | 'end_date'>>
+): Promise<SeasonWithRelations> {
+    return pb.collection(Collections.SEASONS).update<SeasonWithRelations>(id, data);
+}
+```
+
+**Gate [7.1] `updateSeason service check` → уже выполнен**. Пометить как `[x]` или убрать.
+
+### 5. Phase 8 `ensureStandalonePlan` — добавить `coach_id`
+
+```typescript
+// Текущий план (псевдокод):
+return createPlan({ plan_type: 'standalone', start_date: date, end_date: date, status: 'draft' })
+
+// Улучшение:
+const coachId = pb.authStore.record?.id;
+return createPlan({ plan_type: 'standalone', start_date: date, end_date: date, status: 'draft', coach_id: coachId })
+```
+
+Но [createPlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#62-77) сигнатура (L63–69) не принимает `coach_id`. Нужно либо расширить [createPlan](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#62-77), либо создавать запись напрямую через `pb.collection(Collections.TRAINING_PLANS).create(...)`.
+
+### 6. `reassignPublishedPlans` — N+1 problem внутри [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59)
+
+Каждый вызов [assignPlanToAthlete(plan.id, season.athlete_id)](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59) делает [getPlan(planId)](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#55-61) (HTTP). Для 10 планов = 10 лишних GET.
+
+**Решение:** В `reassignPublishedPlans` напрямую вызывать PB API для upsert assignment, минуя [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59). Или создать `_ensureAssignment(planId, { athleteId?, groupId? })` без guard.
+
+### 7. Timezone fix Phase 4 — [validatePhasesCoverage](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#356-402) тоже уязвима
+
+**Файл:** [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) L370–398
+
+```typescript
+const sorted = [...phases].sort((a, b) =>
+    new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+);
+if (sorted[0].start_date !== seasonStart) {  // ← строковое сравнение ISO дат → OK только если формат одинаковый
+```
+
+Если season dates в UTC ISO format, а phases в local ISO format — сравнение `sorted[0].start_date !== seasonStart` **всегда false** (разные форматы). Нужно нормализовать везде.
+
+---
+
+## 📊 Сводная таблица всех задач с флагами
+
+| Phase | Task | Статус найден | Риски / Улучшения |
+|-------|------|---------------|-------------------|
+| 1.1 | duplicatePlanWeek guard | ✅ Подтверждён | Зависит от [2.2], порядок важен |
+| 1.2 | deactivate on draft overwrite | ✅ Подтверждён | Нужен helper из [2.2] |
+| 1.3 | UI confirm for duplicate | Логичный | Нет рисков |
+| 1.4 | reassignPublishedPlans | ✅ Отсутствует | N+1 проблема с [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59) |
+| 1.5 | SeasonParticipants trigger | ⚠️ Нужно изучить структуру | [handleSave](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#180-240) не найден grep |
+| 2.1 | revertToDraft deactivates | ✅ Подтверждён | Простая задача |
+| 2.2 | deactivatePlanAssignments helper | ✅ Отсутствует | Нужен первым из всех |
+| 2.3 | sibling deactivation await | ✅ Подтверждён | Изменит поведение publishPlan |
+| 3.1 | empty plan filter | ✅ Подтверждён | Добавить фильтр + archived status |
+| 3.2 | onBack reload | ✅ Подтверждён | Одна строка кода |
+| 3.3 | WeekDots optimistic update | Логичный | Нужен `loadSeason` prop в WeekConstructor |
+| 4.1 | Wizard toLocalISODate | ✅ Подтверждён | Phases тоже нужно фиксить |
+| 4.2 | getPhaseWeeks UTC | ✅ Подтверждён | [validatePhasesCoverage](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#356-402) тоже затронута |
+| 4.3 | loggedDays weekStart | ✅ Подтверждён | Использовать `getWeekDayDate` |
+| 5.1 | applyWarmupTemplateToDay | ⚡ Уже есть! | [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446) = то же самое |
+| 5.2 | WarmupTemplatePicker | Новый компонент | Использовать [appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446) |
+| 5.3 | WeekConstructor warmup button | Новый UI | В существующей секции warmup |
+| 5.4 | i18n keys | Стандартно | |
+| 6.1 | exerciseAdjustments service | Новый сервис | Проверить схему коллекции в PB |
+| 6.2 | ExerciseAdjustmentPanel | Новый компонент | Дебаунс для upsert |
+| 6.3 | Adjust button в WeekConstructor | UI | Только coach view |
+| 6.4 | Adjustment badge | UI | `_adjusted?: boolean` уже в типе! |
+| 6.5 | i18n | Стандартно | |
+| 7.1 | updateSeason check | ✅ УЖЕ ЕСТЬ | [seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) L143–149 — mark done! |
+| 7.2 | SeasonEditInline | Новый UI | Inline edit в заголовке |
+| 7.3 | i18n | Стандартно | |
+| 8.1 | ensureStandalonePlan | Отсутствует | Добавить coach_id! |
+| 8.2 | QuickWorkout fallback | ✅ Подтверждён баг | Нужна динамическая загрузка |
+| 8.3–8.5 | Conflict resolution | Новый flow | SeasonWizard STEPS fix |
+| 8.6 | i18n | Стандартно | |
+
+---
+
+## 🎯 Рекомендуемый порядок реализации (исправленный)
+
+```
+[2.2] deactivatePlanAssignments    ← фундамент для всего
+[2.1] revertToDraft fix
+[1.0] softDeletePlanExercises helper (NEW — вынести из duplicatePlanWeek)
+[1.1] duplicatePlanWeek guard
+[1.2] deactivate on draft overwrite
+[2.3] sibling await fix в publishPlan
+[1.4] reassignPublishedPlans
+[1.5] SeasonParticipants trigger
+[3.1] empty plan filter (+ archived fix)
+[3.2] onBack → loadSeason()
+[3.3] WeekDots optimistic (через loadSeason prop)
+[4.1] toLocalISODate в handleSave
+[4.2] getPhaseWeeks UTC
+[4.3] loggedDays weekStart
+[5.1] УБРАТЬ (уже есть appendTemplate)
+[5.2] WarmupTemplatePicker (использует appendTemplate)
+[5.3] WeekConstructor button
+[5.4] i18n
+[7.1] MARK DONE (updateSeason уже есть)
+[7.2] SeasonEditInline
+[7.3] i18n
+[8.1] ensureStandalonePlan + coach_id
+[8.2] QuickWorkout fallback
+[8.3–8.5] SeasonWizard conflicts
+[8.6] i18n
+[6.1] exerciseAdjustments service
+[6.2] ExerciseAdjustmentPanel
+[6.3–6.5] WeekConstructor integration
+[9] Tests + QA
+```
+
+---
+
+## 🔑 Ключевые открытия
+
+1. **[updateSeason](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#143-150) уже готова** ([seasons.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts) L143–149) — задача 7.1 выполнена заранее
+2. **[appendTemplate](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts#380-446) заменяет `applyWarmupTemplateToDay`** — готовый код в [templates.ts](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/templates.ts) L391–445
+3. **N+1 проблема** в `reassignPublishedPlans` через [assignPlanToAthlete](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/planAssignments.ts#25-59) — нужен internal helper
+4. **Порядок фаз ошибочен** — [2.2] должен идти первым, т.к. используется в [1.1] и [1.2]
+5. **SeasonWizard STEPS** нужно менять динамически — тип [WizardStep](file:///Users/bogdan/antigravity/skills%20master/tf/src/components/training/SeasonWizard.tsx#22-23) требует расширения
+6. **`_adjusted?: boolean`** уже в типе [PlanExerciseStrict](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/plans.ts#24-31) (L29) — badge [6.4] упрощается
+7. **[validatePhasesCoverage](file:///Users/bogdan/antigravity/skills%20master/tf/src/lib/pocketbase/services/seasons.ts#356-402)** тоже содержит timezone-зависимый код — risk при исправлении [4.1]
