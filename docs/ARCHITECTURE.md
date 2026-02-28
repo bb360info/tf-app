@@ -11,18 +11,27 @@
 | Storage | Cloudflare R2 | Via PocketBase S3 adapter |
 | Offline | Dexie.js (IndexedDB) | Mirrors PocketBase schema *(planned — Track 6)* |
 | PWA | Serwist | Service worker for offline + push |
-| i18n | next-intl | RU, EN, CN with `[locale]` routing |
+| i18n | next-intl | RU, EN, CN с разбиением на доменные словари |
 | Validation | Zod | Schema for every collection |
 | Video | FFmpeg WASM | Client-side compression to 720p |
 | Pose | MediaPipe | Pose Landmarker (client-side) |
 | Charts | Recharts | Training analytics |
 | Push | Cloudflare Worker | `push.jumpedia.app` — VAPID web-push delivery |
 
+## Internationalization (i18n)
+
+Используется `next-intl` (App Router).
+Для удобства работы разработчиков словари (`messages/`) **физически разбиты** на доменные зоны (`shared.json`, `auth.json`, `training.json` и т.д.).
+Однако, в `src/i18n/request.ts` они **логически объединяются** в один объект.
+
+**Почему так сделано:**
+В Server Components статического экспорта Next.js размер словаря не влияет на клиентский бандл (Next.js запекает нужные строки в HTML). Глубокое прокидывание namespaces сильно усложняет `NextIntlClientProvider`. Поэтому `request.ts` отдает монолит, но разработчики редактируют удобные мелкие файлы.
+
 ## Hosting
 
 ```
 ┌─────────────────────────────────────────┐
-│          Hong Kong VPS (CN2 GIA)        │
+│        UK VPS (Development env)         │
 │                                         │
 │  ┌──────────┐    ┌──────────────────┐   │
 │  │  nginx   │    │   PocketBase     │   │
@@ -77,7 +86,7 @@ Cloudflare Worker (push.jumpedia.app)
 Browser/iOS Push → Service Worker (sw.ts) → OS notification
 ```
 
-## PocketBase Schema (26 Collections)
+## PocketBase Schema (31 Collections)
 
 ### Core
 
@@ -95,8 +104,9 @@ Browser/iOS Push → Service Worker (sw.ts) → OS notification
 |-----------|-----------|--------|-------|
 | `seasons` | coach_id FK→users, athlete_id FK→athletes, group_id FK→groups, name, start/end_date | | SoftDeletable. Macrocycle |
 | `training_phases` | season_id FK→seasons, phase_type, order, start/end_date, focus | | SoftDeletable. GPP→SPP→COMP→TRANSITION |
-| `training_plans` | phase_id FK→phases, week_number, status, notes, athlete_id FK→athletes, parent_plan_id FK→self, day_notes (JSON) | | SoftDeletable+Syncable. athlete_id + parent_plan_id for individual overrides |
+| `training_plans` | plan_type, phase_id FK→phases (optional), week_number (optional), start/end_date, status, notes, athlete_id FK→athletes, parent_plan_id FK→self, day_notes (JSON) | | SoftDeletable+Syncable. Discriminator plan_type (phase_based/standalone/override) |
 | `plan_exercises` | plan_id FK→plans, exercise_id FK→exercises (nullable), order, day_of_week, session (0=AM/1=PM), block (warmup/main), sets, reps, intensity, notes, weight, duration, distance, rest_seconds, custom_text_ru/en/cn, source_template_id FK→templates | | SoftDeletable. exercise_id nullable for free-text warmup steps |
+| `exercise_adjustments` | plan_exercise_id FK→plan_exercises, athlete_id FK→athletes, sets, reps, intensity, weight, duration, distance, rest_seconds, notes, skip | plan_exercise_id+athlete_id | SoftDeletable. Per-athlete overrides for a plan exercise |
 | `plan_snapshots` | plan_id FK→plans, snapshot (JSON), version | | Version on publish |
 | `plan_assignments` | plan_id FK→plans (cascade), athlete_id FK→athletes, group_id FK→groups, status | | Assignment of plan to athlete or group |
 
@@ -113,7 +123,7 @@ Browser/iOS Push → Service Worker (sw.ts) → OS notification
 |-----------|-----------|--------|-------|
 | `exercises` | name_ru/en/cn, level, unit_type, cns_cost, training_category, training_quality, phase_suitability, equipment, muscles | | 68+ seeded exercises |
 | `custom_exercises` | coach_id FK→users, base fields like exercises, visibility, approved_by, approved_at, rejection_reason | | SoftDeletable. Visibility: personal→pending→approved→rejected |
-| `training_logs` | athlete_id FK→athletes, plan_id FK→plans, date, session (0=AM/1=PM), notes, readiness_score | athlete_id+plan_id+date+session | Syncable. Daily/session training log |
+| `training_logs` | athlete_id FK→athletes, plan_id FK→plans, date, session (0=AM/1=PM), notes, readiness_score, log_mode | athlete_id+plan_id+date+session | Syncable. Modes: live/post_express/post_quick/post_detailed |
 | `log_exercises` | log_id FK→logs, exercise_id FK→exercises, sets_data (JSON), rpe (1-10), skip_reason | | flexible SetData[] format |
 | `daily_checkins` | athlete_id FK→athletes, date, sleep_hours, sleep_quality, pain_level, mood, notes | athlete_id+date | Syncable. Readiness input |
 | `test_results` | athlete_id FK→athletes, test_type, value, date, notes | athlete_id+test_type+date | Performance tests |
@@ -122,16 +132,19 @@ Browser/iOS Push → Service Worker (sw.ts) → OS notification
 
 | Collection | Key Fields | UNIQUE | Notes |
 |-----------|-----------|--------|-------|
-| `personal_records` | athlete_id FK→athletes, discipline, season_type, result (meters), date, competition_name, source, is_current, notes | | is_current flipped on new PR add |
+| `personal_records` | athlete_id FK→athletes, discipline, season_type, result (meters), date, competition_name, source, is_current, notes, competition_id FK→competitions | | is_current flipped on new PR add |
 
 ### Content & Media
 
 | Collection | Key Fields | UNIQUE | Notes |
 |-----------|-----------|--------|-------|
-| `competitions` | season_id FK→seasons, name, date, priority (A/B/C), location, notes | | SoftDeletable |
+| `competitions` | owner_type (season/athlete/group), season_id FK→seasons (optional), athlete_id FK→athletes, group_id FK→groups, name, date, priority, discipline, season_type, status, official_result, official_updated_by, location, notes | | SoftDeletable. Polymorphic ownership |
+| `competition_participants` | competition_id FK→competitions, athlete_id FK→athletes, status, lane_or_order, bib_number, result_note | | SoftDeletable. Participants for group competitions |
+| `competition_proposals` | competition_id FK→competitions, athlete_id FK→athletes, kind, payload, status, proposed_at, athlete_comment, review_comment, reviewed_fields, reviewed_by | | SoftDeletable. Athlete updates to official results |
+| `competition_media` | competition_id FK→competitions, uploader_athlete_id FK→athletes, subject_athlete_id FK→athletes, file, kind, visibility, moderation_status | | SoftDeletable. User-generated media |
 | `exercise_videos` | exercise_id FK→exercises, file, coach_id FK→users, description | | Video attachments |
 | `achievements` | athlete_id FK→athletes, type (13 types), earned_at, title, description | | Gamification: streak/training/testing/compete |
-| `notifications` | user_id FK→users, type (8 types), message, read, link, priority (normal/urgent), expires_at, delivered | | Push/in-app. Cron delivers undelivered |
+| `notifications` | user_id FK→users, type (8 types), message, message_key, message_params, read, link, priority, expires_at, delivered | | Push/in-app. Cron delivers undelivered |
 | `error_logs` | user_id, error, stack, device_info, url | | Client error telemetry |
 
 ### Push & Notification Preferences
@@ -152,6 +165,11 @@ CREATE UNIQUE INDEX idx_athletes_user ON athletes(user_id) WHERE user_id != '';
 CREATE INDEX idx_training_phases_season ON training_phases(season_id);
 CREATE INDEX idx_planex_plan_deleted ON plan_exercises(plan_id, deleted_at);
 CREATE INDEX idx_planex_block ON plan_exercises(block);
+CREATE UNIQUE INDEX idx_exercise_adjustments_uniq ON exercise_adjustments(plan_exercise_id, athlete_id);
+
+-- Competitions & Proposals indexes
+CREATE INDEX idx_comp_proposals_inbox ON competition_proposals(competition_id, status, proposed_at);
+CREATE INDEX idx_comp_proposals_athlete ON competition_proposals(athlete_id, status, proposed_at);
 
 -- Templates indexes
 CREATE INDEX idx_templates_coach ON training_templates(coach_id);
@@ -218,7 +236,7 @@ phase_id.season_id.coach_id = @request.auth.id || athlete_id.user_id = @request.
 plan_id.phase_id.season_id.coach_id = @request.auth.id || athlete_id.user_id = @request.auth.id
 ```
 
-## Security Headers (pb_hooks)
+## Server Hooks (pb_hooks)
 
 ```javascript
 // pb_hooks/security_headers.pb.js
@@ -229,4 +247,9 @@ routerUse((e) => {
   e.response.header().set("X-XSS-Protection", "1; mode=block")
   return e.next()
 })
+
+// pb_hooks/ownership_integrity.pb.js
+// Validation hook: checks FK consistency for owner_type (season/athlete/group)
+onModelBeforeCreate((e) => { /* ownership logic */ }, "competitions")
+onModelBeforeUpdate((e) => { /* ownership logic */ }, "competitions")
 ```
